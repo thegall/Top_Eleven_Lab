@@ -230,7 +230,9 @@ A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5
 | `1 2 2 2 2` | 1,80 | Ótima |
 | `1 2 2 1 2 2` | 1,67 | Boa |
 | `1 2 1 2 1 2` | 1,43 | Normal |
-| predominantemente 1 | 1,00–1,29 | Ruim / Terrível |
+| predominantemente 1 | 1,00–1,29 | Ruim / Terrível **[PENDENTE]** |
+
+**[PENDENTE]** O método 1 não separa Ruim de Terrível — os dois aparecem como "quase só 1" na barra. A curva da seção 3.1 os trata como valores distintos (0,163 contra 0,130 a 100%). Enquanto não houver corte definido, o produto oferece só o **método 2** para quem cair nessa faixa, porque ele devolve um sigma medido em vez de um padrão visual.
 
 ---
 
@@ -238,8 +240,14 @@ A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5
 
 **[COMUNIDADE]** Multiplicador aplicado sobre o sigma da seção 3.1. Fonte: aba `constantes` da mesma planilha.
 
-- **18 a 21 anos: 1,00** — janela plena, sem penalidade.
-- **22 a 35 anos:** decaimento linear de −0,0679 por ano, chegando a **0,05 aos 35**.
+- **Até 21 anos: 1,00** — janela plena, sem penalidade.
+- **Acima de 21:** decaimento linear, com piso em **0,05 aos 35**.
+
+```
+fatorIdade(idade) = idade <= 21 ? 1,00 : máx(0,05 ; 1,00 − 0,0679 × (idade − 21))
+```
+
+Atenção ao `− 21`: a contagem parte dos 21 anos, o último da janela plena, e não dos 22. Contando a partir de 22 o resultado aos 35 dá 0,117, e a tabela abaixo diz 0,050. Confira sempre pelas duas pontas — aos 22 a fórmula tem que dar 0,932, e aos 35, 0,050.
 
 | Idade | 18–21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 |
 |---|---|---|---|---|---|---|---|---|
@@ -407,6 +415,10 @@ Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e mé
 **Por que este é o método do produto:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab já sabe calcular e pode verificar antes de aceitar o teste.
 
 **[COMUNIDADE]** Vale fazer o teste cedo, com o jogador ainda cru. Jogador já desenvolvido rende menos por sessão e o resultado sai distorcido.
+
+**[PENDENTE] O teste não isola a idade.** O procedimento exige treino classe mundial para padronizar aquele multiplicador, mas o sigma medido também carrega o fator da seção 3.2. Testar um jogador de 26 anos e ler a tabela direto o classifica um ou dois ranks abaixo do real. A leitura adotada pelo produto é **dividir o sigma medido pelo fator de idade antes de consultar a tabela** — decisão nossa, não do material da comunidade, e ainda não validada com ela.
+
+Enquanto isso não se resolve, a saída barata é fazer o teste **antes dos 22 anos**, onde o fator é 1,00 e não há correção a aplicar. É o que a recomendação acima já diz por outro motivo, e é o que o Lab deve sugerir ao usuário.
 
 **[COMUNIDADE]** Para treinar habilidade especial ou posição nova, os drills mais citados são Contra-Ataque Rápido, Academia e Arrancada.
 

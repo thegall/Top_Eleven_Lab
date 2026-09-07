@@ -20,7 +20,7 @@ Fechar o repositório como documento antes de escrever a primeira linha de códi
 
 ## Etapa 2 — Setup, CI e Dependabot
 
-**Em andamento.** Branch `chore/setup-ci`.
+**Concluída.** PR #1.
 
 Setup mínimo do projeto e a esteira que vai validar tudo daqui pra frente. O setup entra junto porque CI sem nada para rodar não prova nada.
 
@@ -37,12 +37,15 @@ O Next.js fica de fora desta etapa. O motor da etapa 5 é TypeScript puro e não
 
 ## Etapa 3 — Arquitetura
 
-- [ ] `docs/ARCHITECTURE.md` — camadas, fronteiras, estrutura de pastas
-- [ ] `docs/adr/` — as decisões caras de reverter, uma por arquivo
+**Em andamento.** Branch `docs/architecture`.
 
-Decisões já tomadas, que entram como ADR: Next.js com export estático, persistência em `localStorage` com exportar e importar JSON, um codebase com layout paisagem no mobile, domínio isolado de framework.
+- [x] `docs/ARCHITECTURE.md` — requisitos apurados, camadas, estrutura de pastas, estado, tabelas de regra, projeção, testes, riscos e suposições
+- [x] `docs/adr/` — nove decisões, uma por arquivo
+- [x] `docs/architecture/workspace.dsl` — modelo C4 com cinco views, validado no Structurizr
 
-A arquitetura de estado e de componentes fica de fora desta etapa. Ela depende do formato de saída do motor, que ainda não existe, e desenhar isso agora seria desenhar no escuro.
+As cinco decisões que já estavam tomadas viraram ADR 0001 a 0005. As quatro novas: um cadastro só para as duas abas (0006), tabelas de regra em TypeScript `as const` (0007), projeção síncrona sem Web Worker (0008), e estado em React Context com `useReducer` (0009).
+
+A **fronteira** de estado ficou resolvida — onde ele mora, como chega ao `localStorage`, como o import e a migração se encaixam. A **árvore de componentes** continua fora: ela depende do formato de saída do motor, que só existe depois da etapa 5.
 
 ## Etapa 4 — Mockups de validação visual
 
