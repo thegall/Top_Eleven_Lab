@@ -20,15 +20,20 @@ Fechar o repositório como documento antes de escrever a primeira linha de códi
 
 ## Etapa 2 — Setup, CI e Dependabot
 
+**Em andamento.** Branch `chore/setup-ci`.
+
 Setup mínimo do projeto e a esteira que vai validar tudo daqui pra frente. O setup entra junto porque CI sem nada para rodar não prova nada.
 
-- [ ] `package.json`, `tsconfig.json`, Vitest configurado
-- [ ] Um teste de fumaça, para o CI ter o que executar
-- [ ] `.github/workflows/ci.yml` — lint, typecheck e testes a cada push e pull request
-- [ ] `.github/dependabot.yml` — atualização de dependências npm e de GitHub Actions
-- [ ] Proteção da branch padrão, exigindo o CI verde
+- [x] `package.json` com npm, `tsconfig.json` em modo estrito, Vitest e ESLint
+- [x] Primeira peça do domínio, com teste: custo de condicionamento por dificuldade
+- [x] `.github/workflows/ci.yml` — lint, typecheck e testes a cada push e pull request
+- [x] `.github/workflows/dependency-audit.yml` — auditoria semanal de vulnerabilidades
+- [x] `.github/dependabot.yml` — atualização de dependências npm e de GitHub Actions
+- [ ] Proteção da `main` — adiada até o repositório abrir. Enquanto for privado e de uma pessoa só, o CI reporta sem bloquear
 
 CI antes do motor, e não depois, porque o valor do TDD some se a bateria de testes só rodar em ambiente limpo no fim. Também é o que permite aceitar contribuição de fora sem revisar tudo na mão.
+
+O Next.js fica de fora desta etapa. O motor da etapa 5 é TypeScript puro e não precisa dele; instalar framework antes de usar deixa dependência parada envelhecendo no `package.json`. O step de build entra no CI junto com o Next, na etapa 6.
 
 ## Etapa 3 — Arquitetura
 

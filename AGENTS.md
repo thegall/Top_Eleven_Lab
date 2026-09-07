@@ -209,7 +209,8 @@ Regras de trabalho válidas para qualquer pessoa ou agente que mexer no projeto.
 
 - Commits semânticos: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`, `style:`.
 - **Commitar só quando pedido.** Nunca commitar por iniciativa própria.
-- Trabalhar em branch, nunca direto na branch padrão.
+- Trabalhar em branch, nunca direto na `main`. Uma branch por etapa do roadmap, nomeada `<tipo>/<descrição-curta>` em inglês, com o tipo casando com o prefixo do commit: `chore/setup-ci`, `feat/squad-tab`, `docs/architecture`.
+- A `main` não tem proteção enquanto o repositório for privado e de uma pessoa só. O CI roda e reporta, sem bloquear. Isso muda quando o repositório abrir.
 
 ### Testes
 
