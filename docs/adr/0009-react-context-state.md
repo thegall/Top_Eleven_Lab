@@ -27,6 +27,11 @@ chega ao armazenamento — não a árvore de componentes.
 O documento vive em memória num **Context de React alimentado por `useReducer`**. Sem
 Zustand, sem Redux, sem Jotai, sem TanStack Query.
 
+**Entra em vigor na etapa 6**, junto com o Next.js e o React — ver
+[ADR 0005](0005-toolchain-and-deferred-nextjs.md). Na etapa 5 não existe React no projeto, e o
+motor de domínio é chamado direto pelos testes. Esta ADR é arquitetura-alvo, decidida agora
+porque a fronteira entre estado e domínio precisa estar fechada antes de o motor ser escrito.
+
 - **A interface despacha ações**; o reducer produz o documento novo.
 - **Gravação write-through, síncrona**, a cada documento novo — ver
   [ADR 0002](0002-local-storage-persistence.md).

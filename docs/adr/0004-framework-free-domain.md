@@ -63,9 +63,15 @@ sem `DOM`, então `window` e `localStorage` **não compilam** dentro de `src/`. 
 caso mais provável de graça.
 
 Quando a camada de interface entrar (etapa 6), o `lib` vai precisar de `DOM`, e essa proteção
-some. Nesse momento, a regra passa a ser cobrada por uma regra de ESLint de import proibido
-(`no-restricted-imports` com padrão de caminho), que é a forma mais barata de manter a
-fronteira sem cerimônia.
+some. Nesse momento a fronteira passa a ser cobrada por ESLint, num bloco com `files:
+['src/domain/**']` — o escopo é do arquivo que está sendo lintado, não do que ele importa:
+
+- **`no-restricted-globals`** para `window`, `document`, `localStorage` e `navigator`.
+- **`no-restricted-imports`** para `react`, `next` e qualquer coisa de `src/ui` ou `src/state`.
+
+As duas regras são necessárias e não se substituem: `no-restricted-imports` casa com
+especificador de módulo e não enxerga acesso a global, que é justamente como `window` e
+`localStorage` apareceriam dentro do domínio.
 
 ## Alternativas descartadas
 

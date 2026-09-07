@@ -45,9 +45,6 @@ só aparece na etapa 6.
 - Quando o Next entrar, o `tsconfig.json` vai precisar de `"lib": [..., "DOM"]` e de `jsx`,
   e o `lib` sem DOM deixa de proteger a fronteira do domínio — ver
   [ADR 0004](0004-framework-free-domain.md), "Como a fronteira é cobrada".
-- `resolveJsonModule: true` está ligado no `tsconfig.json` e ficou sem uso, agora que as
-  tabelas de regra são TypeScript. Registrado em `ARCHITECTURE.md` §11; não foi removido
-  porque limpar configuração é decisão do dono do projeto.
 - npm é mais lento que pnpm em instalação. Irrelevante num projeto com meia dúzia de
   dependências de desenvolvimento.
 

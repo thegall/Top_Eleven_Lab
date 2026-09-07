@@ -117,7 +117,7 @@ O Squad usa nome, overall e posição. O Laboratório usa a ficha completa. É o
 dois níveis de detalhe, e o produto só faz sentido porque as duas abas são a mesma estratégia
 vista de dois lados (GAME-RULES §8.1).
 
-**Decisão: uma lista só de jogadores, e a ficha de Laboratório é um campo opcional do jogador.**
+**Decisão: uma lista só de jogadores, e a ficha de Laboratório é um campo sempre presente e anulável (`lab: FichaLab | null`).**
 
 ```jsonc
 {
@@ -300,9 +300,11 @@ contagem correta parte de **21**:
 fatorIdade(idade) = idade <= 21 ? 1,00 : max(0,05 ; 1,00 − 0,0679 × (idade − 21))
 ```
 
-Conferido nas duas pontas: aos 22 dá `0,9321` (tabela: `0,932`), aos 35 dá `0,0494`
-(tabela: `0,050`). O teste desta função reproduz as 18 linhas da §3.2, e é ele que protege
-contra alguém "consertar" o `− 21` para `− 22`.
+Conferido nas duas pontas: aos 22 dá `0,9321`, que arredonda para o `0,932` da tabela; aos
+35 a parte linear dá `0,0494` e **o piso devolve `0,050`**, que é o valor da tabela. O teste
+compara com `0,05` aos 35, não com `0,0494` — sem o `máx`, a função devolveria um número
+abaixo do piso publicado. É esse teste, reproduzindo as 18 linhas da §3.2, que protege contra
+alguém "consertar" o `− 21` para `− 22`.
 
 Duas decisões menores de interpolação que o GAME-RULES não fecha e o código precisa fechar,
 registradas aqui porque são escolha nossa e não do documento:
@@ -438,33 +440,31 @@ Cada item com o sinal que indica que chegou a hora de incluir.
 Encontradas ao desenhar. Nenhuma foi corrigida por conta própria — `PRD.md` e `GAME-RULES.md`
 não se alteram sem fonte nova (`AGENTS.md:232`).
 
-1. **`AGENTS.md:153-176` — o schema de duas listas.** `squad[]` e `laboratorio[]` com `id`
-   próprio duplicam o mesmo jogador e não dizem como as duas abas compartilham um cadastro.
-   Substituído pelo modelo da §4. **Ação:** atualizar o `AGENTS.md`.
-2. **`AGENTS.md:28` aponta a arquitetura para a "etapa 2"**, e o `ROADMAP.md:38` a coloca na
-   etapa 3. **Ação:** corrigir para etapa 3 e trocar o "Pendente" pelo link deste documento.
-3. **`ROADMAP.md:45` diz que a arquitetura de estado fica fora da etapa 3**, e esta etapa
-   pediu que ela fosse resolvida. Resolvido pela metade de propósito: este documento define
-   **onde** o estado mora e como chega ao armazenamento (§5), e **não** define a árvore de
-   componentes nem o formato de saída do motor, que dependem da etapa 5.
-4. **GAME-RULES §6 passo 5 versus §3 — o corte de 140%.** A §6 manda tirar da rotação o drill
+As três primeiras dependem de observação da comunidade e não de decisão nossa.
+
+1. **GAME-RULES §5 não isola a idade no teste de talento.** O procedimento exige treino
+   classe mundial para padronizar aquele multiplicador, mas o sigma medido também carrega o
+   fator da §3.2. Testar um jogador de 26 anos e ler a tabela direto o classifica um ou dois
+   ranks abaixo do real. A leitura adotada é **dividir o sigma medido pelo fator de idade
+   antes de consultar a tabela** — interpretação nossa, não do material da comunidade.
+   Registrada como `[PENDENTE]` na §5 do GAME-RULES, com a recomendação de testar antes dos
+   22 anos, onde o fator é 1,00 e não há correção a aplicar. **Ação:** validar com a
+   comunidade.
+2. **GAME-RULES §3.1, tabela de conciliação: "Ruim / Terrível" na mesma linha.** O método 1
+   não separa os dois ranks, enquanto a curva os trata como valores distintos (0,163 contra
+   0,130 a 100%). Registrada como `[PENDENTE]` na §3.1, com a decisão de oferecer só o
+   método 2 nessa faixa. **Ação:** definir o corte, ou manter só o método 2.
+3. **GAME-RULES §6 passo 5 versus §3 — o corte de 140%.** A §6 manda tirar da rotação o drill
    acima de ~140%; a §3 diz que acima disso ainda rende, só custa mais. Tratado na §7 acima:
    regra dura do motor é 180%, o corte de 140% é aviso de interface. **Ação:** confirmar a
    leitura, ou ajustar o motor.
-5. **GAME-RULES §5 não menciona a idade no teste de talento.** O procedimento exige treino
-   classe mundial para padronizar o multiplicador da §3.1, mas o sigma medido também carrega
-   o fator de idade da §3.2. Testar um jogador de 26 anos e ler a tabela direto o classifica
-   um ou dois ranks abaixo do real. O motor precisa **dividir o sigma medido pelo fator de
-   idade antes de consultar a tabela** — isto é interpretação nossa, não do documento.
-   **Ação:** validar com a comunidade e registrar na §5 do GAME-RULES.
-6. **GAME-RULES §3.1, tabela de conciliação: "Ruim / Terrível" na mesma linha.** O método 1
-   (padrão de pontos) não separa os dois ranks, enquanto a curva os trata como valores
-   distintos. Se a interface deixar o usuário informar o rank pelo padrão observado, não há
-   como escolher entre eles. **Ação:** oferecer só o método 2 para esses casos, ou definir o
-   corte.
-7. **`resolveJsonModule: true` no `tsconfig.json` ficou sem uso**, agora que as tabelas de
-   regra são TypeScript ([ADR 0007](adr/0007-rule-tables-in-typescript.md)). Não foi
-   removido — é decisão do dono do projeto se vale limpar.
+
+**Resolvidas no mesmo pull request que trouxe este documento:** o schema de duas listas do
+`AGENTS.md`, substituído pelo modelo da §4; a seção de arquitetura do `AGENTS.md`, que
+apontava para a etapa 2 e agora aponta para cá; o `resolveJsonModule` do `tsconfig.json`,
+removido por ficar sem uso depois da [ADR 0007](adr/0007-rule-tables-in-typescript.md); e o
+`ROADMAP.md`, que agora distingue a fronteira de estado (resolvida aqui) da árvore de
+componentes (que continua dependendo da etapa 5).
 
 ## 12. Suposições
 

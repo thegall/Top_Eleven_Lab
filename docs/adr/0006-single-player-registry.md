@@ -25,7 +25,13 @@ uma com `id` próprio. Isso duplica o jogador e não diz como os dois registros 
 
 ## Decisão
 
-**Uma lista só de jogadores.** A ficha de Laboratório é um campo opcional dentro do jogador.
+**Uma lista só de jogadores.** A ficha de Laboratório é um campo **sempre presente e
+anulável** do jogador: `lab: FichaLab | null`, com `null` para quem existe só no Squad.
+
+Não é propriedade opcional (`lab?: FichaLab`). Com `exactOptionalPropertyTypes` ligado no
+`tsconfig.json`, ausente e `null` são tipos diferentes, e a distinção vazaria para a
+serialização: `JSON.stringify` omite a chave ausente e preserva o `null`. Um campo sempre
+presente dá um formato só no arquivo exportado e uma checagem só no código.
 
 ```jsonc
 {
@@ -63,7 +69,7 @@ uma com `id` próprio. Isso duplica o jogador e não diz como os dois registros 
 
 **Custos aceitos:**
 
-- **`lab` é opcional, e todo código do Laboratório precisa lidar com `null`.** Em troca, o
+- **`lab` é anulável, e todo código do Laboratório precisa lidar com `null`.** Em troca, o
   tipo passa a dizer a verdade: "este jogador pode não ter ficha", que é o estado normal da
   maioria do elenco.
 - A lista carrega dados que o Squad não usa. Com ~25 jogadores e ~5 KB, isso não é problema

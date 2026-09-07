@@ -27,6 +27,8 @@ workspace "Top Eleven Lab" "Calculadora de treino e de elenco do Top Eleven, rod
 
             webApp = container "Aplicação Web" "Site estático que roda inteiro no navegador: as duas abas, o cadastro e o motor de cálculo. Não faz nenhuma requisição de rede em runtime" "Next.js (App Router, export estático) + TypeScript" {
 
+                // ui e estado entram na etapa 6, com o Next.js e o React (ADR 0005 e 0009).
+                // O motor abaixo é a etapa 5 e não depende de nenhum dos dois.
                 ui = component "Interface" "As duas abas, os formulários de cadastro, a formatação de número e o layout paisagem no celular. Não contém regra de jogo" "React"
 
                 estado = component "Estado e Persistência" "Guarda o documento do usuário em memória, despacha as ações, grava no armazenamento local e cuida do exportar, do importar e da migração de schemaVersion" "TypeScript + React Context"

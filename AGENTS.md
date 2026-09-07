@@ -119,7 +119,7 @@ interface Drill {
 | `custoEmMaletas` | condicionamento `%` → `number` | `teto(gasto ÷ 15)`. §9 |
 | `montarCronograma` | jogador → `Drill[6]` | Menor média primeiro. §6 |
 | `projetarAteMeta` | jogador, overall alvo → faixa de sessões | Iterativo, recalcula cascata. §11 |
-| `mediaDos14` | `JogadorSquad[]` → `number` | Soma dos 14 maiores ÷ 14. §8 |
+| `mediaDos14` | `Jogador[]` → `number` | Soma dos 14 maiores ÷ 14, ignorando os vendidos. §8 |
 | `classificarTalento` | soma de 5 sessões, drill, média → `RankTalento` | §5, método 2 |
 
 **Invariantes que o motor não pode violar:**

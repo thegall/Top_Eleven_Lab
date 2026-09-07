@@ -20,8 +20,7 @@ O que precisa ser transcrito de lá:
 | Curva de média do exercício | 9 âncoras, interpolação linear | §3.1 |
 | Multiplicador de nível do treinador | 4 valores | §3.1 |
 
-Isso é **dado**, não código. O instinto é colocar em JSON — e o `tsconfig.json` inclusive já
-tem `resolveJsonModule` ligado.
+Isso é **dado**, não código, e o instinto é colocar em JSON.
 
 O modo de falha mais provável deste projeto não é bug de lógica: é **erro de digitação ao
 transcrever tabela de um documento markdown**. Um `"cabeceada"` no lugar de `"cabecada"` na
