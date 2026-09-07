@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   audit:
-    name: Auditoria de produção
+    name: Auditoria de dependências
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -28,5 +28,5 @@ jobs:
         with:
           node-version: 22
 
-      - name: Auditar dependências de produção
-        run: npm audit --omit=dev --audit-level=high
+      - name: Auditar dependências
+        run: npm audit --audit-level=high

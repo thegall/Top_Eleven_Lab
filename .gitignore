@@ -32,9 +32,11 @@ coverage/
 Thumbs.db
 desktop.ini
 
-# Material de terceiros — fica local, não é redistribuído
-# Capturas de tela do jogo (Nordeus) e planilhas da comunidade.
-# As regras extraídas delas estão em docs/GAME-RULES.md, com a origem creditada.
+# Mockups e material de referência — ficam locais, por decisão.
+# Guarda capturas de tela do jogo (Nordeus), planilhas da comunidade e os
+# mockups HTML de validação visual. O que sai das referências está transcrito
+# em docs/GAME-RULES.md, com a origem creditada; os mockups são rascunho de
+# tela, não fazem parte da entrega e não precisam de histórico.
 Mockups/
 *.xlsx
 

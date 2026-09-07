@@ -46,7 +46,9 @@ A arquitetura de estado e de componentes fica de fora desta etapa. Ela depende d
 
 ## Etapa 4 — Mockups de validação visual
 
-Telas navegáveis antes da implementação real, para validar layout e fluxo com jogadores da comunidade. As referências visuais do jogo estão em `Mockups/Referencias/`.
+Telas navegáveis antes da implementação real, para validar layout e fluxo com jogadores da comunidade. HTML solto, sem framework e sem build.
+
+Os mockups ficam em `Mockups/`, **fora do repositório**, junto com as referências visuais do jogo. São rascunho de tela: não fazem parte da entrega, não precisam de histórico e não devem ser confundidos com a implementação por quem chegar no projeto depois.
 
 - [ ] Squad, no desktop e em paisagem no mobile
 - [ ] Laboratório, replicando a tela do jogador
