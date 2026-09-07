@@ -25,17 +25,18 @@ O que faz o produto ter valor não é a interface — é o motor. Ele é determi
 
 ## Arquitetura dos arquivos
 
-> **Pendente.** Estrutura definitiva sai em `docs/ARCHITECTURE.md`, na etapa 2 do roadmap. O que já está decidido é a fronteira, abaixo.
-
-**Regra de fronteira, essa sim já valendo:** o motor de domínio é TypeScript puro. Não importa React, não lê `window`, não conhece `localStorage`, não formata número para exibição. Recebe dados, devolve dados. É por isso que ele é testável sem navegador e é por isso que ele é a primeira coisa a ser construída.
+A árvore de diretórios e as decisões que a sustentam estão em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), com uma ADR por decisão cara de reverter em [`docs/adr/`](docs/adr/). O resumo da fronteira:
 
 ```
+interface → React, Next.js, formatação, layout paisagem
+aplicação → estado, persistência, migração, exportar/importar
 domínio   → cálculo puro, sem I/O e sem framework
-aplicação → estado, persistência, orquestração
-interface → React, layout, formatação
+regras    → as tabelas transcritas do GAME-RULES
 ```
 
 Dependência aponta só para dentro: interface conhece aplicação, aplicação conhece domínio, domínio não conhece ninguém.
+
+**O motor de domínio é TypeScript puro.** Não importa React, não lê `window`, não conhece `localStorage`, não formata número para exibição. Recebe dados, devolve dados. É por isso que ele é testável sem navegador e é por isso que ele é a primeira coisa a ser construída.
 
 ## Fluxos principais
 
@@ -150,26 +151,37 @@ Estes não são exemplos ilustrativos: são medições de campo que o motor tem 
 
 Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `schemaVersion` existe para permitir migração sem perder o elenco de quem já usa.
 
+**Uma lista só de jogadores.** As duas abas são o mesmo jogador em dois níveis de detalhe, e a ficha de Laboratório é um campo opcional — ver [ADR 0006](docs/adr/0006-single-player-registry.md).
+
 ```jsonc
 {
   "schemaVersion": 1,
-  "squad": [
-    { "id": "…", "nome": "…", "overall": 78, "posicao": "DC", "vendido": false }
-  ],
-  "laboratorio": [
+  "jogadores": [
     {
       "id": "…",
       "nome": "…",
-      "idade": 19,
-      "posicoes": ["MC", "AMC"],
-      "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
-      "brancosManuais": null,        // null = derivar da posição
-      "talento": "otima",            // null enquanto não testado
-      "nivelTreinador": "mundial",
-      "testes": [
-        { "data": "2026-09-07", "drill": "pressione-o-play",
-          "mediaAntes": 55, "soma5Sessoes": 31 }
-      ]
+      "overall": 78,
+      "posicoes": ["DC"],
+      "vendido": false,
+      "lab": null                     // null = existe só no Squad
+    },
+    {
+      "id": "…",
+      "nome": "…",
+      "overall": 84,
+      "posicoes": ["MC", "AMC"],      // até 3 — GAME-RULES §1
+      "vendido": false,
+      "lab": {                        // preenchido = promovido ao Laboratório
+        "idade": 19,
+        "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
+        "brancosManuais": null,       // null = derivar da união das posições
+        "talento": "otima",           // null enquanto não testado
+        "nivelTreinador": "mundial",
+        "testes": [
+          { "data": "2026-09-07", "drill": "pressione-o-play",
+            "mediaAntes": 55, "soma5Sessoes": 31 }
+        ]
+      }
     }
   ]
 }
@@ -178,8 +190,10 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 | Campo | Tipo | Significado |
 |---|---|---|
 | `schemaVersion` | `number` | Versão do formato. Migração roda na leitura |
-| `squad[].vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
-| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da posição. Preenchido = usuário corrigiu |
+| `posicoes` | `Posicao[]` | Sempre array, mesmo com uma posição só. Até 3 |
+| `vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
+| `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad |
+| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições. Preenchido = usuário corrigiu |
 | `talento` | `RankTalento \| null` | `null` = desconhecido; o app oferece o teste |
 | `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
 
