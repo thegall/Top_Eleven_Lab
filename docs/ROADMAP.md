@@ -1,0 +1,91 @@
+# Roadmap — Top Eleven Lab
+
+> As etapas do projeto e onde ele está. Uma etapa por commit, salvo onde indicado.
+>
+> Contexto de produto: [`PRD.md`](../PRD.md). Regras do jogo: [`GAME-RULES.md`](GAME-RULES.md). Referência técnica: [`AGENTS.md`](../AGENTS.md).
+
+## Etapa 1 — Documentação
+
+**Em andamento.**
+
+Fechar o repositório como documento antes de escrever a primeira linha de código. O projeto é open source e vai ficar exposto; quem chegar pelo GitHub precisa entender o que é, por que existe e como as regras foram levantadas.
+
+- [x] `PRD.md` — por que o produto existe, para quem, o que ficou fora da V1
+- [x] `docs/GAME-RULES.md` — as regras do jogo, com fórmulas, origem e validação
+- [x] `AGENTS.md` — referência técnica e regras de trabalho
+- [x] `LICENSE` — MIT
+- [x] `README.md`
+- [x] `docs/ROADMAP.md`
+- [ ] `.gitignore`
+
+## Etapa 2 — Setup, CI e Dependabot
+
+Setup mínimo do projeto e a esteira que vai validar tudo daqui pra frente. O setup entra junto porque CI sem nada para rodar não prova nada.
+
+- [ ] `package.json`, `tsconfig.json`, Vitest configurado
+- [ ] Um teste de fumaça, para o CI ter o que executar
+- [ ] `.github/workflows/ci.yml` — lint, typecheck e testes a cada push e pull request
+- [ ] `.github/dependabot.yml` — atualização de dependências npm e de GitHub Actions
+- [ ] Proteção da branch padrão, exigindo o CI verde
+
+CI antes do motor, e não depois, porque o valor do TDD some se a bateria de testes só rodar em ambiente limpo no fim. Também é o que permite aceitar contribuição de fora sem revisar tudo na mão.
+
+## Etapa 3 — Arquitetura
+
+- [ ] `docs/ARCHITECTURE.md` — camadas, fronteiras, estrutura de pastas
+- [ ] `docs/adr/` — as decisões caras de reverter, uma por arquivo
+
+Decisões já tomadas, que entram como ADR: Next.js com export estático, persistência em `localStorage` com exportar e importar JSON, um codebase com layout paisagem no mobile, domínio isolado de framework.
+
+A arquitetura de estado e de componentes fica de fora desta etapa. Ela depende do formato de saída do motor, que ainda não existe, e desenhar isso agora seria desenhar no escuro.
+
+## Etapa 4 — Mockups de validação visual
+
+Telas navegáveis antes da implementação real, para validar layout e fluxo com jogadores da comunidade. As referências visuais do jogo estão em `Mockups/Referencias/`.
+
+- [ ] Squad, no desktop e em paisagem no mobile
+- [ ] Laboratório, replicando a tela do jogador
+- [ ] Fluxo do teste de talento guiado
+- [ ] Validar com três ou quatro jogadores antes de codar
+
+O maior risco de adoção do produto é o cadastro manual cansar antes de o usuário ver valor. Descobrir isso num mockup custa uma tarde; descobrir depois da implementação custa o projeto.
+
+## Etapa 5 — Motor de domínio, via TDD
+
+TypeScript puro, sem framework e sem interface. Os casos de teste já estão escritos em `AGENTS.md`, na seção "Casos de teste que vêm prontos do GAME-RULES", e cada um é uma medição de campo registrada nas regras.
+
+- [ ] Tipos e a tabela dos 29 drills
+- [ ] `brancosDaPosicao` — validar contra ML com 7 brancos e ML+MC com Chute
+- [ ] `mediaExercicio` e `classificarDrill`
+- [ ] `sigma` e `fatorIdade`
+- [ ] `montarCronograma` — validar contra os 8 drills do cronograma de meio-campista
+- [ ] `classificarTalento` — validar contra o teste de 31 pontos
+- [ ] `ganhoSessao`, `custoEmMaletas` e `projetarAteMeta`
+- [ ] `mediaDos14`
+
+## Etapa 6 — Aba Squad
+
+Primeira tela real, e a mais simples: três campos por jogador. Também é a que testa o risco de adoção com o menor custo.
+
+- [ ] Cadastro, lista ordenada e corte visível no 14º
+- [ ] Média dos 14, ao vivo, e contagem por posição
+- [ ] Marcar como vendido, com recálculo e indicação de quem subiu
+- [ ] Faixas de referência do que aquela média significa na temporada seguinte
+- [ ] Persistência em `localStorage`, com exportar e importar JSON
+
+## Etapa 7 — Aba Laboratório
+
+- [ ] Cadastro detalhado, com brancos derivados da posição e editáveis
+- [ ] Recomendação dos 6 slots, com a média e a distância até o teto de cada drill
+- [ ] Teste de talento guiado, com verificação das condições de validade
+- [ ] Estimativa de sessões e de maletas, sempre como faixa
+
+## Etapa 8 — Mobile e acabamento
+
+- [ ] Layout paisagem no mobile
+- [ ] Acessibilidade básica: contraste, foco visível, navegação por teclado
+- [ ] As regras aplicadas visíveis ao usuário, com a origem declarada
+
+## Depois da V1
+
+Fora do escopo por decisão, registrado para não voltar como ideia nova: goleiro no Laboratório, treino em grupo, detecção de talento pelo valor de mercado no leilão, contas de usuário e sincronização, outros idiomas, e qualquer coisa que dependa de dados agregados de muitos usuários. Os motivos estão no `PRD.md` e na seção 10 de `GAME-RULES.md`.

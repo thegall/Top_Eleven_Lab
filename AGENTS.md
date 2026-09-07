@@ -1,0 +1,230 @@
+# AGENTS.md — Top Eleven Lab (Referência Técnica)
+
+> Referência técnica e regras de trabalho do repositório. Este projeto não usa `CLAUDE.md`: tudo o que um agente precisa saber está aqui.
+>
+> O **porquê** do produto: [`PRD.md`](PRD.md). As **regras do jogo**: [`docs/GAME-RULES.md`](docs/GAME-RULES.md). As **etapas**: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+>
+> Este arquivo descreve o sistema. Quando o código e este arquivo discordarem, um dos dois está errado. Resolva antes de seguir.
+
+## Visão geral
+
+Calculadora de treino e de elenco para o jogo mobile Top Eleven, feita para a comunidade brasileira. Site estático, sem backend e sem conta de usuário: tudo roda no navegador do jogador.
+
+Duas abas sobre um cadastro só:
+
+- **Squad** — simula a média dos 14 jogadores mais fortes, que é o número pelo qual o jogo emparelha a temporada seguinte. Marcar um jogador como vendido recalcula a média e mostra quem sobe para a lista.
+- **Laboratório** — recomenda quais dos 29 exercícios treinar em cada um dos 6 slots da sessão, e estima ganho e custo em maletas verdes.
+
+```
+[Jogador digita elenco] → [localStorage] → [motor de domínio] → [recomendação + estimativa]
+                              ↑                                          ↓
+                        [import JSON]                            [export JSON]
+```
+
+O que faz o produto ter valor não é a interface — é o motor. Ele é determinístico e as fórmulas estão todas em `docs/GAME-RULES.md`, com as validações de campo que cada uma passou.
+
+## Arquitetura dos arquivos
+
+> **Pendente.** Estrutura definitiva sai em `docs/ARCHITECTURE.md`, na etapa 2 do roadmap. O que já está decidido é a fronteira, abaixo.
+
+**Regra de fronteira, essa sim já valendo:** o motor de domínio é TypeScript puro. Não importa React, não lê `window`, não conhece `localStorage`, não formata número para exibição. Recebe dados, devolve dados. É por isso que ele é testável sem navegador e é por isso que ele é a primeira coisa a ser construída.
+
+```
+domínio   → cálculo puro, sem I/O e sem framework
+aplicação → estado, persistência, orquestração
+interface → React, layout, formatação
+```
+
+Dependência aponta só para dentro: interface conhece aplicação, aplicação conhece domínio, domínio não conhece ninguém.
+
+## Fluxos principais
+
+### Fluxo 1 — Recomendação de treino
+
+```
+1. Usuário cadastra jogador: idade, posições, 15 atributos
+2. Brancos são derivados da matriz de posições (GAME-RULES §2) e ficam editáveis
+3. Para cada um dos 29 drills: descartar atributos de goleiro, calcular a média
+   do exercício sobre o que sobrou, classificar em primário/secundário/terciário
+4. Ordenar os primários pela menor média (mais longe do teto de 180%)
+5. Preencher os 6 slots, repetindo drill quando houver menos de 6 primários
+6. Calcular ganho e custo da sessão (GAME-RULES §3.1, §3.2, §4, §9)
+7. Recalcular todas as médias e repetir, até a meta de overall
+```
+
+O passo 7 é o que separa este produto de uma planilha: subir um atributo empurra a média de **todo** drill que o contém (efeito cascata), então a projeção precisa ser iterativa, nunca uma multiplicação linear.
+
+### Fluxo 2 — Simulação de venda
+
+```
+1. Usuário cadastra o elenco: nome, overall, posição
+2. Ordenar por overall, cortar no 14º
+3. Média = soma dos 14 maiores ÷ 14
+4. Usuário marca jogadores como vendidos → refazer 2 e 3
+5. Exibir quem entrou na lista dos 14 no lugar do vendido
+```
+
+Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive overall baixíssimo. É exatamente isso que a estratégia explora, então não é caso de erro.
+
+### Fluxo 3 — Teste de talento
+
+```
+1. App indica um drill válido: primário, com média do exercício abaixo de 80%
+2. Usuário roda 5 sessões no jogo e informa a soma dos pontos ganhos
+3. sigma = soma ÷ (5 × 6 × desgaste_por_slot)
+4. Localizar sigma na tabela da GAME-RULES §3.1, na coluna da média do exercício
+5. Devolver o rank e explicar o que ele significa
+```
+
+As três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) o app **verifica antes** de aceitar o teste — teste inválido dá falso negativo e o usuário nunca vai saber.
+
+## Contratos internos
+
+Os tipos abaixo são o contrato entre o domínio e o resto. Cada função corresponde a uma seção do GAME-RULES, que é onde está a fórmula e a validação de campo.
+
+```ts
+type Atributo =
+  | 'corte' | 'marcacao' | 'posicionamento' | 'cabecada' | 'coragem'
+  | 'passe' | 'drible' | 'cruzamento' | 'chute' | 'finalizacao'
+  | 'condicionamento' | 'forca' | 'agressividade' | 'velocidade' | 'criatividade';
+
+type Posicao = 'GK' | 'DL' | 'DC' | 'DR' | 'DMC' | 'ML' | 'MC' | 'MR'
+             | 'AML' | 'AMC' | 'AMR' | 'ST';
+
+type RankTalento = 'terrivel' | 'ruim' | 'normal' | 'boa'
+                 | 'otima' | 'excelente' | 'fenomeno';
+
+type NivelTreinador = 'amador' | 'semiprofissional' | 'profissional' | 'mundial';
+
+type Dificuldade = 1 | 2 | 3 | 4 | 5;   // desgaste = Dificuldade × 0,75%
+
+interface Drill {
+  nome: string;
+  categoria: 'ataque' | 'defesa' | 'posse' | 'fisico';
+  dificuldade: Dificuldade;
+  atributos: Atributo[];      // já sem os de goleiro — GAME-RULES §6
+  soDeGoleiro: boolean;       // Treino de Goleiro: nunca válido para jogador de linha
+}
+```
+
+| Função | Entrada → saída | Regra |
+|---|---|---|
+| `brancosDaPosicao` | `Posicao[]` → `Set<Atributo>` | União das posições. GAME-RULES §2 |
+| `mediaExercicio` | jogador, drill → `number` | Soma ÷ quantidade, só atributos válidos. §3 |
+| `classificarDrill` | jogador, drill → `'primario' \| 'secundario' \| 'terciario' \| 'invalido'` | §4 |
+| `sigma` | rank, média → `number` | Tabela de ganho, interpolação linear. §3.1 |
+| `fatorIdade` | `number` → `number` | 1,00 até 21 anos; −0,0679/ano até 0,05 aos 35. §3.2 |
+| `ganhoSessao` | jogador, slots, nível → pontos por atributo | §3.1 × §3.2 × nível |
+| `custoEmMaletas` | condicionamento `%` → `number` | `teto(gasto ÷ 15)`. §9 |
+| `montarCronograma` | jogador → `Drill[6]` | Menor média primeiro. §6 |
+| `projetarAteMeta` | jogador, overall alvo → faixa de sessões | Iterativo, recalcula cascata. §11 |
+| `mediaDos14` | `JogadorSquad[]` → `number` | Soma dos 14 maiores ÷ 14. §8 |
+| `classificarTalento` | soma de 5 sessões, drill, média → `RankTalento` | §5, método 2 |
+
+**Invariantes que o motor não pode violar:**
+
+- Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador.
+- Exercício com média em 180% rende **zero**. A planilha da comunidade erra nisso; nós não.
+- `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado.
+- Toda projeção sai como **faixa**, nunca como número exato — a conversão de atributo em overall é o único elo estimado do modelo (GAME-RULES §11).
+
+## Casos de teste que vêm prontos do GAME-RULES
+
+Estes não são exemplos ilustrativos: são medições de campo que o motor tem que reproduzir. São a primeira bateria de testes, escrita antes do código.
+
+| Caso | Entrada | Saída esperada | Fonte |
+|---|---|---|---|
+| Cronograma de MC | 9 brancos de MC | Exatamente 8 drills primários, os mesmos do vídeo | §6 |
+| Teste de talento | 31 pontos, Pressione o Play, média 55% | Rank `otima` | §5 |
+| Treino inflado | Os 6 drills da §8.2 | Cobertura de 15/15 atributos | §8.2 |
+| Brancos de ML | `['ML']` | 7 brancos, sem Chute | §2 |
+| Brancos de ML+MC | `['ML','MC']` | Chute presente | §2, fórum oficial |
+| Desgaste | Os 29 drills | `dificuldade × 0,75%` para todos | §4 |
+| Custo em maletas | Fenômeno, +8 atributos, média 100% | 2 maletas; 3 a 140%; 6 a 160% | §9 |
+
+## Integrações externas
+
+**Nenhuma, por decisão.** O Top Eleven não tem API pública e não existe forma de importar elenco. Todo dado é digitado pelo usuário e fica no navegador dele. O projeto não faz requisição de rede em runtime — se algum dia fizer, este é o parágrafo a reescrever primeiro.
+
+## Schemas de dados
+
+Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `schemaVersion` existe para permitir migração sem perder o elenco de quem já usa.
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "squad": [
+    { "id": "…", "nome": "…", "overall": 78, "posicao": "DC", "vendido": false }
+  ],
+  "laboratorio": [
+    {
+      "id": "…",
+      "nome": "…",
+      "idade": 19,
+      "posicoes": ["MC", "AMC"],
+      "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
+      "brancosManuais": null,        // null = derivar da posição
+      "talento": "otima",            // null enquanto não testado
+      "nivelTreinador": "mundial",
+      "testes": [
+        { "data": "2026-09-07", "drill": "pressione-o-play",
+          "mediaAntes": 55, "soma5Sessoes": 31 }
+      ]
+    }
+  ]
+}
+```
+
+| Campo | Tipo | Significado |
+|---|---|---|
+| `schemaVersion` | `number` | Versão do formato. Migração roda na leitura |
+| `squad[].vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
+| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da posição. Preenchido = usuário corrigiu |
+| `talento` | `RankTalento \| null` | `null` = desconhecido; o app oferece o teste |
+| `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
+
+Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostra. A fórmula real da Nordeus não é conhecida, e inventá-la produziria número errado numa tela em que o usuário compara com o jogo aberto do lado.
+
+## Decisões de infraestrutura
+
+- **Next.js App Router com export estático, na Vercel.** Não há backend nem necessidade de SSR — o Next entra pelo deploy trivial e pelo SEO da landing, que importa porque a distribuição do produto é alguém achar e compartilhar no grupo da comunidade. Reverter para Vite é barato enquanto não houver rota dinâmica.
+- **Persistência em `localStorage`, com exportar e importar JSON.** Sem conta, sem servidor, sem custo, sem dado pessoal e sem LGPD. O botão de exportar é o que cobre troca de aparelho e limpeza de navegador. Reverter para backend significa introduzir autenticação — decisão cara, fica para uma V2 que tenha motivo.
+- **Um codebase, layout paisagem no mobile.** O jogo é mobile e horizontal; o Lab acompanha. Sem app nativo: não usa câmera, notificação nem nada de hardware, então loja e build nativo seriam custo puro.
+- **Domínio isolado de framework.** É o que torna o motor testável sem navegador e o que permite trocar a camada de UI sem tocar em regra de jogo. Também é o que deixa o projeto legível para quem chegar pelo GitHub.
+- **`docs/GAME-RULES.md` é fonte única de regra de jogo.** Nenhuma constante de jogo é inventada no código: toda uma delas aponta para uma seção do documento. A Nordeus muda mecânica sem avisar, e quando isso acontecer o conserto tem que ter um lugar só.
+
+## Como trabalhar neste repositório
+
+Regras de trabalho válidas para qualquer pessoa ou agente que mexer no projeto.
+
+### Idioma
+
+- Documentação, comentários, interface e **mensagens de commit** em português do Brasil, com acentuação correta. Nunca substituir caractere acentuado por equivalente ASCII.
+- Código, identificadores e nomes de arquivo em inglês.
+- No commit, só o prefixo de tipo fica em inglês (`feat:`, `fix:`, `docs:`…), porque é palavra-chave do padrão Conventional Commits. O resto da mensagem é português.
+- Termos de domínio ficam como a comunidade fala, mesmo dentro de código em inglês: `maleta`, `drill`, `branco`, `cinza`, `mutante`. Traduzir isso afasta quem for ler.
+- A licença fica em inglês, que é o texto canônico da MIT. A tradução no mesmo arquivo é informativa.
+
+### Git
+
+- Commits semânticos: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`, `style:`.
+- **Commitar só quando pedido.** Nunca commitar por iniciativa própria.
+- Trabalhar em branch, nunca direto na branch padrão.
+
+### Testes
+
+- TDD: o teste vem antes da implementação. A tabela de casos acima é o ponto de partida do motor.
+- Nenhum caso de teste do motor é inventado. Cada um sai de uma medição registrada em `docs/GAME-RULES.md`, com a seção citada no próprio teste.
+- Teste que passou a falhar depois de uma mudança de regra do jogo é sinal de que `docs/GAME-RULES.md` mudou e o motor não acompanhou, ou o contrário. Descobrir qual antes de ajustar o número esperado.
+
+### Código
+
+- Sem `console.log` em código final.
+- Sem credencial, token ou URL sensível no código. Se algum dia houver, vai para variável de ambiente.
+- Nenhuma constante de regra de jogo nasce no código. Toda uma delas vem de `docs/GAME-RULES.md` e cita a seção de origem em comentário.
+- O domínio não importa React, não lê `window`, não toca em `localStorage` e não formata número para exibição.
+- Sem abstração para uso único, sem camada de configuração para valor que nunca muda, sem tratamento de erro para cenário impossível.
+
+### Perguntar antes de
+
+Deletar arquivo, sobrescrever dado, mudar estrutura de pastas, mudar persistência, e alterar qualquer regra em `docs/GAME-RULES.md` sem fonte nova que sustente a mudança.

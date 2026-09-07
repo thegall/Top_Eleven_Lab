@@ -1,0 +1,46 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.*
+
+# Build e cache
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# Testes
+coverage/
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Material de terceiros — fica local, não é redistribuído
+# Capturas de tela do jogo (Nordeus) e planilhas da comunidade.
+# As regras extraídas delas estão em docs/GAME-RULES.md, com a origem creditada.
+Mockups/
+*.xlsx
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

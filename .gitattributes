@@ -1,0 +1,4 @@
+# Normaliza quebra de linha: LF no repositório, nativo no disco de cada um.
+# Evita diff inteiro de arquivo quando alguém em Windows e alguém em Linux
+# mexem no mesmo arquivo.
+* text=auto eol=lf
