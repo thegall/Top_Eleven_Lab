@@ -23,4 +23,13 @@ describe('migrar', () => {
     expect(() => migrar({})).toThrow();
     expect(() => migrar({ schemaVersion: 1, jogadores: 'não é lista' })).toThrow();
   });
+
+  it('recusa schemaVersion numérico inválido', () => {
+    expect(() => migrar({ schemaVersion: 0.5, jogadores: [] })).toThrow();
+    expect(() => migrar({ schemaVersion: 0, jogadores: [] })).toThrow();
+    expect(() => migrar({ schemaVersion: -1, jogadores: [] })).toThrow();
+    expect(() =>
+      migrar({ schemaVersion: Number.MAX_SAFE_INTEGER + 1, jogadores: [] }),
+    ).toThrow();
+  });
 });
