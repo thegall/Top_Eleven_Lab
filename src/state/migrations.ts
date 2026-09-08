@@ -49,7 +49,7 @@ export function migrar(bruto: unknown): Documento {
   const documento = bruto as Record<string, unknown>;
   const { schemaVersion, jogadores } = documento;
 
-  if (typeof schemaVersion !== 'number') {
+  if (typeof schemaVersion !== 'number' || !Number.isSafeInteger(schemaVersion) || schemaVersion < 1) {
     throw new Error('Documento inválido: schemaVersion ausente ou não numérico.');
   }
   if (schemaVersion > CURRENT_SCHEMA_VERSION) {
