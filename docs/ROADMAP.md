@@ -71,17 +71,17 @@ TypeScript puro, sem framework e sem interface. Os casos de teste já estão esc
 - [ ] `montarCronograma` — validar contra os 8 drills do cronograma de meio-campista
 - [ ] `classificarTalento` — validar contra o teste de 31 pontos
 - [ ] `ganhoSessao`, `custoEmMaletas` e `projetarAteMeta`
-- [ ] `mediaDos14`
+- [x] `mediaDos14`
 
 ## Etapa 6 — Aba Squad
 
 Primeira tela real, e a mais simples: três campos por jogador. Também é a que testa o risco de adoção com o menor custo.
 
-- [ ] Cadastro, lista ordenada e corte visível no 14º
-- [ ] Média dos 14, ao vivo, e contagem por posição
-- [ ] Marcar como vendido, com recálculo e indicação de quem subiu
-- [ ] Faixas de referência do que aquela média significa na temporada seguinte
-- [ ] Persistência em `localStorage`, com exportar e importar JSON
+- [x] Cadastro, lista ordenada e corte visível no 14º
+- [x] Média dos 14, ao vivo, e contagem por posição
+- [x] Marcar como vendido, com recálculo e indicação de quem subiu
+- [x] Faixas de referência do que aquela média significa na temporada seguinte
+- [x] Persistência em `localStorage`, com exportar e importar JSON
 
 ## Etapa 7 — Aba Laboratório
 

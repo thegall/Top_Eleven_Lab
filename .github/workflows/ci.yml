@@ -45,3 +45,6 @@ jobs:
 
       - name: Executar testes
         run: npm test
+
+      - name: Build (export estático)
+        run: npm run build
