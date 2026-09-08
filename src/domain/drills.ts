@@ -57,6 +57,9 @@ export const ALL_DRILLS: Drill[] = [
  * (GAME-RULES §3). O drill já vem sem atributos de goleiro.
  */
 export function mediaExercicio(atributosJogador: Record<Atributo, number>, drill: Drill): number {
+  if (drill.soDeGoleiro || drill.atributos.length === 0) {
+    throw new Error(`Drill inválido para jogador de linha: ${drill.nome}.`);
+  }
   const soma = drill.atributos.reduce((total, atributo) => total + atributosJogador[atributo], 0);
   return soma / drill.atributos.length;
 }

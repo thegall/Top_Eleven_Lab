@@ -2,9 +2,9 @@
  * Curva de ganho por talento e média do exercício, e teste de talento pelo
  * método 2 (GAME-RULES §3.1 e §5).
  */
-import type { Drill } from './drills.js';
+import { classificarDrill, type Drill } from './drills.js';
 import { conditionCostPerSlot } from './training.js';
-import type { RankTalento } from './types.js';
+import type { Atributo, RankTalento } from './types.js';
 
 /** Colunas de média do exercício da tabela da curva de ganho. */
 const MEDIA_COLUMNS = [20, 40, 60, 80, 100, 120, 140, 160, 180] as const;
@@ -54,20 +54,22 @@ export function sigma(talento: RankTalento, mediaDoExercicio: number): number {
  * Classifica o talento pelo método 2: soma de pontos em 5 sessões de um drill
  * primário, convertida em sigma e localizada na curva (GAME-RULES §5).
  *
- * Recusa entrada fora das condições de validade do método — média do
- * exercício precisa estar abaixo de 80%, senão o teto de 180% já interfere e
- * o teste dá falso negativo.
+ * Recusa entrada fora das condições de validade do método — drill precisa
+ * ser primário para os brancos do jogador, e a média do exercício precisa
+ * estar abaixo de 80%, senão o teto de 180% já interfere e o teste dá falso
+ * negativo.
  */
 export function classificarTalento(
   somaDe5Sessoes: number,
   drill: Drill,
+  brancos: Set<Atributo>,
   mediaDoExercicio: number,
 ): RankTalento {
+  if (classificarDrill(brancos, drill) !== 'primario') {
+    throw new Error('Teste de talento inválido: drill precisa ser primário para o jogador (GAME-RULES §5).');
+  }
   if (mediaDoExercicio >= 80) {
     throw new Error('Teste de talento inválido: média do exercício precisa estar abaixo de 80% (GAME-RULES §5).');
-  }
-  if (drill.soDeGoleiro) {
-    throw new Error('Teste de talento inválido: drill precisa ser válido para jogador de linha (GAME-RULES §5).');
   }
 
   const desgastePorSlot = conditionCostPerSlot(drill.dificuldade);

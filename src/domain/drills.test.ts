@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { conditionCostPerSlot } from './training.js';
-import { ALL_DRILLS, classificarDrill, drillsPrimarios } from './drills.js';
+import { ALL_DRILLS, classificarDrill, drillsPrimarios, mediaExercicio } from './drills.js';
 import type { Atributo } from './types.js';
 
 describe('ALL_DRILLS', () => {
@@ -53,6 +53,13 @@ describe('classificarDrill / drillsPrimarios', () => {
   it('Treino de Goleiro nunca é válido para jogador de linha (GAME-RULES §6)', () => {
     const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.nome === 'Treino de Goleiro')!;
     expect(classificarDrill(new Set<Atributo>(), treinoDeGoleiro)).toBe('invalido');
+  });
+});
+
+describe('mediaExercicio', () => {
+  it('recusa drill sem atributo de linha, para não dividir por zero (GAME-RULES §3)', () => {
+    const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.nome === 'Treino de Goleiro')!;
+    expect(() => mediaExercicio({} as Record<Atributo, number>, treinoDeGoleiro)).toThrow();
   });
 });
 
