@@ -22,6 +22,12 @@ interface SquadContextValue {
 
 const SquadContext = createContext<SquadContextValue | null>(null);
 
+/** `crypto.randomUUID` pode faltar em contexto não seguro (ex.: HTTP na LAN). */
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function SquadProvider({ children }: { children: ReactNode }) {
   const [documento, dispatch] = useReducer(reducer, documentoVazio());
   const [carregado, marcarCarregado] = useReducer(() => true, false);
@@ -40,7 +46,7 @@ export function SquadProvider({ children }: { children: ReactNode }) {
     carregado,
     adicionarJogador: (nome, overall, posicao) => {
       const jogador: Jogador = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         nome,
         overall,
         posicoes: [posicao],

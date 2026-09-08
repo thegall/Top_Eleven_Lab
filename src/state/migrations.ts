@@ -5,6 +5,37 @@
  */
 import { CURRENT_SCHEMA_VERSION, type Documento, type Jogador } from './schema';
 
+const POSICOES_VALIDAS = new Set([
+  'GK',
+  'DL',
+  'DC',
+  'DR',
+  'DMC',
+  'ML',
+  'MC',
+  'MR',
+  'AML',
+  'AMC',
+  'AMR',
+  'ST',
+]);
+
+function ehJogadorValido(valor: unknown): valor is Jogador {
+  if (typeof valor !== 'object' || valor === null) return false;
+  const j = valor as Record<string, unknown>;
+  return (
+    typeof j.id === 'string' &&
+    typeof j.nome === 'string' &&
+    typeof j.overall === 'number' &&
+    Number.isFinite(j.overall) &&
+    Array.isArray(j.posicoes) &&
+    j.posicoes.length > 0 &&
+    j.posicoes.every((p) => POSICOES_VALIDAS.has(p as string)) &&
+    typeof j.vendido === 'boolean' &&
+    (j.lab === null || typeof j.lab === 'object')
+  );
+}
+
 /**
  * Valida e migra um documento bruto (de `localStorage` ou de um arquivo
  * importado) para o formato atual. Versão maior que a conhecida é recusada,
@@ -29,7 +60,10 @@ export function migrar(bruto: unknown): Documento {
   if (!Array.isArray(jogadores)) {
     throw new Error('Documento inválido: jogadores deve ser uma lista.');
   }
+  if (!jogadores.every(ehJogadorValido)) {
+    throw new Error('Documento inválido: um ou mais jogadores têm formato inválido.');
+  }
 
   // Única versão conhecida hoje é a 1 — nenhum passo de migração a aplicar ainda.
-  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: jogadores as Jogador[] };
+  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores };
 }

@@ -92,7 +92,7 @@ function exportar(documento: { schemaVersion: number; jogadores: Jogador[] }) {
   link.href = url;
   link.download = 'top-eleven-lab.json';
   link.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export default function SquadPage() {
@@ -125,7 +125,7 @@ export default function SquadPage() {
     return contagem;
   }, [jogadores]);
 
-  const faixaAtual = FAIXAS.find((f) => mediaComVendas >= f.min && mediaComVendas <= f.max);
+  const faixaAtual = [...FAIXAS].reverse().find((f) => mediaComVendas >= f.min);
 
   function aoSubmeter(evento: FormEvent) {
     evento.preventDefault();
@@ -164,7 +164,7 @@ export default function SquadPage() {
             <input
               type="file"
               accept="application/json"
-              hidden
+              className="visually-hidden"
               onChange={(e) => void aoImportar(e)}
             />
           </label>

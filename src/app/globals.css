@@ -67,6 +67,9 @@ body{margin:0;background:var(--canvas);color:var(--on-canvas);
 .btn--ghost{background:transparent;color:var(--muted);height:36px;padding:0 12px}
 .btn--ghost:hover{color:var(--ink)}
 .btn--undo{background:transparent;color:var(--loss);height:36px;padding:0 12px}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.btn:has(.visually-hidden:focus-visible){outline:none;box-shadow:var(--e-focus)}
 
 /* ---- lista de elenco ---- */
 .thead{display:grid;grid-template-columns:34px minmax(0,1fr) 62px 72px 150px;gap:var(--s-xs);
@@ -166,6 +169,6 @@ body{margin:0;background:var(--canvas);color:var(--on-canvas);
   .form{grid-template-columns:minmax(0,1fr) 1fr}
   .form .field:first-child{grid-column:1/-1}
   .form .btn--primary{grid-column:1/-1}
-  .row,.thead{grid-template-columns:24px minmax(0,1fr) 54px 56px}
-  .row__act,.thead .c-act{display:none}
+  .row,.thead{grid-template-columns:20px minmax(0,1fr) 44px 44px 78px;gap:4px;padding:0 8px}
+  .row__act .btn{height:30px;padding:0 6px;font-size:10px}
 }

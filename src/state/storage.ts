@@ -13,17 +13,24 @@ const CHAVE = 'top-eleven-lab:documento';
  * documento vazio em vez de lançar — a interface não trava no primeiro uso.
  */
 export function carregar(): Documento {
-  const bruto = localStorage.getItem(CHAVE);
-  if (bruto === null) return documentoVazio();
-
   try {
+    const bruto = localStorage.getItem(CHAVE);
+    if (bruto === null) return documentoVazio();
     return migrar(JSON.parse(bruto));
   } catch {
     return documentoVazio();
   }
 }
 
-/** Grava o documento. Só recebe documento já migrado e válido (ADR 0002, regra 3). */
+/**
+ * Grava o documento. Só recebe documento já migrado e válido (ADR 0002, regra 3).
+ * Falha silenciosa em `localStorage` bloqueado ou com quota esgotada — perder a
+ * gravação é preferível a quebrar a página.
+ */
 export function salvar(documento: Documento): void {
-  localStorage.setItem(CHAVE, JSON.stringify(documento));
+  try {
+    localStorage.setItem(CHAVE, JSON.stringify(documento));
+  } catch {
+    // localStorage indisponível ou quota esgotada — sem o que fazer aqui.
+  }
 }
