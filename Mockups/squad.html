@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Eleven Lab — Squad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---- tokens do DESIGN.md (v2 top-eleven-lab-design) ---- */
+:root{
+  --canvas:#2658aa; --canvas-deep:#1e355a; --canvas-hairline:#263c60;
+  --panel:#d1d6d9; --surface:#e5e9ea; --surface-bright:#ffffff; --surface-muted:#c4cbcf;
+  --hairline:#b4bdc2; --hairline-strong:#9aa5ab;
+  --ink:#1e1d1d; --body:#323232; --muted:#5a656b; --disabled:#8b949a;
+  --on-canvas:#ffffff; --on-canvas-muted:#c9d7ee; --on-primary:#ffffff;
+  --primary:#25761e; --primary-hover:#2f8f28; --primary-active:#1e6a17; --primary-disabled:#b4bdc2;
+  --focus-ring:#1b6ba8;
+  --group-defense:#1c8423; --group-goalkeeping:#1c76ac; --group-attack:#c4323f; --group-physical:#4553b8;
+  --gain:#15701b; --loss:#b32c37; --loss-deep:#96222b; --alert:#95541f; --info:#1b6ba8; --gold:#806000;
+  --r-xs:3px; --r-sm:4px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-pill:9999px;
+  --s-xxs:4px; --s-xs:8px; --s-sm:12px; --s-md:16px; --s-lg:24px; --s-xl:32px;
+  --e-panel:0 1px 3px rgba(19,38,70,.28); --e-card:0 2px 6px rgba(19,38,70,.32);
+  --e-focus:0 0 0 3px rgba(27,107,168,.45);
+  --row-h:44px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--on-canvas);
+  font:400 15px/1.55 Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---- chrome ---- */
+.topbar{height:52px;display:flex;align-items:center;gap:var(--s-md);padding:0 16px;
+  background:var(--canvas-deep);border-bottom:1px solid var(--canvas-hairline)}
+.brand{font:700 15px/1 "Barlow Condensed",Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.brand b{color:#8fd08a}
+.chips{margin-left:auto;display:flex;gap:var(--s-xs);flex-wrap:wrap;align-items:center}
+.chip{height:28px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--canvas-hairline);border-radius:var(--r-pill);
+  font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.chip b{font-weight:700}
+.chip small{font:600 10px/1.3 Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--on-canvas-muted)}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--on-canvas-muted);font-style:normal}
+
+.tabs{height:44px;display:flex;align-items:flex-end;gap:var(--s-xxs);padding:0 16px;background:var(--canvas-deep)}
+.tab{padding:10px 18px;border-radius:var(--r-md) var(--r-md) 0 0;color:var(--on-canvas-muted);
+  font:600 13px/1 Inter,sans-serif;letter-spacing:.8px;text-transform:uppercase;
+  text-decoration:none;display:inline-flex;align-items:center}
+.tab[aria-current]{background:var(--panel);color:var(--ink)}
+
+.hero{max-width:1440px;margin:0 auto;padding:var(--s-lg) var(--s-md) var(--s-xs)}
+.hero h1{margin:0;font:700 40px/1.05 "Barlow Condensed",Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.hero p{margin:var(--s-xxs) 0 0;color:var(--on-canvas-muted);font:400 15px/1.55 Inter,sans-serif}
+
+.page{display:grid;grid-template-columns:minmax(0,1fr) 356px;gap:var(--s-md);
+  padding:var(--s-md);align-items:start;max-width:1440px;margin:0 auto}
+
+/* ---- paineis ---- */
+.panel{background:var(--panel);border-radius:var(--r-lg);padding:var(--s-sm);box-shadow:var(--e-panel);color:var(--body)}
+.panel + .panel{margin-top:var(--s-md)}
+.panel__head{display:flex;align-items:center;gap:var(--s-xs);height:40px;padding:0 2px;color:var(--ink)}
+.panel__head h2{margin:0;font:700 19px/1.2 Inter,sans-serif;letter-spacing:.3px;text-transform:uppercase}
+.panel__head .hint{margin-left:auto;font:500 12px/1.35 Inter,sans-serif;color:var(--muted);text-transform:none;letter-spacing:0}
+.gicon{width:26px;height:26px;border-radius:var(--r-sm);display:grid;place-items:center;
+  background:var(--group-physical);color:var(--on-primary);font:700 13px/1 Inter,sans-serif}
+
+/* ---- cadastro rapido ---- */
+.form{display:grid;grid-template-columns:minmax(0,2fr) 110px 130px auto;gap:var(--s-xs);align-items:end}
+.field{display:flex;flex-direction:column;gap:var(--s-xxs);min-width:0}
+.field label{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.field input,.field select{height:44px;padding:0 12px;border-radius:var(--r-md);
+  border:1px solid var(--hairline-strong);background:var(--surface-bright);color:var(--ink);
+  font:600 15px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums;width:100%}
+.field input:focus,.field select:focus{outline:none;border-color:var(--focus-ring);box-shadow:var(--e-focus)}
+.btn{height:44px;padding:0 24px;border:0;white-space:nowrap;border-radius:var(--r-md);cursor:pointer;
+  font:700 14px/1 Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.btn--primary{background:var(--primary);color:var(--on-primary)}
+.btn--primary:hover{background:var(--primary-hover)}
+.btn--ghost{background:transparent;color:var(--muted);height:36px;padding:0 12px}
+.btn--ghost:hover{color:var(--ink)}
+.btn--undo{background:transparent;color:var(--loss);height:36px;padding:0 12px}
+
+/* ---- lista de elenco ---- */
+.thead{display:grid;grid-template-columns:34px minmax(0,1fr) 62px 72px 150px;gap:var(--s-xs);
+  padding:0 14px 6px;font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted)}
+.thead .r{text-align:right}
+.rows{display:flex;flex-direction:column;gap:3px}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) 62px 72px 150px;gap:var(--s-xs);
+  align-items:center;min-height:var(--row-h);padding:0 14px;border-radius:var(--r-sm);
+  background:var(--surface);color:var(--body);border-left:3px solid transparent}
+.row--top{background:var(--surface-bright);color:var(--ink);border-left-color:var(--gold)}
+.row--sold{background:var(--surface-muted);color:var(--muted);border-left-color:var(--loss)}
+.row--promoted{border-left-color:var(--gain)}
+.row__rank{font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--muted)}
+.row--top .row__rank{color:var(--gold);font-weight:700}
+.row__name{display:flex;align-items:center;gap:var(--s-xs);min-width:0;
+  font:600 15px/1.2 Inter,sans-serif}
+.row__name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row--sold .row__name span{text-decoration:line-through}
+.row__ovr{text-align:right;font:700 16px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.row:not(.row--top) .row__ovr{font-weight:400}
+.row__act{display:flex;justify-content:flex-end}
+/* cor por setor do campo: da para ler a composicao do elenco de relance */
+.pos{justify-self:start;padding:4px 8px;border-radius:var(--r-sm);color:var(--on-primary);
+  font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;
+  background:var(--group-physical)}
+.pos--gk{background:var(--group-goalkeeping)}
+.pos--def{background:var(--group-defense)}
+.pos--atk{background:var(--group-attack)}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r-pill);
+  font:600 11px/1.5 Inter,sans-serif;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap}
+.tag--gain{background:rgba(21,112,27,.14);color:var(--gain)}
+.tag--loss{background:var(--loss);color:var(--on-primary)}
+.tag--lab{background:rgba(27,107,168,.16);color:var(--info)}
+.cut{display:flex;align-items:center;gap:var(--s-xs);margin:6px 0;color:var(--gold)}
+.cut::before,.cut::after{content:"";height:2px;background:var(--gold);flex:1;opacity:.55}
+.cut span{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap}
+
+/* ---- coluna lateral ---- */
+.tile{background:var(--surface-bright);color:var(--ink);border-radius:var(--r-lg);
+  padding:var(--s-md);box-shadow:var(--e-panel)}
+.tile__label{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.tile__value{font:700 34px/1 "Barlow Condensed",Inter,sans-serif;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+.tile__row{display:flex;align-items:baseline;gap:var(--s-xs);flex-wrap:wrap}
+.delta{font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.delta--loss{color:var(--loss)} .delta--gain{color:var(--gain)}
+.note{margin:var(--s-xs) 0 0;font:400 13px/1.5 Inter,sans-serif;color:var(--body)}
+.note b{color:var(--ink)}
+
+.posgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.poscell{background:var(--surface);border-radius:var(--r-sm);padding:8px 6px;text-align:center;color:var(--body)}
+.poscell.is-empty{background:var(--surface-muted);color:var(--body)}
+.poscell b{display:block;font:700 16px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--ink)}
+.poscell.is-empty b{color:var(--body)}
+.poscell span{font:600 11px/1.4 Inter,sans-serif;letter-spacing:.8px;text-transform:uppercase}
+
+.bands{display:flex;flex-direction:column;gap:3px}
+.band{display:grid;grid-template-columns:104px minmax(0,1fr);gap:var(--s-xs);align-items:center;
+  min-height:38px;padding:6px 12px;border-radius:var(--r-sm);
+  background:var(--surface-muted);color:var(--body);border-left:3px solid transparent}
+.band--now{background:var(--surface-bright);color:var(--ink);border-left-color:var(--gold)}
+.band__range{font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.band--now .band__range{font-weight:700}
+.band__text{font:400 13px/1.35 Inter,sans-serif}
+.band--now .band__text{font-weight:600}
+.band__here{display:block;margin-top:2px;font:600 10px/1.3 Inter,sans-serif;
+  letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+
+/* origem da regra sempre declarada — requisito do PRD */
+.callout{padding:10px 12px;border-radius:var(--r-md);background:var(--surface);
+  border-left:3px solid var(--info);color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.callout + .callout{margin-top:var(--s-xs)}
+.callout--warn{border-left-color:var(--alert)}
+.callout b{color:var(--ink)}
+.callout__src{display:block;margin-bottom:2px;font:600 10px/1.3 Inter,sans-serif;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--info)}
+.callout--warn .callout__src{color:var(--alert)}
+.foot{padding:0 var(--s-md) var(--s-lg);max-width:1440px;margin:0 auto;
+  color:var(--on-canvas-muted);font:400 13px/1.5 Inter,sans-serif}
+
+/* ---- paisagem de celular / telas baixas ---- */
+@media (max-width:1080px){ .page{grid-template-columns:minmax(0,1fr)} }
+@media (max-height:560px){
+  :root{--row-h:34px}
+  .topbar{height:44px} .tabs{height:38px}
+  .hero{padding:var(--s-xs) var(--s-xs) 0} .hero h1{font-size:24px} .hero p{font-size:13px}
+  .page{gap:var(--s-xs);padding:var(--s-xs);grid-template-columns:minmax(0,1fr) 296px}
+  .panel{padding:var(--s-xs)} .panel + .panel{margin-top:var(--s-xs)}
+  .panel__head{height:30px} .panel__head h2{font-size:15px}
+  .row,.thead{grid-template-columns:26px minmax(0,1fr) 54px 58px 132px;padding:0 10px}
+  .row__name{font-size:13px} .row__ovr{font-size:14px}
+  .field input,.field select,.btn{height:36px}
+  .btn--ghost,.btn--undo{height:28px;padding:0 6px;font-size:11px}
+  .tile{padding:var(--s-xs)} .tile__value{font-size:26px}
+  .band{min-height:30px;padding:4px 10px}
+}
+@media (max-width:640px){
+  .form{grid-template-columns:minmax(0,1fr) 1fr}
+  .form .field:first-child{grid-column:1/-1}
+  .form .btn--primary{grid-column:1/-1}
+  .row,.thead{grid-template-columns:24px minmax(0,1fr) 54px 56px}
+  .row__act,.thead .c-act{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">Top Eleven <b>Lab</b></span>
+  <div class="chips">
+    <span class="chip"><i></i>Fight Club</span>
+    <span class="chip num">Temporada 12</span>
+    <span class="chip"><small>Maletas</small><b class="num">47</b></span>
+    <span class="chip"><small>Condic.</small><b class="num">82%</b></span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab" aria-current="page" href="#">Squad</a>
+  <a class="tab" href="laboratorio.html">Laboratório</a>
+</nav>
+
+<div class="hero">
+  <h1>Squad</h1>
+  <p>Simulador da média dos 14 mais fortes — o número que define contra quem você joga na próxima temporada.</p>
+</div>
+
+<main class="page">
+  <div>
+    <!-- cadastro rapido: 3 campos, nada alem disso -->
+    <section class="panel">
+      <div class="panel__head">
+        <span class="gicon">+</span>
+        <h2>Adicionar jogador</h2>
+        <span class="hint">3 campos — leva 5 segundos por jogador</span>
+      </div>
+      <form class="form" onsubmit="return false">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" type="text" placeholder="Ex.: Grenn Aemon">
+        </div>
+        <div class="field">
+          <label for="ovr">Overall</label>
+          <input id="ovr" class="num" type="number" inputmode="numeric" placeholder="78">
+        </div>
+        <div class="field">
+          <label for="pos">Posição</label>
+          <select id="pos">
+            <option>GK</option><option>DL</option><option selected>DC</option><option>DR</option>
+            <option>ML</option><option>DMC</option><option>MC</option><option>MR</option>
+            <option>AML</option><option>AMC</option><option>AMR</option><option>ST</option>
+          </select>
+        </div>
+        <button class="btn btn--primary" type="submit">Adicionar</button>
+      </form>
+    </section>
+
+    <!-- elenco ordenado, com o corte do 14o explicito -->
+    <section class="panel">
+      <div class="panel__head">
+        <span class="gicon" style="background:var(--gold)">14</span>
+        <h2>Elenco</h2>
+        <span class="hint">Ordenado por overall — barra dourada marca quem entra na média</span>
+      </div>
+
+      <div class="thead">
+        <span>#</span><span>Jogador</span><span>Pos.</span><span class="r">Ovr</span><span class="r c-act">Simulação</span>
+      </div>
+
+      <div class="rows">
+        <div class="row row--top"><span class="row__rank num">1</span><span class="row__name"><span>Robert Baratheon</span></span><span class="pos pos--atk">ST</span><span class="row__ovr num">118</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">2</span><span class="row__name"><span>Jaime Lannister</span></span><span class="pos">ML</span><span class="row__ovr num">112</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">3</span><span class="row__name"><span>Tyrion Cassel</span></span><span class="pos">MC</span><span class="row__ovr num">109</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+
+        <!-- cenario ativo: este saiu da conta dos 14 -->
+        <div class="row row--sold"><span class="row__rank num">4</span><span class="row__name"><span>Ned Stark</span><span class="tag tag--loss">Vendido</span></span><span class="pos pos--def">DC</span><span class="row__ovr num">106</span><span class="row__act"><button class="btn btn--undo">Desfazer</button></span></div>
+
+        <div class="row row--top"><span class="row__rank num">5</span><span class="row__name"><span>Brienne Tarth</span></span><span class="pos pos--def">DL</span><span class="row__ovr num">104</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">6</span><span class="row__name"><span>Davos Seaworth</span></span><span class="pos pos--gk">GK</span><span class="row__ovr num">101</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">7</span><span class="row__name"><span>Jorah Mormont</span></span><span class="pos pos--def">DR</span><span class="row__ovr num">99</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">8</span><span class="row__name"><span>Beric Dondarrion</span></span><span class="pos">MC</span><span class="row__ovr num">97</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">9</span><span class="row__name"><span>Gendry Rivers</span></span><span class="pos pos--atk">AMR</span><span class="row__ovr num">95</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">10</span><span class="row__name"><span>Podrick Payne</span></span><span class="pos pos--atk">ST</span><span class="row__ovr num">93</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">11</span><span class="row__name"><span>Tormund Giant</span></span><span class="pos pos--def">DC</span><span class="row__ovr num">91</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">12</span><span class="row__name"><span>Samwell Tarly</span></span><span class="pos">DMC</span><span class="row__ovr num">89</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">13</span><span class="row__name"><span>Edd Tollett</span></span><span class="pos">ML</span><span class="row__ovr num">87</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row row--top"><span class="row__rank num">14</span><span class="row__name"><span>Oberyn Martell</span></span><span class="pos pos--atk">AMR</span><span class="row__ovr num">85</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+
+        <!-- este subiu no lugar do vendido -->
+        <div class="row row--top row--promoted"><span class="row__rank num">15</span><span class="row__name"><span>Grenn Aemon</span><span class="tag tag--gain">Subiu para os 14</span></span><span class="pos pos--def">DR</span><span class="row__ovr num">78</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+
+        <div class="cut"><span>Corte do 14º — daqui para baixo não entra na média</span></div>
+
+        <div class="row"><span class="row__rank num">16</span><span class="row__name"><span>Pypar Rosby</span></span><span class="pos pos--atk">AMR</span><span class="row__ovr num">74</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row"><span class="row__rank num">17</span><span class="row__name"><span>Lommy Verde</span></span><span class="pos">MC</span><span class="row__ovr num">71</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row"><span class="row__rank num">18</span><span class="row__name"><span>Olyvar Frey</span></span><span class="pos pos--atk">AMR</span><span class="row__ovr num">68</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row"><span class="row__rank num">19</span><span class="row__name"><span>Rickon Umber</span></span><span class="pos pos--gk">GK</span><span class="row__ovr num">64</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+        <div class="row"><span class="row__rank num">20</span><span class="row__name"><span>Sor Duncan</span><a class="tag tag--lab" href="laboratorio.html">No laboratório</a></span><span class="pos pos--def">DC</span><span class="row__ovr num">60</span><span class="row__act"><button class="btn btn--ghost">Marcar venda</button></span></div>
+      </div>
+
+      <div class="callout" style="margin-top:var(--s-sm)">
+        <span class="callout__src">Como ler</span>
+        Barra dourada = está dentro dos 14 que contam. Cada venda simulada tira um jogador da conta e <b>puxa o próximo reserva para dentro</b> — por isso o efeito quase nunca é o óbvio.
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <div class="tile">
+      <div class="tile__label">Média dos 14 — com as vendas simuladas</div>
+      <div class="tile__row">
+        <div class="tile__value num">97,0</div>
+        <span class="delta delta--loss num">&minus;2,0</span>
+      </div>
+      <p class="note">Sem vendas: <b class="num">99,0</b> · elenco de <b class="num">20</b> jogadores.<br>
+      <b>Ned Stark</b> (106) saiu dos 14 e <b>Grenn Aemon</b> (78) subiu no lugar dele.</p>
+    </div>
+
+    <section class="panel">
+      <div class="panel__head"><h2>O que essa média significa</h2></div>
+      <div class="bands">
+        <div class="band"><span class="band__range num">até 85</span><span class="band__text">Liga confortável — adversários no seu nível ou abaixo</span></div>
+        <div class="band band--now">
+          <span class="band__range num">86 – 100<span class="band__here">Você está aqui</span></span>
+          <span class="band__text">Liga equilibrada — dá para brigar pelo título montando bem</span>
+        </div>
+        <div class="band"><span class="band__range num">101 – 115</span><span class="band__text">Liga puxada — encontra times de quem investe dinheiro</span></div>
+        <div class="band"><span class="band__range num">acima de 115</span><span class="band__text">Liga de pagantes — desvantagem estrutural na temporada inteira</span></div>
+      </div>
+      <div class="callout" style="margin-top:var(--s-xs)">
+        <span class="callout__src">Comunidade</span>
+        O jogo emparelha a temporada seguinte pela média dos <b>14 jogadores mais fortes</b>. As faixas acima são observação da comunidade brasileira, não número publicado pela Nordeus.
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2>Por posição</h2><span class="hint">20 jogadores</span></div>
+      <div class="posgrid">
+        <div class="poscell"><b class="num">2</b><span>GK</span></div>
+        <div class="poscell"><b class="num">1</b><span>DL</span></div>
+        <div class="poscell"><b class="num">3</b><span>DC</span></div>
+        <div class="poscell"><b class="num">2</b><span>DR</span></div>
+        <div class="poscell"><b class="num">2</b><span>ML</span></div>
+        <div class="poscell"><b class="num">1</b><span>DMC</span></div>
+        <div class="poscell"><b class="num">3</b><span>MC</span></div>
+        <div class="poscell is-empty"><b class="num">0</b><span>MR</span></div>
+        <div class="poscell is-empty"><b class="num">0</b><span>AML</span></div>
+        <div class="poscell is-empty"><b class="num">0</b><span>AMC</span></div>
+        <div class="poscell"><b class="num">4</b><span>AMR</span></div>
+        <div class="poscell"><b class="num">2</b><span>ST</span></div>
+      </div>
+      <div class="callout callout--warn" style="margin-top:var(--s-xs)">
+        <span class="callout__src">Atenção</span>
+        Só <b>1 lateral esquerdo</b> no elenco, e ela está entre os 14. Vender medianos sobe a média, mas deixar a posição vazia custa partida.
+      </div>
+    </section>
+  </aside>
+</main>
+
+<p class="foot">Mockup estático para validação visual — dados fictícios, nenhum cálculo é executado nesta página.</p>
+
+</body>
+</html>

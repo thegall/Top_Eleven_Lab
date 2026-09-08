@@ -37,7 +37,9 @@ desktop.ini
 # mockups HTML de validação visual. O que sai das referências está transcrito
 # em docs/GAME-RULES.md, com a origem creditada; os mockups são rascunho de
 # tela, não fazem parte da entrega e não precisam de histórico.
-Mockups/
+Mockups/*
+!Mockups/squad.html
+!Mockups/laboratorio.html
 *.xlsx
 
 # Logs

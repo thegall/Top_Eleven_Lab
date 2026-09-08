@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Eleven Lab — Laboratório</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---- tokens do DESIGN.md (v2 top-eleven-lab-design) ---- */
+:root{
+  --canvas:#2658aa; --canvas-deep:#1e355a; --canvas-hairline:#263c60;
+  --panel:#d1d6d9; --surface:#e5e9ea; --surface-bright:#ffffff; --surface-muted:#c4cbcf;
+  --hairline:#b4bdc2; --hairline-strong:#9aa5ab;
+  --ink:#1e1d1d; --body:#323232; --muted:#5a656b; --disabled:#8b949a;
+  --on-canvas:#ffffff; --on-canvas-muted:#c9d7ee; --on-primary:#ffffff;
+  --primary:#25761e; --primary-hover:#2f8f28; --primary-active:#1e6a17; --primary-disabled:#b4bdc2;
+  --focus-ring:#1b6ba8;
+  --group-defense:#1c8423; --group-goalkeeping:#1c76ac; --group-attack:#c4323f; --group-physical:#4553b8;
+  --gain:#15701b; --loss:#b32c37; --loss-deep:#96222b; --alert:#95541f; --info:#1b6ba8; --gold:#806000;
+  --rank-terrivel:#c4323f; --rank-ruim:#c26a00; --rank-normal:#6b7885; --rank-boa:#1c8423;
+  --rank-otima:#1c76ac; --rank-excelente:#7b3fd4; --rank-fenomeno:#806000;
+  --r-xs:3px; --r-sm:4px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-pill:9999px;
+  --s-xxs:4px; --s-xs:8px; --s-sm:12px; --s-md:16px; --s-lg:24px; --s-xl:32px;
+  --e-panel:0 1px 3px rgba(19,38,70,.28); --e-card:0 2px 6px rgba(19,38,70,.32);
+  --e-focus:0 0 0 3px rgba(27,107,168,.45);
+  --attr-h:43px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--on-canvas);
+  font:400 15px/1.55 Inter,sans-serif;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---- chrome ---- */
+.topbar{height:52px;display:flex;align-items:center;gap:var(--s-md);padding:0 16px;
+  background:var(--canvas-deep);border-bottom:1px solid var(--canvas-hairline)}
+.brand{font:700 15px/1 "Barlow Condensed",Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.brand b{color:#8fd08a}
+.chips{margin-left:auto;display:flex;gap:var(--s-xs);flex-wrap:wrap;align-items:center}
+.chip{height:28px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  background:var(--canvas-hairline);border-radius:var(--r-pill);
+  font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.chip b{font-weight:700}
+.chip small{font:600 10px/1.3 Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--on-canvas-muted)}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--on-canvas-muted);font-style:normal}
+.tabs{height:44px;display:flex;align-items:flex-end;gap:var(--s-xxs);padding:0 16px;background:var(--canvas-deep)}
+.tab{padding:10px 18px;border-radius:var(--r-md) var(--r-md) 0 0;color:var(--on-canvas-muted);
+  font:600 13px/1 Inter,sans-serif;letter-spacing:.8px;text-transform:uppercase;
+  text-decoration:none;display:inline-flex;align-items:center}
+.tab[aria-current]{background:var(--panel);color:var(--ink)}
+
+.hero{max-width:1440px;margin:0 auto;padding:var(--s-lg) var(--s-md) var(--s-xs)}
+.hero h1{margin:0;font:700 40px/1.05 "Barlow Condensed",Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.hero p{margin:var(--s-xxs) 0 0;color:var(--on-canvas-muted);font:400 15px/1.55 Inter,sans-serif}
+
+.page{max-width:1440px;margin:0 auto;padding:var(--s-md);display:flex;flex-direction:column;gap:var(--s-md)}
+.split{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--s-md);align-items:start}
+
+/* ---- paineis ---- */
+.panel{background:var(--panel);border-radius:var(--r-lg);padding:var(--s-sm);box-shadow:var(--e-panel);color:var(--body)}
+.panel + .panel{margin-top:var(--s-md)}
+.panel__head{display:flex;align-items:center;gap:var(--s-xs);height:40px;padding:0 2px;color:var(--ink);flex-wrap:wrap}
+.panel__head h2{margin:0;font:700 19px/1.2 Inter,sans-serif;letter-spacing:.3px;text-transform:uppercase}
+.panel__head .hint{margin-left:auto;font:500 12px/1.35 Inter,sans-serif;color:var(--muted)}
+
+/* ---- ficha do jogador (espelha o cabecalho da tela de habilidades) ---- */
+.ficha{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-sm) var(--s-md);
+  background:var(--panel);border-radius:var(--r-lg);padding:var(--s-sm) var(--s-md);box-shadow:var(--e-card)}
+.ficha__grl{display:flex;align-items:baseline;gap:6px;color:var(--ink);
+  background:var(--surface-bright);border-radius:var(--r-md);padding:4px 12px}
+.ficha__grl small{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.ficha__grl b{font:700 34px/1 "Barlow Condensed",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.ficha__nome{margin:0;font:700 28px/1.1 "Barlow Condensed",Inter,sans-serif;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--ink)}
+.ficha__meta{display:flex;flex-wrap:wrap;gap:var(--s-md);align-items:center;width:100%}
+.meta{display:flex;align-items:center;gap:6px;color:var(--body);font:400 14px/1.3 Inter,sans-serif}
+.meta > span:first-child{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.pos{padding:4px 8px;border-radius:var(--r-sm);color:var(--on-primary);background:var(--group-defense);
+  font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.talento{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-sm);
+  background:var(--surface-bright);color:var(--ink);border-left:3px solid var(--rank-excelente);
+  font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.talento b{color:var(--rank-excelente);font-weight:700}
+.btn{height:44px;padding:0 24px;border:0;border-radius:var(--r-md);cursor:pointer;
+  font:700 14px/1 Inter,sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.btn--primary{background:var(--primary);color:var(--on-primary);width:100%}
+.btn--primary:hover{background:var(--primary-hover)}
+.btn--secondary{background:var(--surface-bright);color:var(--ink);border:1px solid var(--hairline-strong)}
+
+/* ---- grade de atributos: 3 grupos lado a lado, como no jogo ---- */
+.grupos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-sm)}
+.grupo{min-width:0}
+.grupo__head{display:flex;align-items:center;gap:var(--s-xs);height:40px;color:var(--ink)}
+.grupo__head h3{margin:0;font:700 19px/1.2 Inter,sans-serif;letter-spacing:.3px;text-transform:uppercase}
+.grupo__head .total{margin-left:auto;font:700 19px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.gicon{width:26px;height:26px;border-radius:var(--r-sm);display:grid;place-items:center;
+  color:var(--on-primary);font:700 13px/1 Inter,sans-serif}
+.g-def .gicon{background:var(--group-defense)}
+.g-atk .gicon{background:var(--group-attack)}
+.g-phy .gicon{background:var(--group-physical)}
+.attrs{display:flex;flex-direction:column;gap:3px}
+.attr{display:flex;align-items:center;justify-content:space-between;gap:var(--s-xs);
+  height:var(--attr-h);padding:0 14px;border-radius:var(--r-sm)}
+/* chave: fundo mais claro + barra do grupo + valor em negrito */
+.attr--key{background:var(--surface);color:var(--ink);border-left:3px solid var(--group)}
+/* cinza: fundo mais escuro, sem barra, valor em peso normal. O rotulo continua escuro. */
+.attr--gray{background:var(--surface-muted);color:var(--body)}
+.attr__label{font:500 15px/1.3 Inter,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attr--gray .attr__label{font-weight:400}
+.attr__value{font:700 16px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.attr--gray .attr__value{font-weight:400}
+.g-def{--group:var(--group-defense)}
+.g-atk{--group:var(--group-attack)}
+.g-phy{--group:var(--group-physical)}
+.legenda{display:flex;flex-wrap:wrap;gap:var(--s-md);margin-top:var(--s-sm);padding:0 2px;
+  color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.legenda i{display:inline-block;width:10px;height:14px;border-radius:2px;vertical-align:-2px;margin-right:6px}
+
+/* ---- categorias de drill ---- */
+.cats{display:flex;flex-wrap:wrap;gap:var(--s-sm);padding:0 2px var(--s-xs);
+  font:600 11px/1.3 Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+.c-atk{background:var(--group-attack)} .c-def{background:var(--group-defense)}
+.c-pos{background:var(--gold)} .c-fis{background:var(--group-physical)}
+.sub{display:flex;align-items:baseline;gap:var(--s-xs);margin:var(--s-sm) 0 var(--s-xs);padding:0 2px;
+  font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink)}
+.sub em{font-style:normal;font-weight:500;letter-spacing:0;text-transform:none;
+  font-size:12px;color:var(--muted)}
+
+/* ---- cards de primario ---- */
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-xs)}
+.card{background:var(--surface-bright);color:var(--ink);border-radius:var(--r-lg);
+  box-shadow:var(--e-card);border:2px solid transparent;display:flex;flex-direction:column;overflow:hidden}
+.card--rec{border-color:var(--primary)}
+.card__flag{height:22px;display:flex;align-items:center;gap:var(--s-xs);padding:0 12px;
+  background:var(--group-physical);color:var(--on-primary);
+  font:600 10px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.card--f-def .card__flag{background:var(--group-defense)}
+.card--f-atk .card__flag{background:var(--group-attack)}
+.card--f-pos .card__flag{background:var(--gold)}
+.card__flag .rec{margin-left:auto;background:rgba(255,255,255,.22);border-radius:var(--r-pill);padding:1px 8px}
+.card__body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card__name{font:700 14px/1.25 Inter,sans-serif;letter-spacing:.4px;text-transform:uppercase;
+  min-height:2.5em;display:flex;align-items:center}
+.card__attrs{font:400 12px/1.45 Inter,sans-serif;color:var(--muted);flex:1}
+.card__nums{display:flex;align-items:baseline;gap:var(--s-xs)}
+.card__media{font:700 22px/1 "Barlow Condensed",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.card__falta{margin-left:auto;font:500 12px/1.3 Inter,sans-serif;color:var(--muted);font-variant-numeric:tabular-nums}
+.card__foot{display:flex;gap:var(--s-xs);align-items:center;padding-top:6px;border-top:1px solid var(--hairline);
+  font:600 10px/1.3 Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.card__foot b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---- medidor: 0 ate o teto de 180% ---- */
+/* display:block porque nas linhas compactas o medidor e um <span> */
+.meter{display:block;position:relative;height:10px;border-radius:var(--r-pill);background:var(--surface-muted)}
+.meter--mini{height:6px;background:var(--hairline)}
+.meter__fill{display:block;height:100%;border-radius:var(--r-pill);background:var(--primary)}
+.meter__mark{position:absolute;top:-3px;width:2px;height:16px;background:var(--gold)}
+.meter--mini .meter__mark{top:-2px;height:10px}
+.meter__mark--troca{background:var(--alert)}
+.escala{display:flex;justify-content:space-between;padding:2px 2px 0;
+  font:500 10px/1.3 Inter,sans-serif;letter-spacing:.6px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---- linhas compactas de secundario/terciario ---- */
+.lines{display:flex;flex-direction:column;gap:2px}
+.lhead,.line{display:grid;grid-template-columns:minmax(0,1fr) 120px 62px 64px;gap:var(--s-xs);align-items:center}
+.lhead{padding:0 12px 4px;font:600 10px/1.3 Inter,sans-serif;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted)}
+.lhead .r{text-align:right}
+.line{min-height:32px;padding:0 12px;border-radius:var(--r-sm);background:var(--surface);color:var(--body)}
+.line--ter{background:var(--surface-muted)}
+.line--off{color:var(--body)}
+.line--off .line__falta{color:var(--body)}
+.line__name{font:600 12px/1.3 Inter,sans-serif;letter-spacing:.4px;text-transform:uppercase;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.line--ter .line__name{font-weight:500}
+.line__media,.line__falta{text-align:right;font:600 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.line__falta{font-weight:400;color:var(--muted)}
+
+/* ---- teste de talento ---- */
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:6px;margin:0 0 var(--s-sm);padding:0;list-style:none}
+/* block, nao flex: em flex cada <b> vira item e o texto quebra em pedacos */
+.steps li{display:block;position:relative;padding-left:28px;
+  color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.steps li::before{counter-increment:s;content:counter(s);
+  position:absolute;left:0;top:1px;width:20px;height:20px;
+  border-radius:50%;background:var(--canvas-deep);color:var(--on-canvas);
+  font:700 11px/20px Inter,sans-serif;text-align:center}
+.steps b{color:var(--ink)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-xs);margin-bottom:var(--s-xs)}
+.field{display:flex;flex-direction:column;gap:var(--s-xxs);min-width:0}
+.field label{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.field input{height:44px;padding:0 12px;border-radius:var(--r-md);border:1px solid var(--hairline-strong);
+  background:var(--surface-bright);color:var(--ink);
+  font:600 15px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums;width:100%}
+.field input:focus{outline:none;border-color:var(--focus-ring);box-shadow:var(--e-focus)}
+.resultado{background:var(--surface-bright);border-radius:var(--r-lg);padding:var(--s-sm) var(--s-md);
+  margin-top:var(--s-xs);border-left:3px solid var(--rank-excelente)}
+.resultado__nome{font:700 28px/1.1 "Barlow Condensed",Inter,sans-serif;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--rank-excelente);margin:2px 0 4px}
+.resultado p{margin:0;color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.resultado b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ranks{display:flex;flex-direction:column;gap:2px;margin-top:var(--s-xs)}
+.rk{display:flex;align-items:center;gap:var(--s-xs);min-height:30px;padding:4px 12px;border-radius:var(--r-sm);
+  background:var(--surface);color:var(--body);border-left:3px solid var(--rk)}
+.rk--now{background:var(--surface-bright);color:var(--ink);font-weight:700}
+.rk__nome{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+.rk--now .rk__nome{font-weight:700}
+.rk__faixa{margin-left:auto;font:500 13px/1.2 Inter,sans-serif;font-variant-numeric:tabular-nums}
+.rk--now .rk__faixa{font-weight:700}
+
+/* ---- ate a meta ---- */
+.tile{background:var(--surface-bright);color:var(--ink);border-radius:var(--r-lg);
+  padding:var(--s-sm) var(--s-md);box-shadow:var(--e-panel)}
+.tile + .tile{margin-top:var(--s-xs)}
+.tile__label{font:600 11px/1.3 Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.tile__row{display:flex;align-items:baseline;gap:var(--s-xs);flex-wrap:wrap}
+.tile__value{font:700 34px/1 "Barlow Condensed",Inter,sans-serif;font-variant-numeric:tabular-nums;margin:4px 0 0}
+.tile__plus{font:600 13px/1.2 Inter,sans-serif;color:var(--gain);font-variant-numeric:tabular-nums}
+.tile p{margin:var(--s-xxs) 0 0;color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.tile p b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* origem da regra sempre declarada — requisito do PRD */
+.callout{padding:10px 12px;border-radius:var(--r-md);background:var(--surface);
+  border-left:3px solid var(--info);color:var(--body);font:400 13px/1.5 Inter,sans-serif}
+.callout + .callout,.panel > .callout{margin-top:var(--s-xs)}
+.callout--warn{border-left-color:var(--alert)}
+.callout--est{border-left-color:var(--gold)}
+.callout b{color:var(--ink)}
+.callout__src{display:block;margin-bottom:2px;font:600 10px/1.3 Inter,sans-serif;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--info)}
+.callout--warn .callout__src{color:var(--alert)}
+.callout--est .callout__src{color:var(--gold)}
+.foot{padding:0 var(--s-md) var(--s-lg);max-width:1440px;margin:0 auto;
+  color:var(--on-canvas-muted);font:400 13px/1.5 Inter,sans-serif}
+
+/* ---- paisagem de celular / telas baixas ---- */
+@media (max-width:1140px){ .split{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:1024px){ .cards{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:820px){ .grupos{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:767px){ .cards{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:760px){
+  .lhead,.line{grid-template-columns:minmax(0,1fr) 56px 60px}
+  .lhead .c-meter,.line .c-meter{display:none}
+}
+@media (max-height:560px){
+  :root{--attr-h:32px}
+  .topbar{height:44px} .tabs{height:38px}
+  .hero{padding:var(--s-xs) var(--s-xs) 0} .hero h1{font-size:24px} .hero p{font-size:13px}
+  .page{padding:var(--s-xs);gap:var(--s-xs)}
+  .panel{padding:var(--s-xs)} .panel + .panel{margin-top:var(--s-xs)}
+  .panel__head,.grupo__head{height:28px}
+  .panel__head h2,.grupo__head h3,.grupo__head .total{font-size:15px}
+  .ficha{padding:var(--s-xs) var(--s-sm);gap:var(--s-xs) var(--s-sm)}
+  .ficha__nome{font-size:20px} .ficha__grl b{font-size:24px} .ficha__grl{padding:2px 8px}
+  .attr{padding:0 10px} .attr__label{font-size:13px} .attr__value{font-size:14px}
+  .btn{height:36px;padding:0 16px} .field input{height:36px}
+  .tile{padding:var(--s-xs)} .tile__value{font-size:24px}
+  .resultado__nome{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">Top Eleven <b>Lab</b></span>
+  <div class="chips">
+    <span class="chip"><i></i>Fight Club</span>
+    <span class="chip num">Temporada 12</span>
+    <span class="chip"><small>Maletas</small><b class="num">47</b></span>
+    <span class="chip"><small>Condic.</small><b class="num">82%</b></span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <a class="tab" href="squad.html">Squad</a>
+  <a class="tab" aria-current="page" href="#">Laboratório</a>
+</nav>
+
+<div class="hero">
+  <h1>Laboratório</h1>
+  <p>Simulador de treino, um jogador por vez — qual exercício rende mais neste jogador agora.</p>
+</div>
+
+<main class="page">
+
+  <!-- ficha: mesma informacao do cabecalho da tela de habilidades do jogo -->
+  <section class="ficha">
+    <div class="ficha__grl"><small>GRL</small><b class="num">60</b></div>
+    <h1 class="ficha__nome">Sor Duncan</h1>
+    <span class="pos">DC</span>
+    <span class="talento">Talento: <b>Excelente</b></span>
+    <button class="btn btn--secondary" style="margin-left:auto">Trocar jogador</button>
+    <div class="ficha__meta">
+      <span class="meta"><span>Idade</span><b>18</b></span>
+      <span class="meta"><span>Hab. especial</span><b>Defensor implacável</b></span>
+      <span class="meta"><span>Treinador</span><b>Classe Mundial</b></span>
+      <span class="meta"><span>Atributos-chave</span><b>8 de 15</b></span>
+    </div>
+  </section>
+
+  <!-- 15 atributos nos 3 grupos, com os 8 brancos de DC destacados -->
+  <section class="panel">
+    <div class="panel__head">
+      <h2>Habilidades</h2>
+      <span class="hint">Derivadas da posição DC — confira e ajuste se o jogo divergir</span>
+    </div>
+
+    <div class="grupos">
+      <div class="grupo g-def">
+        <div class="grupo__head"><span class="gicon">D</span><h3>Defesa</h3><span class="total num">66</span></div>
+        <div class="attrs">
+          <div class="attr attr--key"><span class="attr__label">Corte</span><span class="attr__value num">71</span></div>
+          <div class="attr attr--key"><span class="attr__label">Marcação</span><span class="attr__value num">68</span></div>
+          <div class="attr attr--key"><span class="attr__label">Posicionamento</span><span class="attr__value num">60</span></div>
+          <div class="attr attr--key"><span class="attr__label">Cabeçada</span><span class="attr__value num">64</span></div>
+          <div class="attr attr--key"><span class="attr__label">Coragem</span><span class="attr__value num">69</span></div>
+        </div>
+      </div>
+
+      <div class="grupo g-atk">
+        <div class="grupo__head"><span class="gicon">A</span><h3>Ataque</h3><span class="total num">54</span></div>
+        <div class="attrs">
+          <div class="attr attr--gray"><span class="attr__label">Passe</span><span class="attr__value num">56</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Drible</span><span class="attr__value num">47</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Cruzamento</span><span class="attr__value num">45</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Chute</span><span class="attr__value num">61</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Finalização</span><span class="attr__value num">63</span></div>
+        </div>
+      </div>
+
+      <div class="grupo g-phy">
+        <div class="grupo__head"><span class="gicon">F</span><h3>Atributos</h3><span class="total num">60</span></div>
+        <div class="attrs">
+          <div class="attr attr--key"><span class="attr__label">Condicionamento</span><span class="attr__value num">65</span></div>
+          <div class="attr attr--key"><span class="attr__label">Força</span><span class="attr__value num">62</span></div>
+          <div class="attr attr--key"><span class="attr__label">Agressividade</span><span class="attr__value num">66</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Velocidade</span><span class="attr__value num">51</span></div>
+          <div class="attr attr--gray"><span class="attr__label">Criatividade</span><span class="attr__value num">56</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="legenda">
+      <span><i style="background:var(--surface);border-left:3px solid var(--group-defense)"></i>Atributo-chave (branco) — cresce ao dobro da velocidade</span>
+      <span><i style="background:var(--surface-muted)"></i>Atributo cinza — entra no overall, quase não muda o jogo</span>
+    </p>
+  </section>
+
+  <div class="split">
+    <!-- entrega central: qual exercicio treinar, com os 29 na tela -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Exercícios</h2>
+        <span class="hint">29 drills classificados para este jogador</span>
+      </div>
+
+      <div class="cats">
+        <span><i class="dot c-atk"></i>Ataque</span>
+        <span><i class="dot c-def"></i>Defesa</span>
+        <span><i class="dot c-pos"></i>Posse de bola</span>
+        <span><i class="dot c-fis"></i>Físico e mental</span>
+      </div>
+
+      <div class="sub">Primários · 4 <em>todos os atributos que contam são chave</em></div>
+
+      <div class="cards">
+        <div class="card card--rec card--f-fis">
+          <div class="card__flag">Físico<span class="rec">Recomendado</span></div>
+          <div class="card__body">
+            <div class="card__name">Academia</div>
+            <div class="card__attrs">Força · Condicionamento</div>
+            <div class="card__nums"><span class="card__media num">63,5%</span><span class="card__falta num">faltam 116,5</span></div>
+            <div class="meter">
+              <div class="meter__fill" style="width:35.3%"></div>
+              <div class="meter__mark meter__mark--troca" style="left:77.8%"></div>
+              <div class="meter__mark" style="left:calc(100% - 2px)"></div>
+            </div>
+            <div class="escala"><span>0%</span><span>140% trocar</span><span>180% trava</span></div>
+            <div class="card__foot"><span>Muito difícil</span><b>22,5% / sessão</b></div>
+          </div>
+        </div>
+
+        <div class="card card--f-def">
+          <div class="card__flag">Defesa</div>
+          <div class="card__body">
+            <div class="card__name">Uma Linha de Defesa</div>
+            <div class="card__attrs">Posicionamento · Marcação</div>
+            <div class="card__nums"><span class="card__media num">64,0%</span><span class="card__falta num">faltam 116,0</span></div>
+            <div class="meter">
+              <div class="meter__fill" style="width:35.6%"></div>
+              <div class="meter__mark meter__mark--troca" style="left:77.8%"></div>
+              <div class="meter__mark" style="left:calc(100% - 2px)"></div>
+            </div>
+            <div class="escala"><span>0%</span><span>140% trocar</span><span>180% trava</span></div>
+            <div class="card__foot"><span>Médio</span><b>13,5% / sessão</b></div>
+          </div>
+        </div>
+
+        <div class="card card--f-fis">
+          <div class="card__flag">Físico</div>
+          <div class="card__body">
+            <div class="card__name">Aquecimento</div>
+            <div class="card__attrs">Agressividade · Cabeçada · Condicionamento</div>
+            <div class="card__nums"><span class="card__media num">65,0%</span><span class="card__falta num">faltam 115,0</span></div>
+            <div class="meter">
+              <div class="meter__fill" style="width:36.1%"></div>
+              <div class="meter__mark meter__mark--troca" style="left:77.8%"></div>
+              <div class="meter__mark" style="left:calc(100% - 2px)"></div>
+            </div>
+            <div class="escala"><span>0%</span><span>140% trocar</span><span>180% trava</span></div>
+            <div class="card__foot"><span>Muito fácil</span><b>4,5% / sessão</b></div>
+          </div>
+        </div>
+
+        <div class="card card--f-def">
+          <div class="card__flag">Defesa<span class="rec">Teste de talento</span></div>
+          <div class="card__body">
+            <div class="card__name">Pressione o Play</div>
+            <div class="card__attrs">Coragem · Posicionamento · Corte · Agressividade · Marcação</div>
+            <div class="card__nums"><span class="card__media num">66,8%</span><span class="card__falta num">faltam 113,2</span></div>
+            <div class="meter">
+              <div class="meter__fill" style="width:37.1%"></div>
+              <div class="meter__mark meter__mark--troca" style="left:77.8%"></div>
+              <div class="meter__mark" style="left:calc(100% - 2px)"></div>
+            </div>
+            <div class="escala"><span>0%</span><span>140% trocar</span><span>180% trava</span></div>
+            <div class="card__foot"><span>Difícil</span><b>18,0% / sessão</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">Secundários · 13 <em>um atributo cinza entra na conta</em></div>
+      <div class="lhead"><span>Exercício</span><span class="c-meter">Até o teto</span><span class="r">Média</span><span class="r">Faltam</span></div>
+      <div class="lines">
+        <div class="line"><span class="line__name"><i class="dot c-fis"></i>Corrida Longa</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.2%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">58,0%</span><span class="line__falta num">122,0</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-fis"></i>Carioca com Escadas</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.5%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">58,5%</span><span class="line__falta num">121,5</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-pos"></i>Posicionamento</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.6%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">58,7%</span><span class="line__falta num">121,3</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-def"></i>Cabeceada</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.8%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">59,0%</span><span class="line__falta num">121,0</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-fis"></i>Alongamento</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.9%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">59,3%</span><span class="line__falta num">120,7</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-atk"></i>Jogada Ensaiada</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:33.1%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">59,5%</span><span class="line__falta num">120,5</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-fis"></i>Corrida de Ir e Vir</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:33.7%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">60,7%</span><span class="line__falta num">119,3</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-def"></i>Cruzamento de Defesa</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:34.2%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">61,5%</span><span class="line__falta num">118,5</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-def"></i>Análise do Vídeo</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:34.3%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">61,7%</span><span class="line__falta num">118,3</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-fis"></i>Corrida de Obstáculo</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:34.3%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">61,8%</span><span class="line__falta num">118,2</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-pos"></i>Entradas</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:34.7%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">62,4%</span><span class="line__falta num">117,6</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-def"></i>Parar o Atacante</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:35.2%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">63,4%</span><span class="line__falta num">116,6</span></div>
+        <div class="line"><span class="line__name"><i class="dot c-pos"></i>Jogo de Bobinho</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:35.3%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">63,6%</span><span class="line__falta num">116,4</span></div>
+      </div>
+
+      <div class="sub">Terciários · 12 <em>dois ou mais cinzas — sobem overall sem melhorar o jogador</em></div>
+      <div class="lines">
+        <div class="line line--ter"><span class="line__name"><i class="dot c-pos"></i>Virada de Jogo</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:29.8%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">53,6%</span><span class="line__falta num">126,4</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-fis"></i>Arrancada</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:30.2%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">54,3%</span><span class="line__falta num">125,7</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Drible de Slalom</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:30.4%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">54,8%</span><span class="line__falta num">125,2</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Contra-Ataque Rápido</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:30.6%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">55,0%</span><span class="line__falta num">125,0</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-pos"></i>Controle da Bola</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:30.9%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">55,7%</span><span class="line__falta num">124,3</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Passe, Vá e Dispare!</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:31.1%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">56,0%</span><span class="line__falta num">124,0</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-pos"></i>Matada de Bola</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:31.1%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">56,0%</span><span class="line__falta num">124,0</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Jogo na Ponta</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.4%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">58,3%</span><span class="line__falta num">121,7</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-pos"></i>Passes para o Chute</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:32.7%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">58,8%</span><span class="line__falta num">121,2</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Marcar Homem a Homem</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:33.5%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">60,3%</span><span class="line__falta num">119,7</span></div>
+        <div class="line line--ter"><span class="line__name"><i class="dot c-atk"></i>Técnica de Chute</span><span class="c-meter"><span class="meter meter--mini"><span class="meter__fill" style="width:34.4%"></span><span class="meter__mark" style="left:calc(100% - 2px)"></span></span></span><span class="line__media num">62,0%</span><span class="line__falta num">118,0</span></div>
+        <div class="line line--ter line--off"><span class="line__name"><i class="dot c-def"></i>Treino de Goleiro</span><span class="c-meter"></span><span class="line__media num">—</span><span class="line__falta">só goleiro</span></div>
+      </div>
+
+      <div class="callout" style="margin-top:var(--s-sm)">
+        <span class="callout__src">Comunidade</span>
+        O nome do exercício não diz nada. O que conta é a <b>média dos atributos que ele treina neste jogador</b>, e ela trava aos 180%. Subir um atributo empurra <b>todos</b> os exercícios que o contêm em direção ao teto — as médias são recalculadas depois de cada sessão.
+      </div>
+    </section>
+
+    <aside>
+      <!-- teste de talento guiado -->
+      <section class="panel">
+        <div class="panel__head"><h2>Teste de talento</h2></div>
+
+        <ol class="steps">
+          <li>Rode <b>Pressione o Play</b> — primário, média <b>66,8%</b>, abaixo do limite de 80% que invalidaria o teste.</li>
+          <li>Faça <b>5 sessões de 6 slots</b> (18,0% de condicionamento cada, <b>90%</b> no total).</li>
+          <li>Informe a <b>soma dos pontos ganhos</b> nas 5 sessões.</li>
+        </ol>
+
+        <div class="duo">
+          <div class="field">
+            <label for="soma">Soma dos pontos</label>
+            <input id="soma" class="num" type="number" inputmode="numeric" value="34">
+          </div>
+          <div class="field">
+            <label for="sessoes">Sessões</label>
+            <input id="sessoes" class="num" type="number" inputmode="numeric" value="5">
+          </div>
+        </div>
+        <button class="btn btn--primary">Classificar talento</button>
+
+        <div class="resultado">
+          <div class="tile__label">Resultado do teste</div>
+          <div class="resultado__nome">Excelente</div>
+          <p>Rende <b>2,1×</b> o que um jogador Terrível renderia por maleta gasta.</p>
+        </div>
+
+        <div class="ranks">
+          <div class="rk" style="--rk:var(--rank-fenomeno)"><span class="rk__nome">Fenômeno</span><span class="rk__faixa num">47 ou mais</span></div>
+          <div class="rk rk--now" style="--rk:var(--rank-excelente)"><span class="rk__nome">Excelente — seu jogador</span><span class="rk__faixa num">31 – 46</span></div>
+          <div class="rk" style="--rk:var(--rank-otima)"><span class="rk__nome">Ótima</span><span class="rk__faixa num">25 – 30</span></div>
+          <div class="rk" style="--rk:var(--rank-boa)"><span class="rk__nome">Boa</span><span class="rk__faixa num">23 – 24</span></div>
+          <div class="rk" style="--rk:var(--rank-normal)"><span class="rk__nome">Normal</span><span class="rk__faixa num">18 – 22</span></div>
+          <div class="rk" style="--rk:var(--rank-ruim)"><span class="rk__nome">Ruim</span><span class="rk__faixa num">15 – 17</span></div>
+          <div class="rk" style="--rk:var(--rank-terrivel)"><span class="rk__nome">Terrível</span><span class="rk__faixa num">14 ou menos</span></div>
+        </div>
+
+        <div class="callout callout--warn">
+          <span class="callout__src">Atenção</span>
+          Os cortes acima valem <b>só para este exercício e esta média</b>. Trocar de drill muda o desgaste e move os cortes junto — por isso o app indica qual usar em vez de dar uma tabela fixa.
+        </div>
+
+        <div class="callout">
+          <span class="callout__src">Janela do teste</span>
+          O teste exige um primário com média <b>abaixo de 80%</b>. Os quatro primários deste jogador ainda estão abaixo. Quando passarem, o teste fica indisponível e o rank anterior é mantido.
+        </div>
+      </section>
+
+      <!-- estimativa ate a meta -->
+      <section class="panel">
+        <div class="panel__head"><h2>Até a meta de overall</h2></div>
+
+        <div class="duo">
+          <div class="field">
+            <label for="atual">Overall atual</label>
+            <input id="atual" class="num" type="number" inputmode="numeric" value="60" readonly>
+          </div>
+          <div class="field">
+            <label for="meta">Meta</label>
+            <input id="meta" class="num" type="number" inputmode="numeric" value="80">
+          </div>
+        </div>
+
+        <div class="tile">
+          <div class="tile__label">Sessões estimadas</div>
+          <div class="tile__value num">22 a 30</div>
+          <p>Treinando <b>Academia</b>, recalculando a média a cada sessão.</p>
+        </div>
+
+        <div class="tile">
+          <div class="tile__label">Maletas verdes</div>
+          <div class="tile__row">
+            <div class="tile__value num">28 a 40</div>
+            <span class="tile__plus num">+20 de overall</span>
+          </div>
+          <p>22,5% de condicionamento por sessão · 1 maleta repõe <b>15%</b>. Você tem <b>47</b> maletas — dá para chegar à meta e sobra folga.</p>
+        </div>
+
+        <div class="callout callout--est">
+          <span class="callout__src">Estimado</span>
+          A conta de maletas é fechada. A conversão de <b>pontos de atributo em overall</b> é o único trecho estimado do modelo — por isso a saída é <b>faixa, nunca número exato</b>.
+        </div>
+
+        <div class="callout">
+          <span class="callout__src">Comunidade</span>
+          Aos <b>18 anos</b> o fator idade está no máximo. Aos 26 ele cai bastante e a mesma meta custa quase o dobro de maleta — treinar cedo é o que barateia a conta.
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<p class="foot">Mockup estático para validação visual — dados fictícios. As médias de exercício foram calculadas com a regra de <b>docs/GAME-RULES.md</b> sobre os atributos exibidos, mas a página não executa nenhum cálculo.</p>
+
+</body>
+</html>
