@@ -34,3 +34,6 @@ export function conditionCostPerSession(difficulty: Difficulty): number {
 export function greenPacksFor(conditionCost: number): number {
   return Math.ceil(conditionCost / CONDITION_PER_GREEN_PACK);
 }
+
+/** Nome de contrato do AGENTS.md para {@link greenPacksFor} (GAME-RULES §9). */
+export const custoEmMaletas = greenPacksFor;
