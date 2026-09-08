@@ -2,8 +2,8 @@
  * Os 29 drills do jogo: categoria, dificuldade e atributos que treinam, já sem
  * os de goleiro (GAME-RULES §4 e tabela de entrada do algoritmo em §6).
  */
-import type { Difficulty } from './training.js';
-import type { Atributo } from './types.js';
+import { SLOTS_PER_SESSION, type Difficulty } from './training';
+import type { Atributo } from './types';
 
 export interface Drill {
   nome: string;
@@ -89,4 +89,31 @@ export function classificarDrill(brancos: Set<Atributo>, drill: Drill): ClasseDr
 /** Todos os drills primários para um conjunto de brancos (GAME-RULES §6, passo 2). */
 export function drillsPrimarios(brancos: Set<Atributo>): Drill[] {
   return ALL_DRILLS.filter((drill) => classificarDrill(brancos, drill) === 'primario');
+}
+
+/**
+ * Recomenda os 6 slots da sessão: preenche com os primários de menor média
+ * (mais longe do teto de 180%), repetindo em ciclo quando houver menos de 6.
+ * Só desce para secundário quando não sobrar primário nenhum (GAME-RULES §6).
+ */
+export function montarCronograma(
+  atributosJogador: Record<Atributo, number>,
+  brancos: Set<Atributo>,
+): Drill[] {
+  const candidatos = (['primario', 'secundario', 'terciario'] as const)
+    .map((classe) => ALL_DRILLS.filter((drill) => classificarDrill(brancos, drill) === classe))
+    .find((drills) => drills.length > 0);
+
+  if (!candidatos) {
+    throw new Error('Nenhum drill válido para este jogador — nem sequer terciário.');
+  }
+
+  const ordenados = [...candidatos].sort(
+    (a, b) => mediaExercicio(atributosJogador, a) - mediaExercicio(atributosJogador, b),
+  );
+
+  return Array.from(
+    { length: SLOTS_PER_SESSION },
+    (_, i) => ordenados[i % ordenados.length]!,
+  );
 }

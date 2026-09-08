@@ -40,4 +40,12 @@ describe('reducer', () => {
     const depois = reducer(documentoVazio(), { type: 'documento/substituido', documento: novo });
     expect(depois).toEqual(novo);
   });
+
+  it('atualiza o lab de um jogador sem alterar os outros', () => {
+    const lab = { atributos: {} as Record<string, number>, brancosOverride: null, talento: null };
+    const antes = { schemaVersion: 1, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const depois = reducer(antes, { type: 'jogador/labAtualizado', id: '1', lab });
+    expect(depois.jogadores.find((j) => j.id === '1')?.lab).toEqual(lab);
+    expect(depois.jogadores.find((j) => j.id === '2')?.lab).toBeNull();
+  });
 });

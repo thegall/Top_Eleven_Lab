@@ -2,7 +2,7 @@
  * Matriz de atributos brancos por posição. Vem da planilha `evolucao_facil.xlsx`,
  * transcrita em GAME-RULES §2.
  */
-import type { Atributo, Posicao } from './types.js';
+import type { Atributo, Posicao } from './types';
 
 export const POSITION_WHITES: Record<Posicao, Atributo[]> = {
   DL: ['corte', 'marcacao', 'posicionamento', 'coragem', 'cruzamento', 'condicionamento', 'agressividade', 'velocidade'],
