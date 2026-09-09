@@ -2,9 +2,9 @@
  * Curva de ganho por talento e média do exercício, e teste de talento pelo
  * método 2 (GAME-RULES §3.1 e §5).
  */
-import { classificarDrill, type Drill } from './drills.js';
-import { conditionCostPerSlot } from './training.js';
-import type { Atributo, RankTalento } from './types.js';
+import { classificarDrill, type Drill } from './drills';
+import { conditionCostPerSlot } from './training';
+import type { Atributo, RankTalento } from './types';
 
 /** Colunas de média do exercício da tabela da curva de ganho. */
 const MEDIA_COLUMNS = [20, 40, 60, 80, 100, 120, 140, 160, 180] as const;

@@ -2,7 +2,7 @@
  * O documento persistido: mesmo formato no `localStorage` e no arquivo de
  * exportação (AGENTS.md § Schemas de dados, ADR 0002, ADR 0006).
  */
-import type { Posicao } from '../domain/types';
+import type { Atributo, Posicao, RankTalento } from '../domain/types';
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
@@ -14,14 +14,25 @@ export const CURRENT_SCHEMA_VERSION = 1;
  */
 export type PosicaoJogador = Posicao | 'GK';
 
+/**
+ * Dados do Laboratório para um jogador (etapa 7). `brancosOverride: null`
+ * significa "deriva da posição" — o Lab deriva os brancos, mas deixa o campo
+ * editável (GAME-RULES §2, "Decisão de produto").
+ */
+export interface DadosLab {
+  atributos: Record<Atributo, number>;
+  brancosOverride: Atributo[] | null;
+  talento: RankTalento | null;
+}
+
 export interface Jogador {
   id: string;
   nome: string;
   overall: number;
   posicoes: PosicaoJogador[];
   vendido: boolean;
-  /** Preenchido = promovido ao Laboratório. Formato definido na etapa 7. */
-  lab: Record<string, unknown> | null;
+  /** Preenchido = promovido ao Laboratório. */
+  lab: DadosLab | null;
 }
 
 export interface Documento {

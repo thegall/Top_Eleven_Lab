@@ -8,7 +8,13 @@
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
 
 import { reducer } from './reducer';
-import { documentoVazio, type Documento, type Jogador, type PosicaoJogador } from './schema';
+import {
+  documentoVazio,
+  type DadosLab,
+  type Documento,
+  type Jogador,
+  type PosicaoJogador,
+} from './schema';
 import { carregar, salvar } from './storage';
 
 interface SquadContextValue {
@@ -17,6 +23,7 @@ interface SquadContextValue {
   adicionarJogador: (nome: string, overall: number, posicao: PosicaoJogador) => void;
   marcarVendido: (id: string) => void;
   desfazerVenda: (id: string) => void;
+  atualizarLab: (id: string, lab: DadosLab) => void;
   substituirDocumento: (documento: Documento) => void;
 }
 
@@ -57,6 +64,7 @@ export function SquadProvider({ children }: { children: ReactNode }) {
     },
     marcarVendido: (id) => dispatch({ type: 'jogador/vendaMarcada', id }),
     desfazerVenda: (id) => dispatch({ type: 'jogador/vendaDesfeita', id }),
+    atualizarLab: (id, lab) => dispatch({ type: 'jogador/labAtualizado', id, lab }),
     substituirDocumento: (documento) => dispatch({ type: 'documento/substituido', documento }),
   };
 
