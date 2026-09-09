@@ -32,4 +32,62 @@ describe('migrar', () => {
       migrar({ schemaVersion: Number.MAX_SAFE_INTEGER + 1, jogadores: [] }),
     ).toThrow();
   });
+
+  const jogadorBase = { id: '1', nome: 'Ned Stark', overall: 78, posicoes: ['DC'], vendido: false };
+  const atributosCompletos = {
+    corte: 50,
+    marcacao: 50,
+    posicionamento: 50,
+    cabecada: 50,
+    coragem: 50,
+    passe: 50,
+    drible: 50,
+    cruzamento: 50,
+    chute: 50,
+    finalizacao: 50,
+    condicionamento: 50,
+    forca: 50,
+    agressividade: 50,
+    velocidade: 50,
+    criatividade: 50,
+  };
+
+  it('aceita um lab completo e válido', () => {
+    const bruto = {
+      schemaVersion: 1,
+      jogadores: [{ ...jogadorBase, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'boa' } }],
+    };
+    expect(migrar(bruto)).toEqual(bruto);
+  });
+
+  it('recusa lab com atributos ausentes ou incompletos, pra não virar NaN na média do exercício', () => {
+    expect(() =>
+      migrar({ schemaVersion: 1, jogadores: [{ ...jogadorBase, lab: {} }] }),
+    ).toThrow();
+    expect(() =>
+      migrar({
+        schemaVersion: 1,
+        jogadores: [{ ...jogadorBase, lab: { atributos: { corte: 50 }, brancosOverride: null, talento: null } }],
+      }),
+    ).toThrow();
+  });
+
+  it('recusa brancosOverride ou talento fora dos valores válidos', () => {
+    expect(() =>
+      migrar({
+        schemaVersion: 1,
+        jogadores: [
+          { ...jogadorBase, lab: { atributos: atributosCompletos, brancosOverride: ['inexistente'], talento: null } },
+        ],
+      }),
+    ).toThrow();
+    expect(() =>
+      migrar({
+        schemaVersion: 1,
+        jogadores: [
+          { ...jogadorBase, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'lendario' } },
+        ],
+      }),
+    ).toThrow();
+  });
 });

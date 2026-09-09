@@ -98,7 +98,7 @@ export default function LaboratorioPage() {
     setErroTeste(null);
   }, [selecionado?.id]);
 
-  const lab = selecionado ? labDoJogador(selecionado) : null;
+  const lab = useMemo(() => (selecionado ? labDoJogador(selecionado) : null), [selecionado]);
 
   const posicoesLinha = useMemo(
     () => (selecionado ? selecionado.posicoes.filter((p): p is Posicao => p !== 'GK') : []),
@@ -133,10 +133,12 @@ export default function LaboratorioPage() {
 
   function handleAtributoChange(atributo: Atributo, valor: string) {
     if (!selecionado || !lab) return;
+    if (valor.trim() === '') return;
     const numero = Number(valor);
+    if (!Number.isFinite(numero)) return;
     atualizarLab(selecionado.id, {
       ...lab,
-      atributos: { ...lab.atributos, [atributo]: Number.isFinite(numero) ? numero : 0 },
+      atributos: { ...lab.atributos, [atributo]: numero },
     });
   }
 
@@ -151,6 +153,7 @@ export default function LaboratorioPage() {
   function aoClassificarTalento(evento: FormEvent) {
     evento.preventDefault();
     if (!selecionado || !lab || !testeDrill) return;
+    if (soma.trim() === '') return;
     const somaNumero = Number(soma);
     if (!Number.isFinite(somaNumero)) return;
     try {
@@ -244,6 +247,7 @@ export default function LaboratorioPage() {
                                 className="attr__input num"
                                 type="number"
                                 inputMode="numeric"
+                                aria-label={LABELS[atributo]}
                                 value={lab.atributos[atributo]}
                                 onChange={(e) => handleAtributoChange(atributo, e.target.value)}
                               />
