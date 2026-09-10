@@ -11,7 +11,7 @@ const ABAS = [
 export function Nav() {
   const pathname = usePathname();
   return (
-    <nav className="tabs">
+    <nav className="tabs" aria-label="Abas principais">
       {ABAS.map((aba) => (
         <Link
           key={aba.href}

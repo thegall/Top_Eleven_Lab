@@ -1,27 +1,53 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import { Barlow_Condensed, Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { SquadProvider } from '../state/store';
 import { Nav } from './nav';
 import './globals.css';
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-ui',
+  display: 'swap',
+});
+
+const barlow = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Top Eleven Lab',
   description: 'Calculadora de treino e de elenco para o Top Eleven',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#1e355a',
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${inter.variable} ${barlow.variable}`}>
       <body>
         <SquadProvider>
+          <a className="skip" href="#conteudo">
+            Pular para o conteúdo
+          </a>
           <header className="topbar">
             <span className="brand">
               Top Eleven <b>Lab</b>
             </span>
           </header>
           <Nav />
-          {children}
+          <div id="conteudo" tabIndex={-1}>
+            {children}
+          </div>
         </SquadProvider>
       </body>
     </html>

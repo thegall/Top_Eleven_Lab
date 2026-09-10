@@ -92,9 +92,11 @@ Primeira tela real, e a mais simples: três campos por jogador. Também é a que
 
 ## Etapa 8 — Mobile e acabamento
 
-- [ ] Layout paisagem no mobile
-- [ ] Acessibilidade básica: contraste, foco visível, navegação por teclado
-- [ ] As regras aplicadas visíveis ao usuário, com a origem declarada
+**Concluída.**
+
+- [x] Layout paisagem no mobile
+- [x] Acessibilidade básica: contraste, foco visível, navegação por teclado
+- [x] As regras aplicadas visíveis ao usuário, com a origem declarada
 
 ## Depois da V1
 

@@ -6,6 +6,7 @@ import { mediaDos14 } from '../domain/squad';
 import type { Jogador, PosicaoJogador } from '../state/schema';
 import { useSquad } from '../state/store';
 import { exportarJSON, importarJSON } from '../state/transfer';
+import { CalloutRegra } from '../ui/callout-regra';
 import { classeBadgePosicao } from '../ui/posicao';
 
 const POSICOES: PosicaoJogador[] = [
@@ -101,6 +102,7 @@ export default function SquadPage() {
   const [nome, setNome] = useState('');
   const [overall, setOverall] = useState('');
   const [posicao, setPosicao] = useState<PosicaoJogador>('DC');
+  const [erroImportacao, setErroImportacao] = useState<string | null>(null);
 
   const jogadores = documento.jogadores;
 
@@ -142,8 +144,9 @@ export default function SquadPage() {
     if (!arquivo) return;
     try {
       substituirDocumento(importarJSON(await arquivo.text()));
+      setErroImportacao(null);
     } catch {
-      window.alert('Arquivo inválido — não foi possível importar.');
+      setErroImportacao('Arquivo inválido — não foi possível importar.');
     }
   }
 
@@ -155,11 +158,11 @@ export default function SquadPage() {
           Simulador da média dos 14 mais fortes — o número que define contra quem você joga na
           próxima temporada.
         </p>
-        <p style={{ marginTop: 'var(--s-xs)' }}>
+        <p className="hero__actions">
           <button className="btn btn--ghost" type="button" onClick={() => exportar(documento)}>
             Exportar elenco
           </button>
-          <label className="btn btn--ghost" style={{ cursor: 'pointer' }}>
+          <label className="btn btn--ghost hero__import">
             Importar elenco
             <input
               type="file"
@@ -169,6 +172,11 @@ export default function SquadPage() {
             />
           </label>
         </p>
+        {erroImportacao && (
+          <p className="hero__erro" role="alert">
+            {erroImportacao}
+          </p>
+        )}
       </div>
 
       <main className="page">
@@ -235,78 +243,101 @@ export default function SquadPage() {
               <p className="empty">Nenhum jogador cadastrado ainda.</p>
             ) : (
               <>
-                <div className="thead">
-                  <span>#</span>
-                  <span>Jogador</span>
-                  <span>Pos.</span>
-                  <span className="r">Ovr</span>
-                  <span className="r c-act">Simulação</span>
-                </div>
-                <div className="rows">
-                  {linhas.map((linha, i) => (
-                    <Fragment key={linha.jogador.id}>
-                      <div
-                        className={[
-                          'row',
-                          linha.top14 && 'row--top',
-                          linha.jogador.vendido && 'row--sold',
-                          linha.promovido && 'row--promoted',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                      >
-                        <span className="row__rank num">{linha.rank}</span>
-                        <span className="row__name">
-                          <span>{linha.jogador.nome}</span>
-                          {linha.jogador.vendido && <span className="tag tag--loss">Vendido</span>}
-                          {linha.promovido && <span className="tag tag--gain">Subiu para os 14</span>}
-                        </span>
-                        <span className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}>
-                          {linha.jogador.posicoes[0] ?? '—'}
-                        </span>
-                        <span className="row__ovr num">{linha.jogador.overall}</span>
-                        <span className="row__act">
-                          {linha.jogador.vendido ? (
-                            <button
-                              className="btn btn--undo"
-                              type="button"
-                              onClick={() => desfazerVenda(linha.jogador.id)}
-                            >
-                              Desfazer
-                            </button>
-                          ) : (
-                            <button
-                              className="btn btn--ghost"
-                              type="button"
-                              onClick={() => marcarVendido(linha.jogador.id)}
-                            >
-                              Marcar venda
-                            </button>
-                          )}
-                        </span>
-                      </div>
-                      {indiceDoCorte === i && (
-                        <div className="cut">
-                          <span>Corte do 14º — daqui para baixo não entra na média</span>
+                <div className="elenco" role="table" aria-label="Elenco ordenado por overall">
+                  <div className="thead" role="row">
+                    <span role="columnheader">#</span>
+                    <span role="columnheader">Jogador</span>
+                    <span role="columnheader">Pos.</span>
+                    <span role="columnheader" className="r">
+                      Ovr
+                    </span>
+                    <span role="columnheader" className="r c-act">
+                      Simulação
+                    </span>
+                  </div>
+                  <div className="rows">
+                    {linhas.map((linha, i) => (
+                      <Fragment key={linha.jogador.id}>
+                        <div
+                          role="row"
+                          className={[
+                            'row',
+                            linha.top14 && 'row--top',
+                            linha.jogador.vendido && 'row--sold',
+                            linha.promovido && 'row--promoted',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                        >
+                          <span role="cell" className="row__rank num">
+                            {linha.rank}
+                          </span>
+                          <span role="cell" className="row__name">
+                            {linha.top14 && (
+                              <span className="visually-hidden">Nos 14 que contam. </span>
+                            )}
+                            <span>{linha.jogador.nome}</span>
+                            {linha.jogador.vendido && <span className="tag tag--loss">Vendido</span>}
+                            {linha.promovido && (
+                              <span className="tag tag--gain">Subiu para os 14</span>
+                            )}
+                          </span>
+                          <span
+                            role="cell"
+                            className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}
+                          >
+                            {linha.jogador.posicoes[0] ?? '—'}
+                          </span>
+                          <span role="cell" className="row__ovr num">
+                            {linha.jogador.overall}
+                          </span>
+                          <span role="cell" className="row__act">
+                            {linha.jogador.vendido ? (
+                              <button
+                                className="btn btn--undo"
+                                type="button"
+                                onClick={() => desfazerVenda(linha.jogador.id)}
+                                aria-label={`Desfazer venda de ${linha.jogador.nome}`}
+                              >
+                                Desfazer
+                              </button>
+                            ) : (
+                              <button
+                                className="btn btn--ghost"
+                                type="button"
+                                onClick={() => marcarVendido(linha.jogador.id)}
+                                aria-label={`Marcar ${linha.jogador.nome} como vendido`}
+                              >
+                                Marcar venda
+                              </button>
+                            )}
+                          </span>
                         </div>
-                      )}
-                    </Fragment>
-                  ))}
+                        {indiceDoCorte === i && (
+                          <div className="cut" role="row">
+                            <span role="cell">
+                              Corte do 14º — daqui para baixo não entra na média
+                            </span>
+                          </div>
+                        )}
+                      </Fragment>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="callout" style={{ marginTop: 'var(--s-sm)' }}>
-                  <span className="callout__src">Como ler</span>
+                <CalloutRegra marca="comunidade" secao="§8">
                   Barra dourada = está dentro dos 14 que contam. Cada venda simulada tira um
                   jogador da conta e <b>puxa o próximo reserva para dentro</b> — por isso o efeito
-                  quase nunca é o óbvio.
-                </div>
+                  quase nunca é o óbvio. A média da tela de escalação (os 11) é outra conta e
+                  induz ao erro.
+                </CalloutRegra>
               </>
             )}
           </section>
         </div>
 
         <aside>
-          <div className="tile">
+          <div className="tile" aria-live="polite" aria-atomic="true">
             <div className="tile__label">Média dos 14 — com as vendas simuladas</div>
             <div className="tile__row">
               <div className="tile__value num">{formatarNumero(mediaComVendas)}</div>
@@ -348,12 +379,11 @@ export default function SquadPage() {
                 </div>
               ))}
             </div>
-            <div className="callout" style={{ marginTop: 'var(--s-xs)' }}>
-              <span className="callout__src">Comunidade</span>
-              O jogo emparelha a temporada seguinte pela média dos <b>14 jogadores mais fortes</b>.
-              As faixas acima são observação da comunidade brasileira, não número publicado pela
-              Nordeus.
-            </div>
+            <CalloutRegra marca="comunidade" secao="§8">
+              O jogo emparelha a temporada seguinte pela média dos <b>14 jogadores mais fortes</b>,
+              não pela dos 11 escalados. As faixas acima são observação da comunidade brasileira,
+              não número publicado pela Nordeus.
+            </CalloutRegra>
           </section>
 
           <section className="panel">

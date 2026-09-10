@@ -9,6 +9,7 @@ import { conditionCostPerSession } from '../../domain/training';
 import type { Atributo, Posicao, RankTalento } from '../../domain/types';
 import type { DadosLab, Jogador } from '../../state/schema';
 import { useSquad } from '../../state/store';
+import { CalloutRegra } from '../../ui/callout-regra';
 import { classeBadgePosicao } from '../../ui/posicao';
 
 const LABELS: Record<Atributo, string> = {
@@ -175,10 +176,11 @@ export default function LaboratorioPage() {
       <main className="lab-page">
         {!selecionado || !lab ? (
           <section className="panel">
-            <p className="empty">
-              Cadastre um jogador de linha na aba Squad pra usar o Laboratório — o goleiro fica de
-              fora (GAME-RULES §10).
-            </p>
+            <p className="empty">Cadastre um jogador de linha na aba Squad pra usar o Laboratório.</p>
+            <CalloutRegra marca="comunidade" secao="§10">
+              O goleiro continua no Squad, mas fica de fora do Laboratório nesta versão — os
+              atributos de GK são outro conjunto.
+            </CalloutRegra>
           </section>
         ) : (
           <>
@@ -197,7 +199,7 @@ export default function LaboratorioPage() {
                   </option>
                 ))}
               </select>
-              <h1 className="ficha__nome">{selecionado.nome}</h1>
+              <p className="ficha__nome">{selecionado.nome}</p>
               <span className={classeBadgePosicao(selecionado.posicoes[0] ?? 'DC')}>
                 {selecionado.posicoes[0]}
               </span>
@@ -231,8 +233,9 @@ export default function LaboratorioPage() {
                       <div className="attrs">
                         {grupo.atributos.map((atributo) => {
                           const branco = brancosEfetivos.has(atributo);
+                          const idValor = `attr-${atributo}`;
                           return (
-                            <label
+                            <div
                               key={atributo}
                               className={`attr ${branco ? 'attr--key' : 'attr--gray'}`}
                             >
@@ -240,18 +243,20 @@ export default function LaboratorioPage() {
                                 type="checkbox"
                                 checked={branco}
                                 onChange={() => handleToggleBranco(atributo)}
-                                title="Atributo-chave (branco)"
+                                aria-label={`${LABELS[atributo]}: atributo-chave`}
                               />
-                              <span className="attr__label">{LABELS[atributo]}</span>
+                              <label className="attr__label" htmlFor={idValor}>
+                                {LABELS[atributo]}
+                              </label>
                               <input
+                                id={idValor}
                                 className="attr__input num"
                                 type="number"
                                 inputMode="numeric"
-                                aria-label={LABELS[atributo]}
                                 value={lab.atributos[atributo]}
                                 onChange={(e) => handleAtributoChange(atributo, e.target.value)}
                               />
-                            </label>
+                            </div>
                           );
                         })}
                       </div>
@@ -262,14 +267,19 @@ export default function LaboratorioPage() {
 
               <p className="legenda">
                 <span>
-                  <i style={{ background: 'var(--surface)', borderLeft: '3px solid var(--group-defense)' }} />
+                  <i className="legenda__key" />
                   Atributo-chave (branco) — cresce ao dobro da velocidade
                 </span>
                 <span>
-                  <i style={{ background: 'var(--surface-muted)' }} />
+                  <i className="legenda__gray" />
                   Atributo cinza — entra no overall, quase não muda o jogo
                 </span>
               </p>
+              <CalloutRegra marca="oficial" secao="§2">
+                Os brancos vêm da união das posições. Cinza entra no overall, mas tem pouco efeito
+                em campo. A velocidade pela metade no cinza é observação da comunidade, na mesma
+                seção.
+              </CalloutRegra>
             </section>
 
             <section className="panel">
@@ -283,11 +293,18 @@ export default function LaboratorioPage() {
                   return (
                     <div className="line" key={`${drill.nome}-${i}`}>
                       <span className="line__name">
-                        <i className={CATEGORIA_DOT[drill.categoria]} />
+                        <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
                         {i + 1}. {drill.nome}
                       </span>
                       <span className="c-meter">
-                        <span className="meter meter--mini">
+                        <span
+                          className="meter meter--mini"
+                          role="meter"
+                          aria-valuemin={0}
+                          aria-valuemax={180}
+                          aria-valuenow={Math.round(media)}
+                          aria-label={`Média de ${drill.nome}`}
+                        >
                           <span
                             className="meter__fill"
                             style={{ width: `${Math.min(100, (media / 180) * 100)}%` }}
@@ -301,6 +318,10 @@ export default function LaboratorioPage() {
                   );
                 })}
               </div>
+              <CalloutRegra marca="comunidade" secao="§6">
+                Os 6 slots, menor média primeiro. Com menos de 6 primários, o drill se repete.
+                Aos 180% o exercício rende zero — a planilha da comunidade erra nisso; o Lab não.
+              </CalloutRegra>
             </section>
 
             <div className="split">
@@ -312,19 +333,19 @@ export default function LaboratorioPage() {
 
                 <div className="cats">
                   <span>
-                    <i className="dot c-atk" />
+                    <i className="dot c-atk" aria-hidden="true" />
                     Ataque
                   </span>
                   <span>
-                    <i className="dot c-def" />
+                    <i className="dot c-def" aria-hidden="true" />
                     Defesa
                   </span>
                   <span>
-                    <i className="dot c-pos" />
+                    <i className="dot c-pos" aria-hidden="true" />
                     Posse de bola
                   </span>
                   <span>
-                    <i className="dot c-fis" />
+                    <i className="dot c-fis" aria-hidden="true" />
                     Físico e mental
                   </span>
                 </div>
@@ -349,8 +370,18 @@ export default function LaboratorioPage() {
                           <span className="card__media num">{formatarPct(media)}%</span>
                           <span className="card__falta num">faltam {formatarPct(Math.max(0, 180 - media))}</span>
                         </div>
-                        <div className="meter">
-                          <div className="meter__fill" style={{ width: `${Math.min(100, (media / 180) * 100)}%` }} />
+                        <div
+                          className="meter"
+                          role="meter"
+                          aria-valuemin={0}
+                          aria-valuemax={180}
+                          aria-valuenow={Math.round(media)}
+                          aria-label={`Média de ${drill.nome}`}
+                        >
+                          <div
+                            className="meter__fill"
+                            style={{ width: `${Math.min(100, (media / 180) * 100)}%` }}
+                          />
                           <div className="meter__mark meter__mark--troca" style={{ left: '77.8%' }} />
                           <div className="meter__mark" style={{ left: 'calc(100% - 2px)' }} />
                         </div>
@@ -383,11 +414,18 @@ export default function LaboratorioPage() {
                       {secundarios.map(({ drill, media }) => (
                         <div className="line" key={drill.nome}>
                           <span className="line__name">
-                            <i className={CATEGORIA_DOT[drill.categoria]} />
+                            <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
                             {drill.nome}
                           </span>
                           <span className="c-meter">
-                            <span className="meter meter--mini">
+                            <span
+                              className="meter meter--mini"
+                              role="meter"
+                              aria-valuemin={0}
+                              aria-valuemax={180}
+                              aria-valuenow={Math.round(media)}
+                              aria-label={`Média de ${drill.nome}`}
+                            >
                               <span
                                 className="meter__fill"
                                 style={{ width: `${Math.min(100, (media / 180) * 100)}%` }}
@@ -412,11 +450,18 @@ export default function LaboratorioPage() {
                       {terciarios.map(({ drill, media }) => (
                         <div className="line line--ter" key={drill.nome}>
                           <span className="line__name">
-                            <i className={CATEGORIA_DOT[drill.categoria]} />
+                            <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
                             {drill.nome}
                           </span>
                           <span className="c-meter">
-                            <span className="meter meter--mini">
+                            <span
+                              className="meter meter--mini"
+                              role="meter"
+                              aria-valuemin={0}
+                              aria-valuemax={180}
+                              aria-valuenow={Math.round(media)}
+                              aria-label={`Média de ${drill.nome}`}
+                            >
                               <span
                                 className="meter__fill"
                                 style={{ width: `${Math.min(100, (media / 180) * 100)}%` }}
@@ -432,12 +477,12 @@ export default function LaboratorioPage() {
                   </>
                 )}
 
-                <div className="callout" style={{ marginTop: 'var(--s-sm)' }}>
-                  <span className="callout__src">Comunidade</span>
+                <CalloutRegra marca="comunidade" secao="§3">
                   O nome do exercício não diz nada. O que conta é a <b>média dos atributos que ele
-                  treina neste jogador</b>, e ela trava aos 180%. Subir um atributo empurra <b>todos</b> os
-                  exercícios que o contêm em direção ao teto.
-                </div>
+                  treina neste jogador</b>, e ela trava aos 180%. Subir um atributo empurra{' '}
+                  <b>todos</b> os exercícios que o contêm em direção ao teto. Quem tem pouca maleta
+                  troca por volta de 140% — recomendação prática, não teto do jogo.
+                </CalloutRegra>
               </section>
 
               <aside>
@@ -447,11 +492,11 @@ export default function LaboratorioPage() {
                   </div>
 
                   {!testeDrill ? (
-                    <div className="callout">
-                      <span className="callout__src">Janela do teste</span>
+                    <CalloutRegra marca="comunidade" secao="§5">
                       O teste exige um primário com média abaixo de 80%. Nenhum dos primários deste
                       jogador está abaixo — o teste fica indisponível e o rank anterior é mantido.
-                    </div>
+                      Acima disso o teto começa a interferir e o teste dá falso negativo.
+                    </CalloutRegra>
                   ) : (
                     <>
                       <ol className="steps">
@@ -489,10 +534,10 @@ export default function LaboratorioPage() {
                       </form>
 
                       {erroTeste && (
-                        <div className="callout callout--warn" style={{ marginTop: 'var(--s-xs)' }}>
+                        <p className="callout callout--warn" role="alert">
                           <span className="callout__src">Atenção</span>
                           {erroTeste}
-                        </div>
+                        </p>
                       )}
 
                       {lab.talento && (
@@ -512,11 +557,24 @@ export default function LaboratorioPage() {
                         </div>
                       )}
 
-                      <div className="callout callout--warn" style={{ marginTop: 'var(--s-sm)' }}>
-                        <span className="callout__src">Atenção</span>
+                      <CalloutRegra marca="comunidade" secao="§5">
                         O corte usado aqui vale <b>só para este exercício e esta média</b>. Trocar de
-                        drill muda o desgaste e move o resultado junto.
-                      </div>
+                        drill muda o desgaste e move o resultado junto. Os cortes 28/33 da comunidade
+                        só valem para Pressione o Play a ~55%.
+                      </CalloutRegra>
+                      <CalloutRegra marca="medicao" secao="§5">
+                        Caso real: 31 pontos em Pressione o Play a 55% classifica como Ótima — os
+                        dois métodos concordaram no vídeo da comunidade.
+                      </CalloutRegra>
+                      <CalloutRegra marca="pendente" secao="§5">
+                        O teste <b>não isola a idade</b>. Não aplicamos correção — esse valor ainda
+                        não foi validado. Faça o teste <b>antes dos 22 anos</b>, onde o fator de
+                        idade é 1,00.
+                      </CalloutRegra>
+                      <CalloutRegra marca="pendente" secao="§3.1">
+                        O método visual da barra (1/2) não separa Ruim de Terrível. O teste por soma
+                        devolve um rank, inclusive nessa faixa; não inventamos um corte visual.
+                      </CalloutRegra>
                     </>
                   )}
                 </section>
