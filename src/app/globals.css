@@ -206,9 +206,9 @@ body{margin:0;background:var(--canvas);color:var(--on-canvas);
 .attr--key{background:var(--surface);color:var(--ink);border-left:3px solid var(--group)}
 .attr--gray{background:var(--surface-muted);color:var(--body)}
 .attr__label{flex:1;font:500 14px/1.3 var(--font-ui),Inter,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.attr__input{width:52px;height:28px;padding:0 6px;border-radius:var(--r-sm);border:1px solid var(--hairline-strong);
-  background:var(--surface-bright);color:var(--ink);font:700 14px/1.2 var(--font-ui),Inter,sans-serif;
-  font-variant-numeric:tabular-nums;text-align:right}
+.attr__input{width:5.5em;min-width:5.5em;flex-shrink:0;height:28px;padding:0 8px;border-radius:var(--r-sm);
+  border:1px solid var(--hairline-strong);background:var(--surface-bright);color:var(--ink);
+  font:700 14px/1.2 var(--font-ui),Inter,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
 .attr__input:focus,.attr__input:focus-visible,.attr input[type=checkbox]:focus-visible,.ficha select:focus-visible{
   outline:none;border-color:var(--focus-ring);box-shadow:var(--e-focus)}
 .g-def{--group:var(--group-defense)}
