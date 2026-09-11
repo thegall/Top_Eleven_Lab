@@ -1,6 +1,6 @@
 /**
- * Curva de ganho por talento e média do exercício, e teste de talento pelo
- * método 2 (GAME-RULES §3.1 e §5).
+ * Curva de ganho por talento e média do exercício, e testes de talento
+ * (GAME-RULES §3.1 e §5): método 1 (habilidade especial) e método 2 (atributos).
  */
 import { classificarDrill, type Drill } from './drills';
 import { conditionCostPerSlot } from './training';
@@ -79,4 +79,48 @@ export function classificarTalento(
     if (sigma(rank, mediaDoExercicio) <= sigmaMedido) return rank;
   }
   return 'terrivel';
+}
+
+export type ResultadoHabilidadeEspecial =
+  | { rank: RankTalento }
+  | { rank: null; motivo: 'ruim-terrivel' };
+
+function casaComPadrao(pontos: readonly number[], padrao: readonly number[]): boolean {
+  return pontos.every((ponto, i) => ponto === padrao[i % padrao.length]);
+}
+
+/**
+ * Classifica o talento pelo método 1: pontos ganhos por sessão (1, 2 ou 3)
+ * ao treinar habilidade especial ou posição nova (GAME-RULES §5).
+ *
+ * Predominantemente 1 não devolve Ruim nem Terrível — o método visual não
+ * separa os dois (GAME-RULES §3.1 [PENDENTE], THE-37).
+ */
+export function classificarTalentoPorHabilidadeEspecial(
+  pontosPorSessao: readonly number[],
+): ResultadoHabilidadeEspecial {
+  if (pontosPorSessao.length === 0) {
+    throw new Error('Teste de talento inválido: informe os pontos de pelo menos uma sessão (GAME-RULES §5).');
+  }
+  for (const ponto of pontosPorSessao) {
+    if (ponto !== 1 && ponto !== 2 && ponto !== 3) {
+      throw new Error('Teste de talento inválido: cada sessão rende 1, 2 ou 3 pontos (GAME-RULES §5).');
+    }
+  }
+
+  if (pontosPorSessao.includes(3)) return { rank: 'fenomeno' };
+  if (pontosPorSessao.every((ponto) => ponto === 2)) return { rank: 'excelente' };
+
+  const media = pontosPorSessao.reduce((soma, n) => soma + n, 0) / pontosPorSessao.length;
+  if (media <= 1.29) return { rank: null, motivo: 'ruim-terrivel' };
+
+  if (pontosPorSessao[0] === 1 && pontosPorSessao.slice(1).every((ponto) => ponto === 2)) {
+    return { rank: 'otima' };
+  }
+  if (pontosPorSessao.every((ponto, i) => ponto === (i % 2 === 0 ? 1 : 2))) {
+    return { rank: 'normal' };
+  }
+  if (casaComPadrao(pontosPorSessao, [1, 2, 2])) return { rank: 'boa' };
+
+  throw new Error('Teste de talento inválido: sequência não casa com nenhum padrão da GAME-RULES §5.');
 }
