@@ -29,25 +29,25 @@ const FAIXAS = [
     min: 0,
     max: 85,
     faixa: 'até 85',
-    texto: 'Liga confortável — adversários no seu nível ou abaixo',
+    texto: 'Liga confortável. Adversários no seu nível ou abaixo.',
   },
   {
     min: 86,
     max: 100,
     faixa: '86 – 100',
-    texto: 'Liga equilibrada — dá para brigar pelo título montando bem',
+    texto: 'Liga equilibrada. Dá para brigar pelo título montando bem.',
   },
   {
     min: 101,
     max: 115,
     faixa: '101 – 115',
-    texto: 'Liga puxada — encontra times de quem investe dinheiro',
+    texto: 'Liga puxada. Encontra times de quem investe dinheiro.',
   },
   {
     min: 116,
     max: Infinity,
     faixa: 'acima de 115',
-    texto: 'Liga de pagantes — desvantagem estrutural na temporada inteira',
+    texto: 'Liga de pagantes. Desvantagem estrutural na temporada inteira.',
   },
 ] as const;
 
@@ -146,7 +146,7 @@ export default function SquadPage() {
       substituirDocumento(importarJSON(await arquivo.text()));
       setErroImportacao(null);
     } catch {
-      setErroImportacao('Arquivo inválido — não foi possível importar.');
+      setErroImportacao('Arquivo inválido. Não deu para importar.');
     }
   }
 
@@ -155,7 +155,7 @@ export default function SquadPage() {
       <div className="hero">
         <h1>Squad</h1>
         <p>
-          Simulador da média dos 14 mais fortes — o número que define contra quem você joga na
+          Simulador da média dos 14 mais fortes, o número que define contra quem você joga na
           próxima temporada.
         </p>
         <p className="hero__actions">
@@ -185,7 +185,7 @@ export default function SquadPage() {
             <div className="panel__head">
               <span className="gicon">+</span>
               <h2>Adicionar jogador</h2>
-              <span className="hint">3 campos — leva 5 segundos por jogador</span>
+              <span className="hint">3 campos, uns 5 segundos por jogador</span>
             </div>
             <form className="form" onSubmit={aoSubmeter}>
               <div className="field">
@@ -236,7 +236,7 @@ export default function SquadPage() {
                 14
               </span>
               <h2>Elenco</h2>
-              <span className="hint">Ordenado por overall — barra dourada marca quem entra na média</span>
+              <span className="hint">Ordenado por overall. A barra dourada marca quem entra na média.</span>
             </div>
 
             {linhas.length === 0 ? (
@@ -286,7 +286,7 @@ export default function SquadPage() {
                             role="cell"
                             className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}
                           >
-                            {linha.jogador.posicoes[0] ?? '—'}
+                            {linha.jogador.posicoes[0] ?? '–'}
                           </span>
                           <span role="cell" className="row__ovr num">
                             {linha.jogador.overall}
@@ -316,7 +316,7 @@ export default function SquadPage() {
                         {indiceDoCorte === i && (
                           <div className="cut" role="row">
                             <span role="cell">
-                              Corte do 14º — daqui para baixo não entra na média
+                              Corte do 14º. Daqui para baixo não entra na média.
                             </span>
                           </div>
                         )}
@@ -326,8 +326,8 @@ export default function SquadPage() {
                 </div>
 
                 <CalloutRegra marca="comunidade" secao="§8">
-                  Barra dourada = está dentro dos 14 que contam. Cada venda simulada tira um
-                  jogador da conta e <b>puxa o próximo reserva para dentro</b> — por isso o efeito
+                  Barra dourada marca quem está nos 14 que contam. Cada venda simulada tira um
+                  jogador da conta e <b>puxa o próximo reserva para dentro</b>, então o efeito
                   quase nunca é o óbvio. A média da tela de escalação (os 11) é outra conta e
                   induz ao erro.
                 </CalloutRegra>
@@ -338,7 +338,7 @@ export default function SquadPage() {
 
         <aside>
           <div className="tile" aria-live="polite" aria-atomic="true">
-            <div className="tile__label">Média dos 14 — com as vendas simuladas</div>
+            <div className="tile__label">Média dos 14, com as vendas simuladas</div>
             <div className="tile__row">
               <div className="tile__value num">{formatarNumero(mediaComVendas)}</div>
               {delta !== 0 && (

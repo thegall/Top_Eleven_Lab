@@ -57,12 +57,37 @@ const CATEGORIA_DOT: Record<string, string> = {
   fisico: 'dot c-fis',
 };
 
-const CATEGORIA_FLAG: Record<string, string> = {
-  ataque: 'card__flag',
-  defesa: 'card__flag card--f-def',
-  posse: 'card__flag card--f-pos',
-  fisico: 'card__flag',
+const CATEGORIA_CARD: Record<string, string> = {
+  ataque: 'card--f-atk',
+  defesa: 'card--f-def',
+  posse: 'card--f-pos',
+  fisico: 'card--f-fis',
 };
+
+const CATEGORIA_LABEL: Record<string, string> = {
+  ataque: 'Ataque',
+  defesa: 'Defesa',
+  posse: 'Posse de bola',
+  fisico: 'Físico e mental',
+};
+
+function TituloGrupoExercicios({
+  quantidade,
+  titulo,
+  explicacao,
+}: {
+  quantidade: number;
+  titulo: string;
+  explicacao: string;
+}) {
+  return (
+    <div className="sub">
+      <span>
+        {quantidade} {titulo} · <em>{explicacao}</em>
+      </span>
+    </div>
+  );
+}
 
 const DIFICULDADE_LABEL = ['', 'Muito Fácil', 'Fácil', 'Médio', 'Difícil', 'Muito Difícil'];
 
@@ -170,7 +195,7 @@ export default function LaboratorioPage() {
     <>
       <div className="hero">
         <h1>Laboratório</h1>
-        <p>Simulador de treino, um jogador por vez — qual exercício rende mais neste jogador agora.</p>
+        <p>Simulador de treino, um jogador por vez. Qual exercício rende mais neste jogador agora.</p>
       </div>
 
       <main className="lab-page">
@@ -178,7 +203,7 @@ export default function LaboratorioPage() {
           <section className="panel">
             <p className="empty">Cadastre um jogador de linha na aba Squad pra usar o Laboratório.</p>
             <CalloutRegra marca="comunidade" secao="§10">
-              O goleiro continua no Squad, mas fica de fora do Laboratório nesta versão — os
+              O goleiro continua no Squad, mas fica de fora do Laboratório nesta versão. Os
               atributos de GK são outro conjunto.
             </CalloutRegra>
           </section>
@@ -195,7 +220,7 @@ export default function LaboratorioPage() {
               >
                 {elegiveis.map((j) => (
                   <option key={j.id} value={j.id}>
-                    {j.nome} — {j.overall}
+                    {j.nome} ({j.overall})
                   </option>
                 ))}
               </select>
@@ -214,7 +239,7 @@ export default function LaboratorioPage() {
               <div className="panel__head">
                 <h2>Habilidades</h2>
                 <span className="hint">
-                  Derivadas da posição {posicoesLinha.join('+')} — confira e ajuste se o jogo divergir
+                  Derivadas da posição {posicoesLinha.join('+')}. Confira e ajuste se o jogo divergir.
                 </span>
               </div>
 
@@ -268,11 +293,11 @@ export default function LaboratorioPage() {
               <p className="legenda">
                 <span>
                   <i className="legenda__key" />
-                  Atributo-chave (branco) — cresce ao dobro da velocidade
+                  Atributo-chave (branco). Cresce ao dobro da velocidade.
                 </span>
                 <span>
                   <i className="legenda__gray" />
-                  Atributo cinza — entra no overall, quase não muda o jogo
+                  Atributo cinza. Entra no overall, quase não muda o jogo.
                 </span>
               </p>
               <CalloutRegra marca="oficial" secao="§2">
@@ -285,7 +310,7 @@ export default function LaboratorioPage() {
             <section className="panel">
               <div className="panel__head">
                 <h2>Sessão recomendada</h2>
-                <span className="hint">Os 6 slots, ordenados pela menor média (GAME-RULES §6)</span>
+                <span className="hint">Os 6 slots, da menor média para a maior (GAME-RULES §6)</span>
               </div>
               <div className="lines">
                 {cronograma.map((drill, i) => {
@@ -320,7 +345,7 @@ export default function LaboratorioPage() {
               </div>
               <CalloutRegra marca="comunidade" secao="§6">
                 Os 6 slots, menor média primeiro. Com menos de 6 primários, o drill se repete.
-                Aos 180% o exercício rende zero — a planilha da comunidade erra nisso; o Lab não.
+                Aos 180% o exercício rende zero. A planilha da comunidade erra nisso; o Lab não.
               </CalloutRegra>
             </section>
 
@@ -350,14 +375,21 @@ export default function LaboratorioPage() {
                   </span>
                 </div>
 
-                <div className="sub">
-                  Primários · {primarios.length} <em>todos os atributos que contam são chave</em>
-                </div>
+                <TituloGrupoExercicios
+                  quantidade={primarios.length}
+                  titulo="Exercícios Primários"
+                  explicacao="Todos os atributos que contam são chave"
+                />
                 <div className="cards">
                   {primarios.map(({ drill, media }, i) => (
-                    <div className={`card${i === 0 ? ' card--rec' : ''}`} key={drill.nome}>
-                      <div className={CATEGORIA_FLAG[drill.categoria]}>
-                        {drill.categoria}
+                    <div
+                      className={['card', i === 0 && 'card--rec', CATEGORIA_CARD[drill.categoria]]
+                        .filter(Boolean)
+                        .join(' ')}
+                      key={drill.nome}
+                    >
+                      <div className="card__flag">
+                        {CATEGORIA_LABEL[drill.categoria]}
                         {i === 0 && <span className="rec">Recomendado</span>}
                         {testeDrill?.drill.nome === drill.nome && <span className="rec">Teste de talento</span>}
                       </div>
@@ -401,9 +433,11 @@ export default function LaboratorioPage() {
 
                 {secundarios.length > 0 && (
                   <>
-                    <div className="sub">
-                      Secundários · {secundarios.length} <em>um atributo cinza entra na conta</em>
-                    </div>
+                    <TituloGrupoExercicios
+                      quantidade={secundarios.length}
+                      titulo="Exercícios Secundários"
+                      explicacao="Um atributo cinza entra na conta"
+                    />
                     <div className="lhead">
                       <span>Exercício</span>
                       <span className="c-meter">Até o teto</span>
@@ -443,9 +477,11 @@ export default function LaboratorioPage() {
 
                 {terciarios.length > 0 && (
                   <>
-                    <div className="sub">
-                      Terciários · {terciarios.length} <em>dois ou mais cinzas — sobem overall sem melhorar o jogador</em>
-                    </div>
+                    <TituloGrupoExercicios
+                      quantidade={terciarios.length}
+                      titulo="Exercícios Terciários"
+                      explicacao="Dois ou mais atributos cinzas"
+                    />
                     <div className="lines">
                       {terciarios.map(({ drill, media }) => (
                         <div className="line line--ter" key={drill.nome}>
@@ -481,7 +517,7 @@ export default function LaboratorioPage() {
                   O nome do exercício não diz nada. O que conta é a <b>média dos atributos que ele
                   treina neste jogador</b>, e ela trava aos 180%. Subir um atributo empurra{' '}
                   <b>todos</b> os exercícios que o contêm em direção ao teto. Quem tem pouca maleta
-                  troca por volta de 140% — recomendação prática, não teto do jogo.
+                  troca por volta de 140%. É recomendação prática, não teto do jogo.
                 </CalloutRegra>
               </section>
 
@@ -494,14 +530,14 @@ export default function LaboratorioPage() {
                   {!testeDrill ? (
                     <CalloutRegra marca="comunidade" secao="§5">
                       O teste exige um primário com média abaixo de 80%. Nenhum dos primários deste
-                      jogador está abaixo — o teste fica indisponível e o rank anterior é mantido.
-                      Acima disso o teto começa a interferir e o teste dá falso negativo.
+                      jogador está abaixo, então o teste fica indisponível e o rank anterior é
+                      mantido. Acima disso o teto começa a interferir e o teste dá falso negativo.
                     </CalloutRegra>
                   ) : (
                     <>
                       <ol className="steps">
                         <li>
-                          Rode <b>{testeDrill.drill.nome}</b> — primário, média{' '}
+                          Rode <b>{testeDrill.drill.nome}</b>. É primário, média{' '}
                           <b>{formatarPct(testeDrill.media)}%</b>, abaixo do limite de 80% que
                           invalidaria o teste.
                         </li>
@@ -563,13 +599,13 @@ export default function LaboratorioPage() {
                         só valem para Pressione o Play a ~55%.
                       </CalloutRegra>
                       <CalloutRegra marca="medicao" secao="§5">
-                        Caso real: 31 pontos em Pressione o Play a 55% classifica como Ótima — os
+                        Caso real: 31 pontos em Pressione o Play a 55% classifica como Ótima. Os
                         dois métodos concordaram no vídeo da comunidade.
                       </CalloutRegra>
                       <CalloutRegra marca="pendente" secao="§5">
-                        O teste <b>não isola a idade</b>. Não aplicamos correção — esse valor ainda
-                        não foi validado. Faça o teste <b>antes dos 22 anos</b>, onde o fator de
-                        idade é 1,00.
+                        O teste <b>não isola a idade</b>. Não aplicamos correção, porque esse valor
+                        ainda não foi validado. Faça o teste <b>antes dos 22 anos</b>, onde o fator
+                        de idade é 1,00.
                       </CalloutRegra>
                       <CalloutRegra marca="pendente" secao="§3.1">
                         O método visual da barra (1/2) não separa Ruim de Terrível. O teste por soma
