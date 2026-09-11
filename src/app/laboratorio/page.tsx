@@ -81,11 +81,11 @@ function TituloGrupoExercicios({
   explicacao: string;
 }) {
   return (
-    <div className="sub">
+    <h3 className="sub">
       <span>
         {quantidade} {titulo} · <em>{explicacao}</em>
       </span>
-    </div>
+    </h3>
   );
 }
 
@@ -103,6 +103,11 @@ function labDoJogador(jogador: Jogador): DadosLab {
 
 function formatarPct(valor: number): string {
   return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+/** `aria-valuenow` de role="meter" precisa ficar entre min e max. */
+function valorMeter(media: number): number {
+  return Math.min(180, Math.max(0, Math.round(media)));
 }
 
 export default function LaboratorioPage() {
@@ -301,9 +306,11 @@ export default function LaboratorioPage() {
                 </span>
               </p>
               <CalloutRegra marca="oficial" secao="§2">
-                Os brancos vêm da união das posições. Cinza entra no overall, mas tem pouco efeito
-                em campo. A velocidade pela metade no cinza é observação da comunidade, na mesma
-                seção.
+                Cinza entra no overall, mas tem pouco efeito em campo.
+              </CalloutRegra>
+              <CalloutRegra marca="comunidade" secao="§2">
+                Os brancos vêm da união das posições. Cinza cresce na metade da velocidade do
+                branco.
               </CalloutRegra>
             </section>
 
@@ -327,7 +334,7 @@ export default function LaboratorioPage() {
                           role="meter"
                           aria-valuemin={0}
                           aria-valuemax={180}
-                          aria-valuenow={Math.round(media)}
+                          aria-valuenow={valorMeter(media)}
                           aria-label={`Média de ${drill.nome}`}
                         >
                           <span
@@ -407,7 +414,7 @@ export default function LaboratorioPage() {
                           role="meter"
                           aria-valuemin={0}
                           aria-valuemax={180}
-                          aria-valuenow={Math.round(media)}
+                          aria-valuenow={valorMeter(media)}
                           aria-label={`Média de ${drill.nome}`}
                         >
                           <div
@@ -457,7 +464,7 @@ export default function LaboratorioPage() {
                               role="meter"
                               aria-valuemin={0}
                               aria-valuemax={180}
-                              aria-valuenow={Math.round(media)}
+                              aria-valuenow={valorMeter(media)}
                               aria-label={`Média de ${drill.nome}`}
                             >
                               <span
@@ -495,7 +502,7 @@ export default function LaboratorioPage() {
                               role="meter"
                               aria-valuemin={0}
                               aria-valuemax={180}
-                              aria-valuenow={Math.round(media)}
+                              aria-valuenow={valorMeter(media)}
                               aria-label={`Média de ${drill.nome}`}
                             >
                               <span
