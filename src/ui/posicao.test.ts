@@ -12,8 +12,8 @@ describe('alternarPosicao (GAME-RULES §1)', () => {
     expect(alternarPosicao(['DC', 'ML', 'ST'], 'AMC')).toEqual(['DC', 'ML', 'ST']);
   });
 
-  it('remove uma posição já selecionada, mas nunca a última', () => {
+  it('remove uma posição já selecionada, inclusive a última', () => {
     expect(alternarPosicao(['DC', 'ML'], 'DC')).toEqual(['ML']);
-    expect(alternarPosicao(['DC'], 'DC')).toEqual(['DC']);
+    expect(alternarPosicao(['DC'], 'DC')).toEqual([]);
   });
 });

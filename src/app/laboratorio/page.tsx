@@ -344,13 +344,6 @@ export default function LaboratorioPage() {
                   Atributo cinza. Entra no overall, quase não muda o jogo.
                 </span>
               </p>
-              <CalloutRegra marca="oficial" secao="§2">
-                Cinza entra no overall, mas tem pouco efeito em campo.
-              </CalloutRegra>
-              <CalloutRegra marca="comunidade" secao="§2">
-                Os brancos vêm da união das posições. Cinza cresce na metade da velocidade do
-                branco.
-              </CalloutRegra>
             </section>
 
             <section className="panel">
@@ -389,10 +382,6 @@ export default function LaboratorioPage() {
                   );
                 })}
               </div>
-              <CalloutRegra marca="comunidade" secao="§6">
-                Os 6 slots, menor média primeiro. Com menos de 6 primários, o drill se repete.
-                Aos 180% o exercício rende zero. A planilha da comunidade erra nisso; o Lab não.
-              </CalloutRegra>
             </section>
 
             <div className="split">
@@ -557,13 +546,6 @@ export default function LaboratorioPage() {
                     </div>
                   </>
                 )}
-
-                <CalloutRegra marca="comunidade" secao="§3">
-                  O nome do exercício não diz nada. O que conta é a <b>média dos atributos que ele
-                  treina neste jogador</b>, e ela trava aos 180%. Subir um atributo empurra{' '}
-                  <b>todos</b> os exercícios que o contêm em direção ao teto. Quem tem pouca maleta
-                  troca por volta de 140%. É recomendação prática, não teto do jogo.
-                </CalloutRegra>
               </section>
 
               <aside>

@@ -131,12 +131,12 @@ export default function SquadPage() {
   } = useSquad();
   const [nome, setNome] = useState('');
   const [overall, setOverall] = useState('');
-  const [posicoes, setPosicoes] = useState<PosicaoJogador[]>(['DC']);
+  const [posicoes, setPosicoes] = useState<PosicaoJogador[]>([]);
   const [erroImportacao, setErroImportacao] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [editNome, setEditNome] = useState('');
   const [editOverall, setEditOverall] = useState('');
-  const [editPosicoes, setEditPosicoes] = useState<PosicaoJogador[]>(['DC']);
+  const [editPosicoes, setEditPosicoes] = useState<PosicaoJogador[]>([]);
 
   const jogadores = documento.jogadores;
 
@@ -171,7 +171,7 @@ export default function SquadPage() {
     adicionarJogador(nome.trim(), overallNumero, posicoes);
     setNome('');
     setOverall('');
-    setPosicoes(['DC']);
+    setPosicoes([]);
   }
 
   function comecarEdicao(jogador: Jogador) {
@@ -269,10 +269,10 @@ export default function SquadPage() {
                   onChange={(e) => setOverall(e.target.value)}
                 />
               </div>
-              <button className="btn btn--primary" type="submit">
+              <SeletorPosicao id="pos-novo" valor={posicoes} onChange={setPosicoes} />
+              <button className="btn btn--primary" type="submit" disabled={posicoes.length === 0}>
                 Adicionar
               </button>
-              <SeletorPosicao id="pos-novo" valor={posicoes} onChange={setPosicoes} />
             </form>
           </section>
 
@@ -327,8 +327,17 @@ export default function SquadPage() {
                                   onChange={(e) => setEditOverall(e.target.value)}
                                 />
                               </div>
+                              <SeletorPosicao
+                                id={`pos-edit-${linha.jogador.id}`}
+                                valor={editPosicoes}
+                                onChange={setEditPosicoes}
+                              />
                               <div className="row-edit__btns">
-                                <button className="btn btn--primary" type="submit">
+                                <button
+                                  className="btn btn--primary"
+                                  type="submit"
+                                  disabled={editPosicoes.length === 0}
+                                >
                                   Salvar
                                 </button>
                                 <button
@@ -340,11 +349,6 @@ export default function SquadPage() {
                                 </button>
                               </div>
                             </div>
-                            <SeletorPosicao
-                              id={`pos-edit-${linha.jogador.id}`}
-                              valor={editPosicoes}
-                              onChange={setEditPosicoes}
-                            />
                           </form>
                         ) : (
                         <div
