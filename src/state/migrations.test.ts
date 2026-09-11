@@ -72,6 +72,29 @@ describe('migrar', () => {
     ).toThrow();
   });
 
+  it('recusa mais de 3 posições ou posições repetidas (GAME-RULES §1)', () => {
+    expect(() =>
+      migrar({
+        schemaVersion: 1,
+        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'ML', 'ST', 'AMC'] }],
+      }),
+    ).toThrow();
+    expect(() =>
+      migrar({
+        schemaVersion: 1,
+        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'DC'] }],
+      }),
+    ).toThrow();
+  });
+
+  it('aceita até 3 posições distintas', () => {
+    const bruto = {
+      schemaVersion: 1,
+      jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
+    };
+    expect(migrar(bruto)).toEqual(bruto);
+  });
+
   it('recusa brancosOverride ou talento fora dos valores válidos', () => {
     expect(() =>
       migrar({

@@ -48,4 +48,27 @@ describe('reducer', () => {
     expect(depois.jogadores.find((j) => j.id === '1')?.lab).toEqual(lab);
     expect(depois.jogadores.find((j) => j.id === '2')?.lab).toBeNull();
   });
+
+  it('atualiza nome, overall e posições de um jogador', () => {
+    const antes = { schemaVersion: 1, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const depois = reducer(antes, {
+      type: 'jogador/atualizado',
+      id: '1',
+      nome: 'Jon Snow',
+      overall: 84,
+      posicoes: ['DC', 'ML'],
+    });
+    expect(depois.jogadores.find((j) => j.id === '1')).toMatchObject({
+      nome: 'Jon Snow',
+      overall: 84,
+      posicoes: ['DC', 'ML'],
+    });
+    expect(depois.jogadores.find((j) => j.id === '2')?.nome).toBe('Ned Stark');
+  });
+
+  it('exclui um jogador sem alterar os outros', () => {
+    const antes = { schemaVersion: 1, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const depois = reducer(antes, { type: 'jogador/excluido', id: '1' });
+    expect(depois.jogadores.map((j) => j.id)).toEqual(['2']);
+  });
 });

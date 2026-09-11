@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#1e355a',
+  themeColor: '#181A1E',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -41,10 +41,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </a>
           <header className="topbar">
             <span className="brand">
-              Top Eleven <b>Lab</b>
+              <img
+                className="brand__logo"
+                src="/logo-lab.png"
+                alt="Top Eleven Lab"
+                width={686}
+                height={160}
+              />
             </span>
+            <Nav />
           </header>
-          <Nav />
           <div id="conteudo" tabIndex={-1}>
             {children}
           </div>

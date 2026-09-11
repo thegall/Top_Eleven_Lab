@@ -87,7 +87,9 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
     Number.isFinite(j.overall) &&
     Array.isArray(j.posicoes) &&
     j.posicoes.length > 0 &&
+    j.posicoes.length <= 3 &&
     j.posicoes.every((p) => POSICOES_VALIDAS.has(p as string)) &&
+    new Set(j.posicoes).size === j.posicoes.length &&
     typeof j.vendido === 'boolean' &&
     (j.lab === null || ehLabValido(j.lab))
   );

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from '
 
 import { ALL_DRILLS, classificarDrill, mediaExercicio, montarCronograma } from '../../domain/drills';
 import { brancosDaPosicao } from '../../domain/positions';
-import { sigma, classificarTalento } from '../../domain/talent';
+import { classificarTalentoPorHabilidadeEspecial } from '../../domain/talent';
 import { conditionCostPerSession } from '../../domain/training';
 import type { Atributo, Posicao, RankTalento } from '../../domain/types';
 import type { DadosLab, Jogador } from '../../state/schema';
@@ -49,6 +49,16 @@ const RANK_LABELS: Record<RankTalento, string> = {
   excelente: 'Excelente',
   fenomeno: 'Fenômeno',
 };
+
+const RANKS_ESCOLHA: RankTalento[] = [
+  'fenomeno',
+  'excelente',
+  'otima',
+  'boa',
+  'normal',
+  'ruim',
+  'terrivel',
+];
 
 const CATEGORIA_DOT: Record<string, string> = {
   ataque: 'dot c-atk',
@@ -121,12 +131,14 @@ export default function LaboratorioPage() {
   const [jogadorId, setJogadorId] = useState<string | null>(null);
   const selecionado = elegiveis.find((j) => j.id === jogadorId) ?? elegiveis[0] ?? null;
 
-  const [soma, setSoma] = useState('');
+  const [sessoes, setSessoes] = useState(['', '', '', '', '', '']);
   const [erroTeste, setErroTeste] = useState<string | null>(null);
+  const [avisoPendente, setAvisoPendente] = useState(false);
 
   useEffect(() => {
-    setSoma('');
+    setSessoes(['', '', '', '', '', '']);
     setErroTeste(null);
+    setAvisoPendente(false);
   }, [selecionado?.id]);
 
   const lab = useMemo(() => (selecionado ? labDoJogador(selecionado) : null), [selecionado]);
@@ -155,7 +167,6 @@ export default function LaboratorioPage() {
   const primarios = drillsInfo.filter((d) => d.classe === 'primario');
   const secundarios = drillsInfo.filter((d) => d.classe === 'secundario');
   const terciarios = drillsInfo.filter((d) => d.classe === 'terciario');
-  const testeDrill = primarios.find((p) => p.media < 80) ?? null;
 
   const cronograma = useMemo(
     () => (lab ? montarCronograma(lab.atributos, brancosEfetivos) : []),
@@ -181,18 +192,34 @@ export default function LaboratorioPage() {
     atualizarLab(selecionado.id, { ...lab, brancosOverride: [...novoSet] });
   }
 
-  function aoClassificarTalento(evento: FormEvent) {
+  function aoEscolherTalento(valor: string) {
+    if (!selecionado || !lab) return;
+    const talento = valor === '' ? null : (valor as RankTalento);
+    atualizarLab(selecionado.id, { ...lab, talento });
+    setAvisoPendente(false);
+    setErroTeste(null);
+  }
+
+  function aoClassificarEspecial(evento: FormEvent) {
     evento.preventDefault();
-    if (!selecionado || !lab || !testeDrill) return;
-    if (soma.trim() === '') return;
-    const somaNumero = Number(soma);
-    if (!Number.isFinite(somaNumero)) return;
+    if (!selecionado || !lab) return;
+    const pontos = sessoes
+      .map((s) => s.trim())
+      .filter((s) => s !== '')
+      .map(Number);
     try {
-      const rank = classificarTalento(somaNumero, testeDrill.drill, brancosEfetivos, testeDrill.media);
-      atualizarLab(selecionado.id, { ...lab, talento: rank });
+      const resultado = classificarTalentoPorHabilidadeEspecial(pontos);
+      if (resultado.rank === null) {
+        setAvisoPendente(true);
+        setErroTeste(null);
+        return;
+      }
+      atualizarLab(selecionado.id, { ...lab, talento: resultado.rank });
+      setAvisoPendente(false);
       setErroTeste(null);
     } catch (erro) {
       setErroTeste(erro instanceof Error ? erro.message : 'Teste inválido.');
+      setAvisoPendente(false);
     }
   }
 
@@ -230,14 +257,26 @@ export default function LaboratorioPage() {
                 ))}
               </select>
               <p className="ficha__nome">{selecionado.nome}</p>
-              <span className={classeBadgePosicao(selecionado.posicoes[0] ?? 'DC')}>
-                {selecionado.posicoes[0]}
-              </span>
-              {lab.talento && (
-                <span className="talento">
-                  Talento: <b>{RANK_LABELS[lab.talento]}</b>
+              {selecionado.posicoes.map((posicao) => (
+                <span key={posicao} className={classeBadgePosicao(posicao)}>
+                  {posicao}
                 </span>
-              )}
+              ))}
+              <label htmlFor="talento-lab" className="visually-hidden">
+                Talento
+              </label>
+              <select
+                id="talento-lab"
+                value={lab.talento ?? ''}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => aoEscolherTalento(e.target.value)}
+              >
+                <option value="">Talento não testado</option>
+                {RANKS_ESCOLHA.map((rank) => (
+                  <option key={rank} value={rank}>
+                    {RANK_LABELS[rank]}
+                  </option>
+                ))}
+              </select>
             </section>
 
             <section className="panel">
@@ -398,7 +437,6 @@ export default function LaboratorioPage() {
                       <div className="card__flag">
                         {CATEGORIA_LABEL[drill.categoria]}
                         {i === 0 && <span className="rec">Recomendado</span>}
-                        {testeDrill?.drill.nome === drill.nome && <span className="rec">Teste de talento</span>}
                       </div>
                       <div className="card__body">
                         <div className="card__name">{drill.nome}</div>
@@ -534,92 +572,80 @@ export default function LaboratorioPage() {
                     <h2>Teste de talento</h2>
                   </div>
 
-                  {!testeDrill ? (
-                    <CalloutRegra marca="comunidade" secao="§5">
-                      O teste exige um primário com média abaixo de 80%. Nenhum dos primários deste
-                      jogador está abaixo, então o teste fica indisponível e o rank anterior é
-                      mantido. Acima disso o teto começa a interferir e o teste dá falso negativo.
-                    </CalloutRegra>
-                  ) : (
-                    <>
-                      <ol className="steps">
-                        <li>
-                          Rode <b>{testeDrill.drill.nome}</b>. É primário, média{' '}
-                          <b>{formatarPct(testeDrill.media)}%</b>, abaixo do limite de 80% que
-                          invalidaria o teste.
-                        </li>
-                        <li>
-                          Faça <b>5 sessões de 6 slots</b> ({formatarPct(conditionCostPerSession(testeDrill.drill.dificuldade))}%
-                          de condicionamento cada).
-                        </li>
-                        <li>
-                          Informe a <b>soma dos pontos ganhos</b> nas 5 sessões.
-                        </li>
-                      </ol>
+                  <p className="note">
+                    Isolado do treino de atributos. No jogo, treine uma{' '}
+                    <b>habilidade especial</b> ou posição nova (40–50 pontos) e anote quanto a barra
+                    andou em cada sessão: 1, 2 ou 3.
+                  </p>
 
-                      <form onSubmit={aoClassificarTalento}>
-                        <div className="duo">
-                          <div className="field">
-                            <label htmlFor="soma">Soma dos pontos</label>
-                            <input
-                              id="soma"
-                              className="num"
-                              type="number"
-                              inputMode="numeric"
-                              value={soma}
-                              onChange={(e) => setSoma(e.target.value)}
-                            />
-                          </div>
+                  <ol className="steps">
+                    <li>
+                      Comece uma habilidade especial. Não troque depois de iniciada.
+                    </li>
+                    <li>
+                      Rode sessões e anote os pontos da barra (1, 2 ou 3).
+                    </li>
+                    <li>
+                      Informe a sequência. Ou escolha o talento no seletor da ficha, se já souber.
+                    </li>
+                  </ol>
+
+                  <form onSubmit={aoClassificarEspecial}>
+                    <div className="sessoes-especial">
+                      {sessoes.map((valor, i) => (
+                        <div className="field" key={i}>
+                          <label htmlFor={`sessao-${i}`}>S{i + 1}</label>
+                          <input
+                            id={`sessao-${i}`}
+                            className="num"
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={3}
+                            value={valor}
+                            onChange={(e) => {
+                              const proximo = [...sessoes];
+                              proximo[i] = e.target.value;
+                              setSessoes(proximo);
+                            }}
+                          />
                         </div>
-                        <button className="btn btn--primary" type="submit">
-                          Classificar talento
-                        </button>
-                      </form>
+                      ))}
+                    </div>
+                    <button className="btn btn--primary" type="submit">
+                      Classificar pela barra
+                    </button>
+                  </form>
 
-                      {erroTeste && (
-                        <p className="callout callout--warn" role="alert">
-                          <span className="callout__src">Atenção</span>
-                          {erroTeste}
-                        </p>
-                      )}
-
-                      {lab.talento && (
-                        <div className="resultado">
-                          <div className="tile__label">Resultado do teste</div>
-                          <div className="resultado__nome">{RANK_LABELS[lab.talento]}</div>
-                          <p>
-                            Rende{' '}
-                            <b>
-                              {formatarPct(
-                                sigma(lab.talento, testeDrill.media) / sigma('terrivel', testeDrill.media),
-                              )}
-                              ×
-                            </b>{' '}
-                            o que um jogador Terrível renderia por maleta gasta, neste exercício.
-                          </p>
-                        </div>
-                      )}
-
-                      <CalloutRegra marca="comunidade" secao="§5">
-                        O corte usado aqui vale <b>só para este exercício e esta média</b>. Trocar de
-                        drill muda o desgaste e move o resultado junto. Os cortes 28/33 da comunidade
-                        só valem para Pressione o Play a ~55%.
-                      </CalloutRegra>
-                      <CalloutRegra marca="medicao" secao="§5">
-                        Caso real: 31 pontos em Pressione o Play a 55% classifica como Ótima. Os
-                        dois métodos concordaram no vídeo da comunidade.
-                      </CalloutRegra>
-                      <CalloutRegra marca="pendente" secao="§5">
-                        O teste <b>não isola a idade</b>. Não aplicamos correção, porque esse valor
-                        ainda não foi validado. Faça o teste <b>antes dos 22 anos</b>, onde o fator
-                        de idade é 1,00.
-                      </CalloutRegra>
-                      <CalloutRegra marca="pendente" secao="§3.1">
-                        O método visual da barra (1/2) não separa Ruim de Terrível. O teste por soma
-                        devolve um rank, inclusive nessa faixa; não inventamos um corte visual.
-                      </CalloutRegra>
-                    </>
+                  {erroTeste && (
+                    <p className="callout callout--warn" role="alert">
+                      <span className="callout__src">Atenção</span>
+                      {erroTeste}
+                    </p>
                   )}
+
+                  {avisoPendente && (
+                    <CalloutRegra marca="pendente" secao="§3.1">
+                      Predominantemente 1 não separa <b>Ruim</b> de <b>Terrível</b>. Não inventamos
+                      esse corte. Escolha na ficha se souber, ou deixe em branco.
+                    </CalloutRegra>
+                  )}
+
+                  {lab.talento && (
+                    <div className="resultado">
+                      <div className="tile__label">Talento</div>
+                      <div className="resultado__nome">{RANK_LABELS[lab.talento]}</div>
+                    </div>
+                  )}
+
+                  <CalloutRegra marca="comunidade" secao="§5">
+                    O padrão da barra classifica: chega a 3 é Fenômeno; só 2s é Excelente; 1 só na
+                    primeira é Ótima; <span className="num">1 2 2 1 2 2</span> é Boa.
+                  </CalloutRegra>
+                  <CalloutRegra marca="pendente" secao="§5">
+                    O teste <b>não isola a idade</b>. Não aplicamos correção. Faça antes dos 22
+                    anos, onde o fator é 1,00.
+                  </CalloutRegra>
                 </section>
               </aside>
             </div>

@@ -8,6 +8,7 @@ import { useSquad } from '../state/store';
 import { exportarJSON, importarJSON } from '../state/transfer';
 import { CalloutRegra } from '../ui/callout-regra';
 import { classeBadgePosicao } from '../ui/posicao';
+import { SeletorPosicao } from '../ui/seletor-posicao';
 
 const POSICOES: PosicaoJogador[] = [
   'GK',
@@ -96,13 +97,46 @@ function exportar(documento: { schemaVersion: number; jogadores: Jogador[] }) {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
+function IconeLapis() {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M11.7 1.3a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4L6 13H3v-3l8.7-8.7zM3 14h10v1H3z"
+      />
+    </svg>
+  );
+}
+
+function IconeLixeira() {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M6 1h4l1 1h3v1H2V2h3l1-1zm1 4h1v7H7V5zm3 0h1v7h-1V5zM4 4h8l-.7 10.1A1 1 0 0 1 10.3 15H5.7a1 1 0 0 1-1-.9L4 4z"
+      />
+    </svg>
+  );
+}
+
 export default function SquadPage() {
-  const { documento, adicionarJogador, marcarVendido, desfazerVenda, substituirDocumento } =
-    useSquad();
+  const {
+    documento,
+    adicionarJogador,
+    atualizarJogador,
+    excluirJogador,
+    marcarVendido,
+    desfazerVenda,
+    substituirDocumento,
+  } = useSquad();
   const [nome, setNome] = useState('');
   const [overall, setOverall] = useState('');
-  const [posicao, setPosicao] = useState<PosicaoJogador>('DC');
+  const [posicoes, setPosicoes] = useState<PosicaoJogador[]>(['DC']);
   const [erroImportacao, setErroImportacao] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editNome, setEditNome] = useState('');
+  const [editOverall, setEditOverall] = useState('');
+  const [editPosicoes, setEditPosicoes] = useState<PosicaoJogador[]>(['DC']);
 
   const jogadores = documento.jogadores;
 
@@ -133,9 +167,34 @@ export default function SquadPage() {
     evento.preventDefault();
     const overallNumero = Number(overall);
     if (!nome.trim() || !Number.isFinite(overallNumero) || overallNumero <= 0) return;
-    adicionarJogador(nome.trim(), overallNumero, posicao);
+    if (posicoes.length < 1 || posicoes.length > 3) return;
+    adicionarJogador(nome.trim(), overallNumero, posicoes);
     setNome('');
     setOverall('');
+    setPosicoes(['DC']);
+  }
+
+  function comecarEdicao(jogador: Jogador) {
+    setEditandoId(jogador.id);
+    setEditNome(jogador.nome);
+    setEditOverall(String(jogador.overall));
+    setEditPosicoes([...jogador.posicoes]);
+  }
+
+  function aoSalvarEdicao(evento: FormEvent) {
+    evento.preventDefault();
+    if (!editandoId) return;
+    const overallNumero = Number(editOverall);
+    if (!editNome.trim() || !Number.isFinite(overallNumero) || overallNumero <= 0) return;
+    if (editPosicoes.length < 1 || editPosicoes.length > 3) return;
+    atualizarJogador(editandoId, editNome.trim(), overallNumero, editPosicoes);
+    setEditandoId(null);
+  }
+
+  function aoExcluir(jogador: Jogador) {
+    if (!window.confirm(`Excluir ${jogador.nome} do elenco?`)) return;
+    if (editandoId === jogador.id) setEditandoId(null);
+    excluirJogador(jogador.id);
   }
 
   async function aoImportar(evento: ChangeEvent<HTMLInputElement>) {
@@ -210,23 +269,10 @@ export default function SquadPage() {
                   onChange={(e) => setOverall(e.target.value)}
                 />
               </div>
-              <div className="field">
-                <label htmlFor="pos">Posição</label>
-                <select
-                  id="pos"
-                  value={posicao}
-                  onChange={(e) => setPosicao(e.target.value as PosicaoJogador)}
-                >
-                  {POSICOES.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <button className="btn btn--primary" type="submit">
                 Adicionar
               </button>
+              <SeletorPosicao id="pos-novo" valor={posicoes} onChange={setPosicoes} />
             </form>
           </section>
 
@@ -258,6 +304,49 @@ export default function SquadPage() {
                   <div className="rows">
                     {linhas.map((linha, i) => (
                       <Fragment key={linha.jogador.id}>
+                        {editandoId === linha.jogador.id ? (
+                          <form className="row-edit" onSubmit={aoSalvarEdicao}>
+                            <div className="row-edit__fields">
+                              <div className="field">
+                                <label htmlFor={`edit-nome-${linha.jogador.id}`}>Nome</label>
+                                <input
+                                  id={`edit-nome-${linha.jogador.id}`}
+                                  type="text"
+                                  value={editNome}
+                                  onChange={(e) => setEditNome(e.target.value)}
+                                />
+                              </div>
+                              <div className="field">
+                                <label htmlFor={`edit-ovr-${linha.jogador.id}`}>Overall</label>
+                                <input
+                                  id={`edit-ovr-${linha.jogador.id}`}
+                                  className="num"
+                                  type="number"
+                                  inputMode="numeric"
+                                  value={editOverall}
+                                  onChange={(e) => setEditOverall(e.target.value)}
+                                />
+                              </div>
+                              <div className="row-edit__btns">
+                                <button className="btn btn--primary" type="submit">
+                                  Salvar
+                                </button>
+                                <button
+                                  className="btn btn--ghost"
+                                  type="button"
+                                  onClick={() => setEditandoId(null)}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                            <SeletorPosicao
+                              id={`pos-edit-${linha.jogador.id}`}
+                              valor={editPosicoes}
+                              onChange={setEditPosicoes}
+                            />
+                          </form>
+                        ) : (
                         <div
                           role="row"
                           className={[
@@ -286,7 +375,7 @@ export default function SquadPage() {
                             role="cell"
                             className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}
                           >
-                            {linha.jogador.posicoes[0] ?? '–'}
+                            {linha.jogador.posicoes.join('+')}
                           </span>
                           <span role="cell" className="row__ovr num">
                             {linha.jogador.overall}
@@ -311,8 +400,25 @@ export default function SquadPage() {
                                 Marcar venda
                               </button>
                             )}
+                            <button
+                              className="btn btn--icon"
+                              type="button"
+                              onClick={() => comecarEdicao(linha.jogador)}
+                              aria-label={`Editar ${linha.jogador.nome}`}
+                            >
+                              <IconeLapis />
+                            </button>
+                            <button
+                              className="btn btn--icon btn--icon-danger"
+                              type="button"
+                              onClick={() => aoExcluir(linha.jogador)}
+                              aria-label={`Excluir ${linha.jogador.nome}`}
+                            >
+                              <IconeLixeira />
+                            </button>
                           </span>
                         </div>
+                        )}
                         {indiceDoCorte === i && (
                           <div className="cut" role="row">
                             <span role="cell">

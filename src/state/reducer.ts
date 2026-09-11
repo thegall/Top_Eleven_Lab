@@ -7,6 +7,8 @@ import type { DadosLab, Documento, Jogador } from './schema';
 
 export type Acao =
   | { type: 'jogador/adicionado'; jogador: Jogador }
+  | { type: 'jogador/atualizado'; id: string; nome: string; overall: number; posicoes: Jogador['posicoes'] }
+  | { type: 'jogador/excluido'; id: string }
   | { type: 'jogador/vendaMarcada'; id: string }
   | { type: 'jogador/vendaDesfeita'; id: string }
   | { type: 'jogador/labAtualizado'; id: string; lab: DadosLab }
@@ -25,6 +27,20 @@ export function reducer(documento: Documento, acao: Acao): Documento {
   switch (acao.type) {
     case 'jogador/adicionado':
       return { ...documento, jogadores: [...documento.jogadores, acao.jogador] };
+    case 'jogador/atualizado':
+      return {
+        ...documento,
+        jogadores: documento.jogadores.map((jogador) =>
+          jogador.id === acao.id
+            ? { ...jogador, nome: acao.nome, overall: acao.overall, posicoes: acao.posicoes }
+            : jogador,
+        ),
+      };
+    case 'jogador/excluido':
+      return {
+        ...documento,
+        jogadores: documento.jogadores.filter((jogador) => jogador.id !== acao.id),
+      };
     case 'jogador/vendaMarcada':
       return definirVendido(documento, acao.id, true);
     case 'jogador/vendaDesfeita':
