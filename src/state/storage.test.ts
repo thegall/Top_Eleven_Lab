@@ -28,14 +28,14 @@ describe('carregar / salvar', () => {
   });
 
   it('devolve documento vazio quando nada foi salvo ainda', () => {
-    expect(carregar()).toEqual({ schemaVersion: 1, jogadores: [] });
+    expect(carregar()).toEqual({ schemaVersion: 2, jogadores: [] });
   });
 
   it('faz ida e volta do documento salvo', () => {
     const documento = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       jogadores: [
-        { id: '1', nome: 'Ned Stark', overall: 78, posicoes: ['DC' as const], vendido: false, lab: null },
+        { id: '1', nome: 'Ned Stark', idade: 18, overall: 78, posicoes: ['DC' as const], vendido: false, lab: null },
       ],
     };
     salvar(documento);
@@ -44,6 +44,6 @@ describe('carregar / salvar', () => {
 
   it('devolve documento vazio quando o dado salvo está corrompido', () => {
     localStorage.setItem('top-eleven-lab:documento', '{ isso não é JSON');
-    expect(carregar()).toEqual({ schemaVersion: 1, jogadores: [] });
+    expect(carregar()).toEqual({ schemaVersion: 2, jogadores: [] });
   });
 });

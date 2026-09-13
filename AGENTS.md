@@ -120,6 +120,7 @@ interface Drill {
 | `montarCronograma` | jogador → `Drill[6]` | Menor média primeiro. §6 |
 | `projetarAteMeta` | jogador, overall alvo → faixa de sessões | Iterativo, recalcula cascata. §11 |
 | `mediaDos14` | `Jogador[]` → `number` | Soma dos 14 maiores ÷ 14, ignorando os vendidos. §8 |
+| `applySeasonTurnover` | atributos → atributos | Retira 20 de cada atributo, com piso em zero. §7 |
 | `classificarTalento` | soma de 5 sessões, drill, média → `RankTalento` | §5, método 2 |
 
 **Invariantes que o motor não pode violar:**
@@ -155,11 +156,12 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 
 ```jsonc
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "jogadores": [
     {
       "id": "…",
       "nome": "…",
+      "idade": null,                  // null = cadastro migrado da versão 1
       "overall": 78,
       "posicoes": ["DC"],
       "vendido": false,
@@ -168,11 +170,11 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
     {
       "id": "…",
       "nome": "…",
+      "idade": 19,
       "overall": 84,
       "posicoes": ["MC", "AMC"],      // até 3 — GAME-RULES §1
       "vendido": false,
       "lab": {                        // preenchido = promovido ao Laboratório
-        "idade": 19,
         "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
         "brancosManuais": null,       // null = derivar da união das posições
         "talento": "otima",           // null enquanto não testado
@@ -190,11 +192,12 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 | Campo | Tipo | Significado |
 |---|---|---|
 | `schemaVersion` | `number` | Versão do formato. Migração roda na leitura |
+| `idade` | `number \| null` | Inteiro de 18 a 35; `null` apenas após migração da versão 1 |
 | `posicoes` | `Posicao[]` | Sempre array, mesmo com uma posição só. Até 3 |
 | `vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
 | `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad |
 | `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições. Preenchido = usuário corrigiu |
-| `talento` | `RankTalento \| null` | `null` = desconhecido; o app oferece o teste |
+| `talento` | `RankTalento \| 'bagre' \| null` | `null` = não classificado; `bagre` é rank visual do método 1 (GAME-RULES §5), fora da curva |
 | `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
 
 Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostra. A fórmula real da Nordeus não é conhecida, e inventá-la produziria número errado numa tela em que o usuário compara com o jogo aberto do lado.

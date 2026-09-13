@@ -3,14 +3,50 @@ import { describe, expect, it } from 'vitest';
 import { migrar } from './migrations.js';
 
 describe('migrar', () => {
-  it('aceita um documento v1 válido', () => {
+  it('migra um documento v1 válido para v2 com idade desconhecida', () => {
     const bruto = {
       schemaVersion: 1,
       jogadores: [
         { id: '1', nome: 'Ned Stark', overall: 78, posicoes: ['DC'], vendido: false, lab: null },
       ],
     };
-    expect(migrar(bruto)).toEqual(bruto);
+    expect(migrar(bruto)).toEqual({
+      schemaVersion: 2,
+      jogadores: [
+        {
+          id: '1',
+          nome: 'Ned Stark',
+          idade: null,
+          overall: 78,
+          posicoes: ['DC'],
+          vendido: false,
+          lab: null,
+        },
+      ],
+    });
+  });
+
+  it('aceita idade válida na v2 e recusa valores fora de 18 a 35 anos', () => {
+    const jogador = {
+      id: '1',
+      nome: 'Ned Stark',
+      idade: 18,
+      overall: 78,
+      posicoes: ['DC'],
+      vendido: false,
+      lab: null,
+    };
+
+    expect(migrar({ schemaVersion: 2, jogadores: [jogador] })).toEqual({
+      schemaVersion: 2,
+      jogadores: [jogador],
+    });
+
+    for (const idade of [17, 36, 20.5, Number.NaN]) {
+      expect(() =>
+        migrar({ schemaVersion: 2, jogadores: [{ ...jogador, idade }] }),
+      ).toThrow();
+    }
   });
 
   it('recusa versão maior que a conhecida, em vez de adivinhar (ADR 0002)', () => {
@@ -57,6 +93,19 @@ describe('migrar', () => {
       schemaVersion: 1,
       jogadores: [{ ...jogadorBase, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'boa' } }],
     };
+    expect(migrar(bruto)).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...bruto.jogadores[0], idade: null }],
+    });
+  });
+
+  it('aceita talento bagre do método visual (GAME-RULES §5)', () => {
+    const bruto = {
+      schemaVersion: 2,
+      jogadores: [
+        { ...jogadorBase, idade: 19, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'bagre' } },
+      ],
+    };
     expect(migrar(bruto)).toEqual(bruto);
   });
 
@@ -70,6 +119,45 @@ describe('migrar', () => {
         jogadores: [{ ...jogadorBase, lab: { atributos: { corte: 50 }, brancosOverride: null, talento: null } }],
       }),
     ).toThrow();
+  });
+
+  it('na v1 repara posições repetidas e corta no teto de 3, em vez de apagar o elenco', () => {
+    expect(
+      migrar({
+        schemaVersion: 1,
+        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'DC', 'ML', 'ST', 'AMC'] }],
+      }),
+    ).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...jogadorBase, idade: null, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
+    });
+  });
+
+  it('na v2 recusa mais de 3 posições ou posições repetidas (GAME-RULES §1)', () => {
+    const jogadorV2 = { ...jogadorBase, idade: 18, lab: null };
+    expect(() =>
+      migrar({
+        schemaVersion: 2,
+        jogadores: [{ ...jogadorV2, posicoes: ['DC', 'ML', 'ST', 'AMC'] }],
+      }),
+    ).toThrow();
+    expect(() =>
+      migrar({
+        schemaVersion: 2,
+        jogadores: [{ ...jogadorV2, posicoes: ['DC', 'DC'] }],
+      }),
+    ).toThrow();
+  });
+
+  it('aceita até 3 posições distintas', () => {
+    const bruto = {
+      schemaVersion: 1,
+      jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
+    };
+    expect(migrar(bruto)).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...bruto.jogadores[0], idade: null }],
+    });
   });
 
   it('recusa brancosOverride ou talento fora dos valores válidos', () => {

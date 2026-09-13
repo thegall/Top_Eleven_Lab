@@ -221,18 +221,18 @@ Interpolar linearmente entre colunas. A curva é o que o produto precisa comunic
 
 ### Conciliação com os ranks da seção 5
 
-A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5 usa cinco rótulos, e os nomes não coincidem com os padrões. **A conciliação é feita pelo padrão de pontos por sessão, nunca pelo nome:**
+A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5 usa seis classificações próprias. **A conciliação é feita pelo padrão de pontos por sessão, nunca por letras ou tiers externos:**
 
-| Padrão observado | Média de pontos/sessão | Rank da curva |
-|---|---|---|
-| chega a 3 | 2,14 | Fenômeno |
-| `2 2 2 2 2` | 2,00 | Excelente |
-| `1 2 2 2 2` | 1,80 | Ótima |
-| `1 2 2 1 2 2` | 1,67 | Boa |
-| `1 2 1 2 1 2` | 1,43 | Normal |
-| predominantemente 1 | 1,00–1,29 | Ruim / Terrível **[PENDENTE]** |
+| Padrão observado | Média de pontos/sessão | Classificação do método 1 | Rank da curva |
+|---|---|---|---|
+| qualquer sessão com 3 | variável | Fenômeno | Fenômeno |
+| `2 2 2 2 2 2` | 2,00 | Excelente | Excelente |
+| `1 2 2 2 2 2` | 1,83 | Ótimo | Ótima |
+| `1 2 2 1 2 2` | 1,67 | Bom | Boa |
+| `1 2 1 2 1 2` | 1,50 | Normal | Normal |
+| `1 1 1 1 1 1` | 1,00 | Bagre | Ruim / Terrível **[PENDENTE]** |
 
-**[PENDENTE]** O método 1 não separa Ruim de Terrível — os dois aparecem como "quase só 1" na barra. A curva da seção 3.1 os trata como valores distintos (0,163 contra 0,130 a 100%). Enquanto não houver corte definido, o produto oferece só o **método 2** para quem cair nessa faixa, porque ele devolve um sigma medido em vez de um padrão visual.
+**[PENDENTE]** Bagre é uma classificação exclusiva do método 1. Ela não cria um oitavo rank na curva e não separa Ruim de Terrível, que continuam valores distintos no método 2 (0,163 contra 0,130 a 100%). Quem precisar dessa distinção deve usar o sigma medido do método 2.
 
 ---
 
@@ -366,23 +366,26 @@ Exemplo real (ST com brancos Passe, Chute, Velocidade, Finalização, Drible, Po
 
 ## 5. Talento do jogador
 
-Variável mais importante do Laboratório, e que o jogo **não mostra em lugar nenhum**. Existem dois métodos de medir, e o segundo é o que o Lab implementa.
+Variável mais importante do Laboratório, e que o jogo **não mostra em lugar nenhum**. Existem dois métodos de medir. O fluxo atual do Lab oferece o método 1; o motor também mantém o método 2 quantitativo.
 
 ### Método 1 — teste de habilidade especial ou posição nova
 
-**[COMUNIDADE]** Durante o treino de uma habilidade especial ou posição nova (as que custam 40–50 pontos), a barra avança em casas e o jogador ganha 1, 2 ou 3 pontos por sessão. O padrão da sequência classifica o jogador:
+**[COMUNIDADE]** Durante o treino de uma habilidade especial ou posição nova (as que custam 40–50 pontos), a barra avança em casas e o jogador ganha 1, 2 ou 3 pontos por sessão. O teste usa exatamente 6 sessões. Qualquer sessão com ganho 3 classifica como Fenômeno; sem 3, a sequência precisa casar exatamente com uma das demais linhas:
 
-| Rank | Rótulo exibido | Sequência observada |
-|---|---|---|
-| S | Fenômeno | Ganha 2 e em algum momento chega a 3 |
-| A | Excelente | `2 2 2 2 2` — começa em 2 e nunca cai |
-| B | Ótimo | `1 2 2 2 2` — cai para 1 só na primeira |
-| C | Bom | `1 2 2 1 2 2` — alterna |
-| F | Fraco | Predominantemente 1 |
+| Rank | Sequência |
+|---|---|
+| Fenômeno | Qualquer sequência com 3 em uma das sessões |
+| Excelente | `2 2 2 2 2 2` |
+| Ótimo | `1 2 2 2 2 2` |
+| Bom | `1 2 2 1 2 2` |
+| Normal | `1 2 1 2 1 2` |
+| Bagre | `1 1 1 1 1 1` |
+
+Sequências que usam apenas 1 e 2, mas não casam exatamente com a tabela, são inválidas. Exemplo: `1 2 1 2 2 2`.
 
 **Custo do método:** consome o treino de uma habilidade especial ou posição, que não pode ser trocada depois de iniciada. Por isso existe o método 2.
 
-### Método 2 — teste por ganho de atributos (o que o Lab usa)
+### Método 2 — teste por ganho de atributos (método quantitativo)
 
 **[COMUNIDADE]** Mede a mesma coisa sem gastar habilidade especial. Procedimento:
 
@@ -404,15 +407,15 @@ Depois basta olhar a coluna da média do exercício e ver em que linha de talent
 
 | Soma em 5 sessões | Rank | Equivale a |
 |---|---|---|
-| 33 ou mais | Excelente / Fenômeno | `2 2 2 2 2` ou melhor |
+| 33 ou mais | Excelente / Fenômeno | `2 2 2 2 2 2` ou melhor |
 | 29 a 32 | Ótima | Entre os dois padrões |
 | 28 ou menos | Boa ou pior | `1 2 2 1 2 2` ou pior |
 
 > Cortes válidos **somente** para 6 slots de Pressione o Play com média perto de 55%. Fora disso, usar a fórmula.
 
-Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e média de 55%. Pela fórmula, `31 ÷ (5 × 18) = 0,344` — que a 55% de média cai entre Ótima (0,301) e Excelente (0,366). O mesmo jogador confirmou `1 2 2 2` no método 1, que a tabela de conciliação da seção 3.1 mapeia como Ótima. **Os dois métodos concordam**, e a curva reproduz a medição de campo.
+Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e média de 55%. Pela fórmula, `31 ÷ (5 × 18) = 0,344`, que a 55% de média cai entre Ótima (0,301) e Excelente (0,366). O mesmo jogador confirmou o padrão Ótimo no método 1. **Os dois métodos concordam**, e a curva reproduz a medição de campo.
 
-**Por que este é o método do produto:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab já sabe calcular e pode verificar antes de aceitar o teste.
+**Por que este método continua no motor:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab sabe calcular e pode verificar antes de aceitar o teste.
 
 **[COMUNIDADE]** Vale fazer o teste cedo, com o jogador ainda cru. Jogador já desenvolvido rende menos por sessão e o resultado sai distorcido.
 
@@ -441,7 +444,8 @@ Só há coeficientes para 18, 19 e 20 anos — é um método de scout de jovem, 
 ### Como o produto usa
 
 1. **Já sei o rank** — escolhe direto.
-2. **Não sei** — o app indica qual drill usar (primário com média abaixo de 80%), o usuário roda 5 sessões e informa a soma, o app converte em sigma pela fórmula acima e classifica.
+2. **Não sei** — o fluxo atual pede os ganhos de 6 sessões do método 1, mostra a tabela completa e classifica apenas sequências válidas.
+3. **Preciso separar Ruim de Terrível** — usar o método 2 quantitativo, porque Bagre não resolve esse corte.
 
 A extrapolação do rank para condições diferentes das do teste — um drill com média em 130%, um jogador de 26 anos, treino profissional em vez de classe mundial — **está resolvida** pelas seções 3.1 e 3.2. O rank é um ponto na tabela; a curva faz o resto.
 

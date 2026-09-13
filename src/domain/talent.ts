@@ -1,6 +1,6 @@
 /**
- * Curva de ganho por talento e média do exercício, e teste de talento pelo
- * método 2 (GAME-RULES §3.1 e §5).
+ * Curva de ganho por talento e média do exercício, e testes de talento
+ * (GAME-RULES §3.1 e §5): método 1 (habilidade especial) e método 2 (atributos).
  */
 import { classificarDrill, type Drill } from './drills';
 import { conditionCostPerSlot } from './training';
@@ -79,4 +79,63 @@ export function classificarTalento(
     if (sigma(rank, mediaDoExercicio) <= sigmaMedido) return rank;
   }
   return 'terrivel';
+}
+
+export type SpecialAbilityRank =
+  | Exclude<RankTalento, 'ruim' | 'terrivel'>
+  | 'bagre';
+
+export interface SpecialAbilityPattern {
+  rank: SpecialAbilityRank;
+  label: string;
+  points: readonly [number, number, number, number, number, number] | null;
+}
+
+/**
+ * Tabela do método 1 exibida na interface e usada na classificação.
+ * Pontos nulos representam a regra especial do Fenômeno: qualquer uma das
+ * seis sessões com ganho 3 (GAME-RULES §5).
+ */
+export const SPECIAL_ABILITY_PATTERNS: readonly SpecialAbilityPattern[] = [
+  { rank: 'fenomeno', label: 'Fenômeno', points: null },
+  { rank: 'excelente', label: 'Excelente', points: [2, 2, 2, 2, 2, 2] },
+  { rank: 'otima', label: 'Ótimo', points: [1, 2, 2, 2, 2, 2] },
+  { rank: 'boa', label: 'Bom', points: [1, 2, 2, 1, 2, 2] },
+  { rank: 'normal', label: 'Normal', points: [1, 2, 1, 2, 1, 2] },
+  { rank: 'bagre', label: 'Bagre', points: [1, 1, 1, 1, 1, 1] },
+];
+
+export type SpecialAbilityResult = { rank: SpecialAbilityRank };
+
+function casaComPadrao(pontos: readonly number[], padrao: readonly number[]): boolean {
+  return pontos.every((ponto, i) => ponto === padrao[i]);
+}
+
+/**
+ * Classifica o talento pelo método 1: pontos ganhos em exatamente 6 sessões
+ * ao treinar habilidade especial ou posição nova (GAME-RULES §5).
+ *
+ * Bagre é uma classificação exclusiva deste método visual e não cria um
+ * oitavo rank na curva: ela não separa Ruim de Terrível (THE-37).
+ */
+export function classificarTalentoPorHabilidadeEspecial(
+  pontosPorSessao: readonly number[],
+): SpecialAbilityResult {
+  if (pontosPorSessao.length !== 6) {
+    throw new Error('Teste de talento inválido: informe exatamente 6 sessões (GAME-RULES §5).');
+  }
+  for (const ponto of pontosPorSessao) {
+    if (ponto !== 1 && ponto !== 2 && ponto !== 3) {
+      throw new Error('Teste de talento inválido: cada sessão rende 1, 2 ou 3 pontos (GAME-RULES §5).');
+    }
+  }
+
+  if (pontosPorSessao.includes(3)) return { rank: 'fenomeno' };
+
+  const pattern = SPECIAL_ABILITY_PATTERNS.find(
+    (item) => item.points !== null && casaComPadrao(pontosPorSessao, item.points),
+  );
+  if (pattern) return { rank: pattern.rank };
+
+  throw new Error('Teste de talento inválido: sequência não casa com nenhum padrão da GAME-RULES §5.');
 }

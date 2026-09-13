@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ALL_DRILLS } from './drills.js';
-import { classificarTalento, sigma } from './talent.js';
+import { classificarTalento, classificarTalentoPorHabilidadeEspecial, sigma } from './talent.js';
 import { custoEmMaletas } from './training.js';
 import type { Atributo } from './types.js';
 
@@ -37,6 +37,50 @@ describe('classificarTalento', () => {
       pressioneOPlay.atributos.filter((atributo) => atributo !== 'agressividade'),
     );
     expect(() => classificarTalento(31, pressioneOPlay, brancosIncompletos, 55)).toThrow();
+  });
+});
+
+describe('classificarTalentoPorHabilidadeEspecial (GAME-RULES §5, método 1)', () => {
+  it('qualquer sessão com 3 entre as seis classifica como fenômeno', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([1, 2, 3, 1, 1, 2])).toEqual({ rank: 'fenomeno' });
+  });
+
+  it('2 2 2 2 2 2 classifica como excelente', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([2, 2, 2, 2, 2, 2])).toEqual({ rank: 'excelente' });
+  });
+
+  it('1 2 2 2 2 2 classifica como ótima', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([1, 2, 2, 2, 2, 2])).toEqual({ rank: 'otima' });
+  });
+
+  it('1 2 2 1 2 2 classifica como boa', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([1, 2, 2, 1, 2, 2])).toEqual({ rank: 'boa' });
+  });
+
+  it('1 2 1 2 1 2 classifica como normal (GAME-RULES §3.1, conciliação)', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([1, 2, 1, 2, 1, 2])).toEqual({ rank: 'normal' });
+  });
+
+  it('1 1 1 1 1 1 classifica como bagre sem inventar corte Ruim/Terrível', () => {
+    expect(classificarTalentoPorHabilidadeEspecial([1, 1, 1, 1, 1, 1])).toEqual({ rank: 'bagre' });
+  });
+
+  it('recusa uma sequência de seis sessões que não casa exatamente com a tabela', () => {
+    expect(() => classificarTalentoPorHabilidadeEspecial([1, 2, 1, 2, 2, 2])).toThrow(
+      /não casa com nenhum padrão/,
+    );
+  });
+
+  it('recusa sequência com menos ou mais de seis sessões', () => {
+    expect(() => classificarTalentoPorHabilidadeEspecial([2])).toThrow(/exatamente 6 sessões/);
+    expect(() => classificarTalentoPorHabilidadeEspecial([2, 2, 2, 2, 2])).toThrow(/exatamente 6 sessões/);
+    expect(() => classificarTalentoPorHabilidadeEspecial([2, 2, 2, 2, 2, 2, 2])).toThrow(
+      /exatamente 6 sessões/,
+    );
+  });
+
+  it('recusa ponto fora de 1, 2 ou 3', () => {
+    expect(() => classificarTalentoPorHabilidadeEspecial([2, 2, 2, 4, 2, 2])).toThrow(/1, 2 ou 3/);
   });
 });
 

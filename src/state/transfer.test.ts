@@ -6,9 +6,9 @@ import type { Documento } from './schema.js';
 describe('exportarJSON / importarJSON', () => {
   it('faz ida e volta do documento', () => {
     const documento: Documento = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       jogadores: [
-        { id: '1', nome: 'Ned Stark', overall: 78, posicoes: ['DC'], vendido: false, lab: null },
+        { id: '1', nome: 'Ned Stark', idade: 18, overall: 78, posicoes: ['DC'], vendido: false, lab: null },
       ],
     };
     expect(importarJSON(exportarJSON(documento))).toEqual(documento);
