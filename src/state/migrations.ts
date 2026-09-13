@@ -46,6 +46,7 @@ const RANKS_TALENTO_VALIDOS = new Set([
   'otima',
   'excelente',
   'fenomeno',
+  'bagre',
 ]);
 
 /**
@@ -83,6 +84,11 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
   return (
     typeof j.id === 'string' &&
     typeof j.nome === 'string' &&
+    (j.idade === null ||
+      (typeof j.idade === 'number' &&
+        Number.isInteger(j.idade) &&
+        j.idade >= 18 &&
+        j.idade <= 35)) &&
     typeof j.overall === 'number' &&
     Number.isFinite(j.overall) &&
     Array.isArray(j.posicoes) &&
@@ -119,10 +125,19 @@ export function migrar(bruto: unknown): Documento {
   if (!Array.isArray(jogadores)) {
     throw new Error('Documento inválido: jogadores deve ser uma lista.');
   }
-  if (!jogadores.every(ehJogadorValido)) {
+  const jogadoresDesconhecidos: unknown[] = jogadores;
+  const jogadoresAtuais: unknown[] =
+    schemaVersion === 1
+      ? jogadoresDesconhecidos.map((jogador) =>
+          typeof jogador === 'object' && jogador !== null
+            ? { ...jogador, idade: null }
+            : jogador,
+        )
+      : jogadoresDesconhecidos;
+
+  if (!jogadoresAtuais.every(ehJogadorValido)) {
     throw new Error('Documento inválido: um ou mais jogadores têm formato inválido.');
   }
 
-  // Única versão conhecida hoje é a 1 — nenhum passo de migração a aplicar ainda.
-  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores };
+  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: jogadoresAtuais };
 }

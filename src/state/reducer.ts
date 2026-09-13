@@ -7,7 +7,14 @@ import type { DadosLab, Documento, Jogador } from './schema';
 
 export type Acao =
   | { type: 'jogador/adicionado'; jogador: Jogador }
-  | { type: 'jogador/atualizado'; id: string; nome: string; overall: number; posicoes: Jogador['posicoes'] }
+  | {
+      type: 'jogador/atualizado';
+      id: string;
+      nome: string;
+      idade: number;
+      overall: number;
+      posicoes: Jogador['posicoes'];
+    }
   | { type: 'jogador/excluido'; id: string }
   | { type: 'jogador/vendaMarcada'; id: string }
   | { type: 'jogador/vendaDesfeita'; id: string }
@@ -32,7 +39,13 @@ export function reducer(documento: Documento, acao: Acao): Documento {
         ...documento,
         jogadores: documento.jogadores.map((jogador) =>
           jogador.id === acao.id
-            ? { ...jogador, nome: acao.nome, overall: acao.overall, posicoes: acao.posicoes }
+            ? {
+                ...jogador,
+                nome: acao.nome,
+                idade: acao.idade,
+                overall: acao.overall,
+                posicoes: acao.posicoes,
+              }
             : jogador,
         ),
       };

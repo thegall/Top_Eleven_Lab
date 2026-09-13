@@ -20,8 +20,14 @@ import { carregar, salvar } from './storage';
 interface SquadContextValue {
   documento: Documento;
   carregado: boolean;
-  adicionarJogador: (nome: string, overall: number, posicoes: PosicaoJogador[]) => void;
-  atualizarJogador: (id: string, nome: string, overall: number, posicoes: PosicaoJogador[]) => void;
+  adicionarJogador: (nome: string, idade: number, overall: number, posicoes: PosicaoJogador[]) => void;
+  atualizarJogador: (
+    id: string,
+    nome: string,
+    idade: number,
+    overall: number,
+    posicoes: PosicaoJogador[],
+  ) => void;
   excluirJogador: (id: string) => void;
   marcarVendido: (id: string) => void;
   desfazerVenda: (id: string) => void;
@@ -53,10 +59,11 @@ export function SquadProvider({ children }: { children: ReactNode }) {
   const value: SquadContextValue = {
     documento,
     carregado,
-    adicionarJogador: (nome, overall, posicoes) => {
+    adicionarJogador: (nome, idade, overall, posicoes) => {
       const jogador: Jogador = {
         id: generateId(),
         nome,
+        idade,
         overall,
         posicoes,
         vendido: false,
@@ -64,8 +71,8 @@ export function SquadProvider({ children }: { children: ReactNode }) {
       };
       dispatch({ type: 'jogador/adicionado', jogador });
     },
-    atualizarJogador: (id, nome, overall, posicoes) =>
-      dispatch({ type: 'jogador/atualizado', id, nome, overall, posicoes }),
+    atualizarJogador: (id, nome, idade, overall, posicoes) =>
+      dispatch({ type: 'jogador/atualizado', id, nome, idade, overall, posicoes }),
     excluirJogador: (id) => dispatch({ type: 'jogador/excluido', id }),
     marcarVendido: (id) => dispatch({ type: 'jogador/vendaMarcada', id }),
     desfazerVenda: (id) => dispatch({ type: 'jogador/vendaDesfeita', id }),

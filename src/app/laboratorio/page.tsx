@@ -1,16 +1,22 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
 import { ALL_DRILLS, classificarDrill, mediaExercicio, montarCronograma } from '../../domain/drills';
 import { brancosDaPosicao } from '../../domain/positions';
-import { classificarTalentoPorHabilidadeEspecial } from '../../domain/talent';
+import { applySeasonTurnover } from '../../domain/season';
+import {
+  SPECIAL_ABILITY_PATTERNS,
+  classificarTalentoPorHabilidadeEspecial,
+  type SpecialAbilityRank,
+} from '../../domain/talent';
 import { conditionCostPerSession } from '../../domain/training';
 import type { Atributo, Posicao, RankTalento } from '../../domain/types';
-import type { DadosLab, Jogador } from '../../state/schema';
+import type { DadosLab, Jogador, TalentoLab } from '../../state/schema';
 import { useSquad } from '../../state/store';
 import { CalloutRegra } from '../../ui/callout-regra';
 import { classeBadgePosicao } from '../../ui/posicao';
+import { sortSquadPlayers } from '../squad-order';
 
 const LABELS: Record<Atributo, string> = {
   corte: 'Corte',
@@ -50,15 +56,11 @@ const RANK_LABELS: Record<RankTalento, string> = {
   fenomeno: 'Fenômeno',
 };
 
-const RANKS_ESCOLHA: RankTalento[] = [
-  'fenomeno',
-  'excelente',
-  'otima',
-  'boa',
-  'normal',
-  'ruim',
-  'terrivel',
-];
+function rotuloTalento(rank: TalentoLab): string {
+  const especial = SPECIAL_ABILITY_PATTERNS.find((pattern) => pattern.rank === rank);
+  if (especial) return especial.label;
+  return RANK_LABELS[rank as RankTalento];
+}
 
 const CATEGORIA_DOT: Record<string, string> = {
   ataque: 'dot c-atk',
@@ -124,7 +126,11 @@ export default function LaboratorioPage() {
   const { documento, atualizarLab } = useSquad();
 
   const elegiveis = useMemo(
-    () => documento.jogadores.filter((j) => !j.vendido && !j.posicoes.includes('GK')),
+    () =>
+      sortSquadPlayers(
+        documento.jogadores.filter((j) => !j.vendido && !j.posicoes.includes('GK')),
+        'name',
+      ),
     [documento.jogadores],
   );
 
@@ -133,15 +139,20 @@ export default function LaboratorioPage() {
 
   const [sessoes, setSessoes] = useState(['', '', '', '', '', '']);
   const [erroTeste, setErroTeste] = useState<string | null>(null);
-  const [avisoPendente, setAvisoPendente] = useState(false);
+  const [testResult, setTestResult] = useState<SpecialAbilityRank | null>(null);
+  const [editandoTalento, setEditandoTalento] = useState(false);
+  const testeTalentoRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setSessoes(['', '', '', '', '', '']);
     setErroTeste(null);
-    setAvisoPendente(false);
+    setTestResult(null);
+    setEditandoTalento(false);
   }, [selecionado?.id]);
 
   const lab = useMemo(() => (selecionado ? labDoJogador(selecionado) : null), [selecionado]);
+  const talentoAtual: TalentoLab | null = testResult ?? lab?.talento ?? null;
+  const resultLabel = talentoAtual ? rotuloTalento(talentoAtual) : null;
 
   const posicoesLinha = useMemo(
     () => (selecionado ? selecionado.posicoes.filter((p): p is Posicao => p !== 'GK') : []),
@@ -191,13 +202,36 @@ export default function LaboratorioPage() {
     else novoSet.add(atributo);
     atualizarLab(selecionado.id, { ...lab, brancosOverride: [...novoSet] });
   }
+  function handleSeasonTurnover() {
+    if (!selecionado || !lab) return;
+    const confirmed = window.confirm(
+      'Esta ação simula a virada de temporada e irá abaixar 20 pontos de cada atributo. Confirmar?',
+    );
+    if (!confirmed) return;
+    atualizarLab(selecionado.id, {
+      ...lab,
+      atributos: applySeasonTurnover(lab.atributos),
+    });
+  }
+
+
+  function aoAbrirTesteTalento() {
+    const abrir = !editandoTalento;
+    setTestResult(null);
+    setErroTeste(null);
+    setEditandoTalento(abrir);
+    if (abrir) {
+      testeTalentoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   function aoEscolherTalento(valor: string) {
-    if (!selecionado || !lab) return;
-    const talento = valor === '' ? null : (valor as RankTalento);
-    atualizarLab(selecionado.id, { ...lab, talento });
-    setAvisoPendente(false);
+    if (!selecionado || !lab || valor === '') return;
+    if (!SPECIAL_ABILITY_PATTERNS.some((pattern) => pattern.rank === valor)) return;
+    atualizarLab(selecionado.id, { ...lab, talento: valor as SpecialAbilityRank });
+    setTestResult(null);
     setErroTeste(null);
+    setEditandoTalento(false);
   }
 
   function aoClassificarEspecial(evento: FormEvent) {
@@ -209,17 +243,13 @@ export default function LaboratorioPage() {
       .map(Number);
     try {
       const resultado = classificarTalentoPorHabilidadeEspecial(pontos);
-      if (resultado.rank === null) {
-        setAvisoPendente(true);
-        setErroTeste(null);
-        return;
-      }
       atualizarLab(selecionado.id, { ...lab, talento: resultado.rank });
-      setAvisoPendente(false);
+      setTestResult(resultado.rank);
       setErroTeste(null);
+      setEditandoTalento(false);
     } catch (erro) {
       setErroTeste(erro instanceof Error ? erro.message : 'Teste inválido.');
-      setAvisoPendente(false);
+      setTestResult(null);
     }
   }
 
@@ -262,31 +292,38 @@ export default function LaboratorioPage() {
                   {posicao}
                 </span>
               ))}
-              <label htmlFor="talento-lab" className="visually-hidden">
-                Talento
-              </label>
-              <select
-                id="talento-lab"
-                value={lab.talento ?? ''}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => aoEscolherTalento(e.target.value)}
-              >
-                <option value="">Talento não testado</option>
-                {RANKS_ESCOLHA.map((rank) => (
-                  <option key={rank} value={rank}>
-                    {RANK_LABELS[rank]}
-                  </option>
-                ))}
-              </select>
+              <span className="ficha__age">
+                {selecionado.idade === null ? 'Idade não informada' : `${selecionado.idade} anos`}
+              </span>
+              <div className="ficha__talento">
+                <span
+                  className={`talento${resultLabel ? '' : ' talento--empty'}`}
+                  data-rank={talentoAtual ?? undefined}
+                >
+                  Talento: <b>{resultLabel ?? 'não classificado'}</b>
+                </span>
+                <button className="btn btn--secondary" type="button" onClick={aoAbrirTesteTalento}>
+                  {editandoTalento ? 'Cancelar' : lab.talento ? 'Reclassificar' : 'Classificar'}
+                </button>
+              </div>
             </section>
 
             <section className="panel">
-              <div className="panel__head">
+              <div className="panel__head panel__head--season">
                 <h2>Habilidades</h2>
-                <span className="hint">
-                  Derivadas da posição {posicoesLinha.join('+')}. Confira e ajuste se o jogo divergir.
-                </span>
+                <button
+                  className="btn btn--season"
+                  type="button"
+                  aria-label="Virada de temporada: reduzir 20 pontos de cada atributo"
+                  onClick={handleSeasonTurnover}
+                >
+                  Virada de temporada
+                  <span className="btn__delta" aria-hidden="true">−20</span>
+                </button>
               </div>
-
+              <p className="panel__lede">
+                Derivadas da posição {posicoesLinha.join('+')}. Confira e ajuste se o jogo divergir.
+              </p>
               <div className="grupos">
                 {GRUPOS.map((grupo) => {
                   const total = Math.round(
@@ -549,7 +586,16 @@ export default function LaboratorioPage() {
               </section>
 
               <aside>
-                <section className="panel">
+                <section
+                  className="panel"
+                  id="teste-talento"
+                  ref={(el) => {
+                    testeTalentoRef.current = el;
+                    return () => {
+                      testeTalentoRef.current = null;
+                    };
+                  }}
+                >
                   <div className="panel__head">
                     <h2>Teste de talento</h2>
                   </div>
@@ -557,47 +603,101 @@ export default function LaboratorioPage() {
                   <p className="note">
                     Isolado do treino de atributos. No jogo, treine uma{' '}
                     <b>habilidade especial</b> ou posição nova (40–50 pontos) e anote quanto a barra
-                    andou em cada sessão: 1, 2 ou 3.
+                    andou em cada uma das 6 sessões: 1, 2 ou 3.
                   </p>
 
-                  <ol className="steps">
-                    <li>
-                      Comece uma habilidade especial. Não troque depois de iniciada.
-                    </li>
-                    <li>
-                      Rode sessões e anote os pontos da barra (1, 2 ou 3).
-                    </li>
-                    <li>
-                      Informe a sequência. Ou escolha o talento no seletor da ficha, se já souber.
-                    </li>
-                  </ol>
+                  {!editandoTalento ? (
+                    <p className="note">
+                      {lab.talento ? (
+                        <>
+                          Classificado como <b>{rotuloTalento(lab.talento)}</b>. Use Reclassificar
+                          na ficha para testar de novo ou informar outro talento.
+                        </>
+                      ) : (
+                        <>
+                          Ainda não classificado. Use <b>Classificar</b> na ficha para fazer o teste
+                          ou informar o talento manualmente.
+                        </>
+                      )}
+                    </p>
+                  ) : (
+                    <>
+                      <ol className="steps">
+                        <li>Comece uma habilidade especial. Não troque depois de iniciada.</li>
+                        <li>Rode exatamente 6 sessões e anote os pontos da barra (1, 2 ou 3).</li>
+                        <li>Informe a sequência, ou lance o talento manualmente se já souber.</li>
+                      </ol>
 
-                  <form onSubmit={aoClassificarEspecial}>
-                    <div className="sessoes-especial">
-                      {sessoes.map((valor, i) => (
-                        <div className="field" key={i}>
-                          <label htmlFor={`sessao-${i}`}>S{i + 1}</label>
-                          <input
-                            id={`sessao-${i}`}
-                            className="num"
-                            type="number"
-                            inputMode="numeric"
-                            min={1}
-                            max={3}
-                            value={valor}
-                            onChange={(e) => {
-                              const proximo = [...sessoes];
-                              proximo[i] = e.target.value;
-                              setSessoes(proximo);
-                            }}
-                          />
+                      <form onSubmit={aoClassificarEspecial}>
+                        <div className="sessoes-especial">
+                          {sessoes.map((valor, i) => (
+                            <div className="field" key={i}>
+                              <label htmlFor={`sessao-${i}`}>S{i + 1}</label>
+                              <input
+                                id={`sessao-${i}`}
+                                className="num"
+                                type="number"
+                                inputMode="numeric"
+                                min={1}
+                                max={3}
+                                required
+                                aria-invalid={erroTeste ? true : undefined}
+                                value={valor}
+                                onChange={(e) => {
+                                  const proximo = [...sessoes];
+                                  proximo[i] = e.target.value;
+                                  setSessoes(proximo);
+                                }}
+                              />
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                    <button className="btn btn--primary" type="submit">
-                      Classificar pela barra
-                    </button>
-                  </form>
+                        <button className="btn btn--primary" type="submit">
+                          Classificar pela barra
+                        </button>
+                      </form>
+
+                      <div className="field talento-manual">
+                        <label htmlFor="talento-manual">Informar manualmente</label>
+                        <select
+                          id="talento-manual"
+                          value=""
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                            aoEscolherTalento(e.target.value)
+                          }
+                        >
+                          <option value="">Escolher talento</option>
+                          {SPECIAL_ABILITY_PATTERNS.map((pattern) => (
+                            <option key={pattern.rank} value={pattern.rank}>
+                              {pattern.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  <div className='tabela-talento-wrap'>
+                    <table className='tabela-talento'>
+                      <caption>Classificação pelas 6 sessões</caption>
+                      <thead>
+                        <tr>
+                          <th scope='col'>Resultado</th>
+                          <th scope='col'>Sequência</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {SPECIAL_ABILITY_PATTERNS.map((pattern) => (
+                          <tr key={pattern.rank}>
+                            <th scope='row'>{pattern.label}</th>
+                            <td className='num'>
+                              {pattern.points?.join(' ') ?? 'Qualquer sequência com 3'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
                   {erroTeste && (
                     <p className="callout callout--warn" role="alert">
@@ -606,27 +706,16 @@ export default function LaboratorioPage() {
                     </p>
                   )}
 
-                  {avisoPendente && (
-                    <CalloutRegra marca="pendente" secao="§3.1">
-                      Predominantemente 1 não separa <b>Ruim</b> de <b>Terrível</b>. Não inventamos
-                      esse corte. Escolha na ficha se souber, ou deixe em branco.
-                    </CalloutRegra>
-                  )}
-
-                  {lab.talento && (
-                    <div className="resultado">
+                  {testResult && resultLabel && (
+                    <div className="resultado" data-rank={testResult}>
                       <div className="tile__label">Talento</div>
-                      <div className="resultado__nome">{RANK_LABELS[lab.talento]}</div>
+                      <div className="resultado__nome">{resultLabel}</div>
                     </div>
                   )}
 
                   <CalloutRegra marca="comunidade" secao="§5">
-                    O padrão da barra classifica: chega a 3 é Fenômeno; só 2s é Excelente; 1 só na
-                    primeira é Ótima; <span className="num">1 2 2 1 2 2</span> é Boa.
-                  </CalloutRegra>
-                  <CalloutRegra marca="pendente" secao="§5">
-                    O teste <b>não isola a idade</b>. Não aplicamos correção. Faça antes dos 22
-                    anos, onde o fator é 1,00.
+                    A sequência precisa casar exatamente com a tabela. A única exceção é Fenômeno:
+                    basta aparecer um 3 em qualquer uma das 6 sessões.
                   </CalloutRegra>
                 </section>
               </aside>

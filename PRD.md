@@ -35,7 +35,7 @@ Contra a alternativa atual, três diferenças concretas:
 
 ## Métricas de sucesso
 
-- Usuário cadastra o elenco inteiro sem abandonar no meio — o cadastro do Squad tem 3 campos por jogador exatamente por isso.
+- Usuário cadastra o elenco inteiro sem abandonar no meio — o cadastro do Squad tem 4 campos por jogador exatamente por isso.
 - Usuário testa mais de um cenário de venda na mesma sessão. Uma simulação só significa calculadora; várias significam ferramenta de decisão.
 - Usuário volta na virada de temporada. O uso é sazonal por natureza — retorno diário não é meta, e perseguir isso distorce o produto.
 - Alguém compartilha print do simulador no grupo da comunidade sem ter sido pedido.
@@ -46,8 +46,8 @@ Contra a alternativa atual, três diferenças concretas:
 
 **Aba Squad — simulador da média dos 14**
 
-- Cadastro rápido: nome, overall, posição.
-- Lista ordenada por overall, com corte visível no 14º jogador.
+- Cadastro rápido: nome, idade, overall, posição.
+- Lista ordenável por overall, nome ou posição, com corte visível no 14º jogador quando ordenada por overall.
 - Média dos 14 mais fortes, atualizada ao vivo, e contagem de jogadores por posição.
 - Marcar jogador como **vendido** e ver a média recalcular, mostrando qual reserva sobe para a lista dos 14 no lugar dele.
 - Faixas de referência do que aquela média significa na temporada seguinte.
@@ -58,6 +58,7 @@ Contra a alternativa atual, três diferenças concretas:
 - **Recomendação de exercício:** os 29 drills classificados em primário, secundário e terciário para aquele jogador, com a média de cada um e a distância até o teto de 180%. Esta é a entrega central, e é cálculo exato.
 - **Teste de talento guiado:** o app indica um drill válido para o teste, o usuário roda 5 sessões e informa a soma dos pontos, o app classifica e explica o que aquilo significa.
 - **Estimativa de sessões e de maletas até a meta de overall**, apresentada como faixa. O custo em maletas é cálculo fechado; a conversão final para overall é o único trecho estimado (ver riscos).
+- **Virada de temporada:** ação confirmada para retirar 20 pontos de cada atributo, com piso em zero.
 - Dimensionado para 3–4 jogadores por temporada, que é quanto de maleta verde existe na prática.
 
 **Transversal**
@@ -86,7 +87,7 @@ A parte quantitativa vem da planilha `evolucao_facil.xlsx`, que circula na comun
 
 **Mitigação, e uma oportunidade:** o teste de talento produz exatamente o dado que falta — pontos ganhos, média do exercício, idade, overall antes e depois. Guardando cada teste que o usuário rodar, a estimativa melhora com o uso sem pedir nada a mais de ninguém.
 
-**Risco de adoção:** o cadastro manual é a única barreira real. Não há API do jogo nem forma de importar elenco. Se o cadastro cansar, o produto morre antes de mostrar valor. Daí Squad com 3 campos e Laboratório limitado a poucos jogadores.
+**Risco de adoção:** o cadastro manual é a única barreira real. Não há API do jogo nem forma de importar elenco. Se o cadastro cansar, o produto morre antes de mostrar valor. Daí Squad com 4 campos e Laboratório limitado a poucos jogadores.
 
 **Risco de mercado:** público de ordem de mil pessoas, que já tem planilhas funcionando. O Lab precisa ser claramente melhor que um Excel, não apenas equivalente na web.
 

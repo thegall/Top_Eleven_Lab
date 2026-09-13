@@ -4,7 +4,7 @@
  */
 import type { Atributo, Posicao, RankTalento } from '../domain/types';
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /**
  * `Posicao` do domínio cobre só as 11 posições de linha — goleiro está fora
@@ -19,15 +19,23 @@ export type PosicaoJogador = Posicao | 'GK';
  * significa "deriva da posição" — o Lab deriva os brancos, mas deixa o campo
  * editável (GAME-RULES §2, "Decisão de produto").
  */
+/**
+ * Talento persistido no Lab. `bagre` é o rank visual do método 1
+ * (GAME-RULES §5) e não entra na curva de ganho (THE-37).
+ */
+export type TalentoLab = RankTalento | 'bagre';
+
 export interface DadosLab {
   atributos: Record<Atributo, number>;
   brancosOverride: Atributo[] | null;
-  talento: RankTalento | null;
+  talento: TalentoLab | null;
 }
 
 export interface Jogador {
   id: string;
   nome: string;
+  /** Nulo apenas em cadastros migrados da versão 1. */
+  idade: number | null;
   overall: number;
   posicoes: PosicaoJogador[];
   vendido: boolean;
