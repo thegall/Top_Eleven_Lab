@@ -69,6 +69,39 @@ describe('reducer', () => {
     expect(depois.jogadores.find((j) => j.id === '2')?.nome).toBe('Ned Stark');
   });
 
+  it('recusa adicionar jogador com posições vazias, repetidas ou acima de 3', () => {
+    expect(() =>
+      reducer(documentoVazio(), { type: 'jogador/adicionado', jogador: jogador({ posicoes: [] }) }),
+    ).toThrow(/1 a 3 posições/);
+    expect(() =>
+      reducer(documentoVazio(), {
+        type: 'jogador/adicionado',
+        jogador: jogador({ posicoes: ['DC', 'DC'] }),
+      }),
+    ).toThrow(/1 a 3 posições/);
+    expect(() =>
+      reducer(documentoVazio(), {
+        type: 'jogador/adicionado',
+        jogador: jogador({ posicoes: ['DC', 'ML', 'ST', 'AMC'] }),
+      }),
+    ).toThrow(/1 a 3 posições/);
+  });
+
+  it('recusa atualizar jogador com posições inválidas e preserva o estado', () => {
+    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' })] };
+    expect(() =>
+      reducer(antes, {
+        type: 'jogador/atualizado',
+        id: '1',
+        nome: 'Jon Snow',
+        idade: 21,
+        overall: 84,
+        posicoes: [],
+      }),
+    ).toThrow(/1 a 3 posições/);
+    expect(antes.jogadores[0]?.nome).toBe('Ned Stark');
+  });
+
   it('exclui um jogador sem alterar os outros', () => {
     const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
     const depois = reducer(antes, { type: 'jogador/excluido', id: '1' });

@@ -121,17 +121,30 @@ describe('migrar', () => {
     ).toThrow();
   });
 
-  it('recusa mais de 3 posições ou posições repetidas (GAME-RULES §1)', () => {
-    expect(() =>
+  it('na v1 repara posições repetidas e corta no teto de 3, em vez de apagar o elenco', () => {
+    expect(
       migrar({
         schemaVersion: 1,
-        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'ML', 'ST', 'AMC'] }],
+        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'DC', 'ML', 'ST', 'AMC'] }],
+      }),
+    ).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...jogadorBase, idade: null, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
+    });
+  });
+
+  it('na v2 recusa mais de 3 posições ou posições repetidas (GAME-RULES §1)', () => {
+    const jogadorV2 = { ...jogadorBase, idade: 18, lab: null };
+    expect(() =>
+      migrar({
+        schemaVersion: 2,
+        jogadores: [{ ...jogadorV2, posicoes: ['DC', 'ML', 'ST', 'AMC'] }],
       }),
     ).toThrow();
     expect(() =>
       migrar({
-        schemaVersion: 1,
-        jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'DC'] }],
+        schemaVersion: 2,
+        jogadores: [{ ...jogadorV2, posicoes: ['DC', 'DC'] }],
       }),
     ).toThrow();
   });

@@ -3,7 +3,13 @@
  * documento novo. Toda mutação passa por aqui — nenhum componente altera o
  * documento direto.
  */
-import type { DadosLab, Documento, Jogador } from './schema';
+import { ehPosicoesValidas, type DadosLab, type Documento, type Jogador } from './schema';
+
+function exigirPosicoes(posicoes: Jogador['posicoes']): void {
+  if (!ehPosicoesValidas(posicoes)) {
+    throw new Error('Jogador inválido: informe de 1 a 3 posições distintas.');
+  }
+}
 
 export type Acao =
   | { type: 'jogador/adicionado'; jogador: Jogador }
@@ -33,8 +39,10 @@ function definirVendido(documento: Documento, id: string, vendido: boolean): Doc
 export function reducer(documento: Documento, acao: Acao): Documento {
   switch (acao.type) {
     case 'jogador/adicionado':
+      exigirPosicoes(acao.jogador.posicoes);
       return { ...documento, jogadores: [...documento.jogadores, acao.jogador] };
     case 'jogador/atualizado':
+      exigirPosicoes(acao.posicoes);
       return {
         ...documento,
         jogadores: documento.jogadores.map((jogador) =>

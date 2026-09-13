@@ -374,8 +374,8 @@ export default function SquadPage() {
                     {linhas.map((linha, i) => (
                       <Fragment key={linha.jogador.id}>
                         {editandoId === linha.jogador.id ? (
-                          <form className="row-edit" onSubmit={aoSalvarEdicao}>
-                            <div className="row-edit__fields">
+                          <form className="row-edit" role="row" onSubmit={aoSalvarEdicao}>
+                            <div className="row-edit__fields" role="cell" aria-colspan={7}>
                               <div className="field">
                                 <label htmlFor={`edit-nome-${linha.jogador.id}`}>Nome</label>
                                 <input

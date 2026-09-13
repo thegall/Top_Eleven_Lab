@@ -237,10 +237,13 @@ export default function LaboratorioPage() {
   function aoClassificarEspecial(evento: FormEvent) {
     evento.preventDefault();
     if (!selecionado || !lab) return;
-    const pontos = sessoes
-      .map((s) => s.trim())
-      .filter((s) => s !== '')
-      .map(Number);
+    const preenchidas = sessoes.map((s) => s.trim());
+    if (preenchidas.some((s) => s === '')) {
+      setErroTeste('Teste de talento inválido: informe exatamente 6 sessões (GAME-RULES §5).');
+      setTestResult(null);
+      return;
+    }
+    const pontos = preenchidas.map(Number);
     try {
       const resultado = classificarTalentoPorHabilidadeEspecial(pontos);
       atualizarLab(selecionado.id, { ...lab, talento: resultado.rank });

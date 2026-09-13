@@ -3,22 +3,19 @@
  * caminho para `localStorage` e para import — dois caminhos seria um deles
  * sem manutenção.
  */
-import { CURRENT_SCHEMA_VERSION, type Documento, type Jogador } from './schema';
+import {
+  CURRENT_SCHEMA_VERSION,
+  ehPosicoesValidas,
+  repararPosicoesV1,
+  type Documento,
+  type Jogador,
+} from './schema';
 
-const POSICOES_VALIDAS = new Set([
-  'GK',
-  'DL',
-  'DC',
-  'DR',
-  'DMC',
-  'ML',
-  'MC',
-  'MR',
-  'AML',
-  'AMC',
-  'AMR',
-  'ST',
-]);
+function repararJogadorV1(jogador: unknown): unknown {
+  if (typeof jogador !== 'object' || jogador === null) return jogador;
+  const bruto = jogador as Record<string, unknown>;
+  return { ...bruto, idade: null, posicoes: repararPosicoesV1(bruto.posicoes) };
+}
 
 const ATRIBUTOS_VALIDOS = new Set([
   'corte',
@@ -91,11 +88,7 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
         j.idade <= 35)) &&
     typeof j.overall === 'number' &&
     Number.isFinite(j.overall) &&
-    Array.isArray(j.posicoes) &&
-    j.posicoes.length > 0 &&
-    j.posicoes.length <= 3 &&
-    j.posicoes.every((p) => POSICOES_VALIDAS.has(p as string)) &&
-    new Set(j.posicoes).size === j.posicoes.length &&
+    ehPosicoesValidas(j.posicoes) &&
     typeof j.vendido === 'boolean' &&
     (j.lab === null || ehLabValido(j.lab))
   );
@@ -128,11 +121,7 @@ export function migrar(bruto: unknown): Documento {
   const jogadoresDesconhecidos: unknown[] = jogadores;
   const jogadoresAtuais: unknown[] =
     schemaVersion === 1
-      ? jogadoresDesconhecidos.map((jogador) =>
-          typeof jogador === 'object' && jogador !== null
-            ? { ...jogador, idade: null }
-            : jogador,
-        )
+      ? jogadoresDesconhecidos.map((jogador) => repararJogadorV1(jogador))
       : jogadoresDesconhecidos;
 
   if (!jogadoresAtuais.every(ehJogadorValido)) {

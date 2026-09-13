@@ -14,6 +14,44 @@ export const CURRENT_SCHEMA_VERSION = 2;
  */
 export type PosicaoJogador = Posicao | 'GK';
 
+const POSICOES_JOGADOR = new Set<string>([
+  'GK',
+  'DL',
+  'DC',
+  'DR',
+  'DMC',
+  'ML',
+  'MC',
+  'MR',
+  'AML',
+  'AMC',
+  'AMR',
+  'ST',
+]);
+
+/** 1 a 3 posições distintas do elenco (GAME-RULES §1). */
+export function ehPosicoesValidas(posicoes: unknown): posicoes is PosicaoJogador[] {
+  return (
+    Array.isArray(posicoes) &&
+    posicoes.length > 0 &&
+    posicoes.length <= 3 &&
+    posicoes.every((p) => typeof p === 'string' && POSICOES_JOGADOR.has(p)) &&
+    new Set(posicoes).size === posicoes.length
+  );
+}
+
+/** v1 aceitava repetidas e mais de 3; a v2 corta no teto sem perder o jogador. */
+export function repararPosicoesV1(posicoes: unknown): unknown {
+  if (!Array.isArray(posicoes)) return posicoes;
+  const unicas: string[] = [];
+  for (const p of posicoes) {
+    if (typeof p !== 'string' || !POSICOES_JOGADOR.has(p) || unicas.includes(p)) continue;
+    unicas.push(p);
+    if (unicas.length === 3) break;
+  }
+  return unicas;
+}
+
 /**
  * Dados do Laboratório para um jogador (etapa 7). `brancosOverride: null`
  * significa "deriva da posição" — o Lab deriva os brancos, mas deixa o campo

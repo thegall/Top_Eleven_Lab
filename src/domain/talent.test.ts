@@ -72,6 +72,7 @@ describe('classificarTalentoPorHabilidadeEspecial (GAME-RULES §5, método 1)', 
   });
 
   it('recusa sequência com menos ou mais de seis sessões', () => {
+    expect(() => classificarTalentoPorHabilidadeEspecial([2])).toThrow(/exatamente 6 sessões/);
     expect(() => classificarTalentoPorHabilidadeEspecial([2, 2, 2, 2, 2])).toThrow(/exatamente 6 sessões/);
     expect(() => classificarTalentoPorHabilidadeEspecial([2, 2, 2, 2, 2, 2, 2])).toThrow(
       /exatamente 6 sessões/,
