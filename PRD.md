@@ -56,7 +56,7 @@ Contra a alternativa atual, três diferenças concretas:
 
 - Cadastro detalhado espelhando a tela do jogo: idade, posição, habilidade especial e os 15 atributos. Os brancos vêm **derivados da posição** e ficam editáveis — o usuário confere em vez de digitar.
 - **Recomendação de exercício:** os 29 drills classificados em primário, secundário e terciário para aquele jogador, com a média de cada um e a distância até o teto de 180%. Esta é a entrega central, e é cálculo exato.
-- **Teste de talento guiado:** o app indica um drill válido para o teste, o usuário roda 5 sessões e informa a soma dos pontos, o app classifica e explica o que aquilo significa.
+- **Teste de talento guiado:** o app pede os pontos da barra (1, 2 ou 3) em 6 sessões de habilidade especial ou posição nova, classifica pela sequência (método 1) e explica o que aquilo significa. A V1 **não** oferece o teste por ganho de pontos (método 2).
 - **Estimativa de sessões e de maletas até a meta de overall**, apresentada como faixa. O custo em maletas é cálculo fechado; a conversão final para overall é o único trecho estimado (ver riscos).
 - **Virada de temporada:** ação confirmada para retirar 20 pontos de cada atributo, com piso em zero.
 - Dimensionado para 3–4 jogadores por temporada, que é quanto de maleta verde existe na prática.

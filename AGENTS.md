@@ -70,14 +70,13 @@ Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive 
 ### Fluxo 3 — Teste de talento
 
 ```
-1. App indica um drill válido: primário, com média do exercício abaixo de 80%
-2. Usuário roda 5 sessões no jogo e informa a soma dos pontos ganhos
-3. sigma = soma ÷ (5 × 6 × desgaste_por_slot)
-4. Localizar sigma na tabela da GAME-RULES §3.1, na coluna da média do exercício
-5. Devolver o rank e explicar o que ele significa
+1. Usuário treina habilidade especial ou posição nova e anota 1, 2 ou 3 em cada uma das 6 sessões
+2. App classifica só pela sequência (GAME-RULES §5, método 1) — idade não entra
+3. Qualquer 3 → Fenômeno; `1 1 1 1 1 1` → Bagre; demais linhas da tabela
+4. Sequência que não casa é recusada, em vez de devolver um rank errado
 ```
 
-As três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) o app **verifica antes** de aceitar o teste — teste inválido dá falso negativo e o usuário nunca vai saber.
+O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam ranks distintos nessa curva. Bagre **não** mapeia para nenhum dos dois.
 
 ## Contratos internos
 
@@ -121,13 +120,15 @@ interface Drill {
 | `projetarAteMeta` | jogador, overall alvo → faixa de sessões | Iterativo, recalcula cascata. §11 |
 | `mediaDos14` | `Jogador[]` → `number` | Soma dos 14 maiores ÷ 14, ignorando os vendidos. §8 |
 | `applySeasonTurnover` | atributos → atributos | Retira 20 de cada atributo, com piso em zero. §7 |
-| `classificarTalento` | soma de 5 sessões, drill, média → `RankTalento` | §5, método 2 |
+| `classificarTalentoPorHabilidadeEspecial` | 6 sessões 1/2/3 → rank visual (inclui `bagre`) | §5, método 1 — UI da V1 |
+| `classificarTalento` | soma de 5 sessões, drill, média → `RankTalento` | §5, método 2 — motor, fora da UI |
 
 **Invariantes que o motor não pode violar:**
 
 - Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador.
 - Exercício com média em 180% rende **zero**. A planilha da comunidade erra nisso; nós não.
-- `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado.
+- `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre não mapeia para Ruim nem Terrível.
+- `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado. Fica no motor; a UI da V1 não o chama.
 - Toda projeção sai como **faixa**, nunca como número exato — a conversão de atributo em overall é o único elo estimado do modelo (GAME-RULES §11).
 
 ## Casos de teste que vêm prontos do GAME-RULES
