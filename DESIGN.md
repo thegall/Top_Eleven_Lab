@@ -560,7 +560,7 @@ Sete ranks, na ordem de `docs/GAME-RULES.md`, em rampa de raridade de jogo:
 | Excelente | `{colors.rank-excelente}` | #7b3fd4 |
 | Fenômeno | `{colors.rank-fenomeno}` | #806000 |
 
-A cor nunca carrega a informação sozinha — o `{component.talent-badge}` sempre mostra o nome do rank ao lado. Vale para daltônicos e para o caso `[PENDENTE]` em que Ruim e Terrível não são separáveis: aí o badge mostra "Ruim / Terrível" com a cor de Ruim e um ícone de incerteza.
+A cor nunca carrega a informação sozinha — o `{component.talent-badge}` sempre mostra o nome do rank ao lado. Vale para daltônicos. Bagre é rótulo próprio do método 1 (`1 1 1 1 1 1`); o badge mostra "Bagre", sem mapear para Ruim nem Terrível. Ruim e Terrível existem na curva de ganho (§3.1), não como corte do classificador da V1.
 
 O badge vive sobre `{colors.surface-bright}` ou `{colors.surface}`. Sobre `{colors.surface-muted}` as cores mais claras da rampa perdem separação.
 
@@ -890,5 +890,5 @@ Preenchimentos com texto branco: `{colors.primary}` 5,69 · `{colors.loss-deep}`
 - Não há tema escuro. Se aparecer demanda, o trabalho é remapear as superfícies claras; os tokens semânticos (grupos, ranks, gain/loss) não mudam.
 - Ícones não estão definidos. O jogo usa um glifo por grupo dentro do `{component.group-icon}`; a escolha do conjunto fica para a etapa 6.
 - Animação e transição não estão em escopo além da regra de `prefers-reduced-motion`.
-- O corte entre Ruim e Terrível é `[PENDENTE]` em `docs/GAME-RULES.md`; o `{component.talent-badge}` já prevê o estado combinado.
+- O Lab V1 não corta Ruim versus Terrível: Bagre é o rótulo do método 1 e não mapeia para a curva. O `{component.talent-badge}` mostra Bagre como rótulo próprio, sem estado combinado "Ruim / Terrível".
 - Não há referência amostrada da barra verde de Defesa em jogador de linha — `{colors.group-defense}` veio do ícone (#07a50d) seguindo o mesmo ajuste de contraste dos outros grupos. Uma captura de zagueiro fecharia isso.

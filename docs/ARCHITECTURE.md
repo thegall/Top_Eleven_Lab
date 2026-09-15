@@ -437,23 +437,22 @@ Cada item com o sinal que indica que chegou a hora de incluir.
 
 ## 11. Contradições e pendências no material existente
 
-Encontradas ao desenhar. Nenhuma foi corrigida por conta própria — `PRD.md` e `GAME-RULES.md`
-não se alteram sem fonte nova (`AGENTS.md:232`).
+Encontradas ao desenhar. Nenhuma regra de jogo foi corrigida por conta própria —
+`PRD.md` e `GAME-RULES.md` não se alteram sem fonte nova (`AGENTS.md:232`). Decisão
+de produto datada conta como fonte para o que o Lab faz com a regra, não para a
+mecânica do jogo.
 
-As três primeiras dependem de observação da comunidade e não de decisão nossa.
+Itens 1 e 2 fechados por decisão de produto do dono (2026-09-14, THE-37), sem nova
+observação de campo: o Lab não inventa fator de idade no classificador e não mapeia
+Bagre para Ruim nem Terrível. O item 3 continua aberto.
 
-1. **GAME-RULES §5 não isola a idade no teste de talento.** O procedimento exige treino
-   classe mundial para padronizar aquele multiplicador, mas o sigma medido também carrega o
-   fator da §3.2. Testar um jogador de 26 anos e ler a tabela direto o classifica um ou dois
-   ranks abaixo do real. A leitura adotada é **dividir o sigma medido pelo fator de idade
-   antes de consultar a tabela** — interpretação nossa, não do material da comunidade.
-   Registrada como `[PENDENTE]` na §5 do GAME-RULES, com a recomendação de testar antes dos
-   22 anos, onde o fator é 1,00 e não há correção a aplicar. **Ação:** validar com a
-   comunidade.
-2. **GAME-RULES §3.1, tabela de conciliação: "Ruim / Terrível" na mesma linha.** O método 1
-   não separa os dois ranks, enquanto a curva os trata como valores distintos (0,163 contra
-   0,130 a 100%). Registrada como `[PENDENTE]` na §3.1, com a decisão de oferecer só o
-   método 2 nessa faixa. **Ação:** definir o corte, ou manter só o método 2.
+1. **Resolvida (2026-09-14).** Idade **não entra** no teste de talento da V1 (método 1).
+   Classifica só pela sequência 1/2/3 em 6 sessões. Idade segue na curva de ganho §3.2,
+   na projeção, não no classificador. Não se divide o sigma medido do método 2 pelo fator
+   da §3.2 para "corrigir" o rank. A V1 **não** oferece o método 2 na UI.
+2. **Resolvida (2026-09-14).** Bagre (`1 1 1 1 1 1`) é rótulo do método 1 e **não** corta
+   Ruim versus Terrível. Ruim e Terrível permanecem ranks distintos na curva §3.1. Quem
+   precisar da distinção mede sigma fora da UI.
 3. **GAME-RULES §6 passo 5 versus §3 — o corte de 140%.** A §6 manda tirar da rotação o drill
    acima de ~140%; a §3 diz que acima disso ainda rende, só custa mais. Tratado na §7 acima:
    regra dura do motor é 180%, o corte de 140% é aviso de interface. **Ação:** confirmar a

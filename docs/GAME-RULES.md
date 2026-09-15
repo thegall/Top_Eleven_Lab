@@ -230,9 +230,9 @@ A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5
 | `1 2 2 2 2 2` | 1,83 | Ótimo | Ótima |
 | `1 2 2 1 2 2` | 1,67 | Bom | Boa |
 | `1 2 1 2 1 2` | 1,50 | Normal | Normal |
-| `1 1 1 1 1 1` | 1,00 | Bagre | Ruim / Terrível **[PENDENTE]** |
+| `1 1 1 1 1 1` | 1,00 | Bagre | — |
 
-**[PENDENTE]** Bagre é uma classificação exclusiva do método 1. Ela não cria um oitavo rank na curva e não separa Ruim de Terrível, que continuam valores distintos no método 2 (0,163 contra 0,130 a 100%). Quem precisar dessa distinção deve usar o sigma medido do método 2.
+**Decisão de produto (2026-09-14):** Bagre é o rótulo do método 1 para `1 1 1 1 1 1`. Não cria um oitavo rank na curva e **não** corta Ruim versus Terrível. Ruim (0,163 a 100%) e Terrível (0,130 a 100%) continuam valores distintos na curva da seção 3.1 e no método 2. O Lab V1 classifica **só pelo método 1** (barra); **não** oferece teste por ganho de pontos na interface. Quem precisar da distinção mede sigma pelo método 2, fora da UI.
 
 ---
 
@@ -366,7 +366,7 @@ Exemplo real (ST com brancos Passe, Chute, Velocidade, Finalização, Drible, Po
 
 ## 5. Talento do jogador
 
-Variável mais importante do Laboratório, e que o jogo **não mostra em lugar nenhum**. Existem dois métodos de medir. O fluxo atual do Lab oferece o método 1; o motor também mantém o método 2 quantitativo.
+Variável mais importante do Laboratório, e que o jogo **não mostra em lugar nenhum**. Existem dois métodos de medir. **Decisão de produto (2026-09-14):** o Lab V1 oferece **só o método 1** (barra). O motor mantém o método 2 (sigma) para a curva de ganho e para quem medir fora da interface; a V1 **não** oferece esse teste na UI.
 
 ### Método 1 — teste de habilidade especial ou posição nova
 
@@ -382,6 +382,8 @@ Variável mais importante do Laboratório, e que o jogo **não mostra em lugar n
 | Bagre | `1 1 1 1 1 1` |
 
 Sequências que usam apenas 1 e 2, mas não casam exatamente com a tabela, são inválidas. Exemplo: `1 2 1 2 2 2`.
+
+**Decisão de produto (2026-09-14):** a idade **não entra** no teste do método 1. A classificação usa só a sequência 1/2/3 das 6 sessões. A idade continua no fator da seção 3.2 quando o Lab projeta ganho; não entra no classificador.
 
 **Custo do método:** consome o treino de uma habilidade especial ou posição, que não pode ser trocada depois de iniciada. Por isso existe o método 2.
 
@@ -415,13 +417,11 @@ Depois basta olhar a coluna da média do exercício e ver em que linha de talent
 
 Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e média de 55%. Pela fórmula, `31 ÷ (5 × 18) = 0,344`, que a 55% de média cai entre Ótima (0,301) e Excelente (0,366). O mesmo jogador confirmou o padrão Ótimo no método 1. **Os dois métodos concordam**, e a curva reproduz a medição de campo.
 
-**Por que este método continua no motor:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab sabe calcular e pode verificar antes de aceitar o teste.
+**Por que este método continua no motor, e não na UI da V1:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab sabe calcular. Fica disponível para quem medir sigma fora da interface. A V1 **não** oferece o teste por ganho de pontos.
 
 **[COMUNIDADE]** Vale fazer o teste cedo, com o jogador ainda cru. Jogador já desenvolvido rende menos por sessão e o resultado sai distorcido.
 
-**[PENDENTE] O teste não isola a idade.** O procedimento exige treino classe mundial para padronizar aquele multiplicador, mas o sigma medido também carrega o fator da seção 3.2. Testar um jogador de 26 anos e ler a tabela direto o classifica um ou dois ranks abaixo do real. A leitura adotada pelo produto é **dividir o sigma medido pelo fator de idade antes de consultar a tabela** — decisão nossa, não do material da comunidade, e ainda não validada com ela.
-
-Enquanto isso não se resolve, a saída barata é fazer o teste **antes dos 22 anos**, onde o fator é 1,00 e não há correção a aplicar. É o que a recomendação acima já diz por outro motivo, e é o que o Lab deve sugerir ao usuário.
+**Decisão de produto (2026-09-14):** o classificador **não** aplica fator de idade. O sigma medido do método 2 carrega o fator da seção 3.2, mas o produto **não** divide esse sigma pelo fator para "corrigir" o rank — isso seria inventar um ajuste sem validação de campo. A idade entra só na curva de ganho da seção 3.2, na projeção. O teste da V1 é o método 1, que classifica pela sequência e não usa idade.
 
 **[COMUNIDADE]** Para treinar habilidade especial ou posição nova, os drills mais citados são Contra-Ataque Rápido, Academia e Arrancada.
 
@@ -444,8 +444,8 @@ Só há coeficientes para 18, 19 e 20 anos — é um método de scout de jovem, 
 ### Como o produto usa
 
 1. **Já sei o rank** — escolhe direto.
-2. **Não sei** — o fluxo atual pede os ganhos de 6 sessões do método 1, mostra a tabela completa e classifica apenas sequências válidas.
-3. **Preciso separar Ruim de Terrível** — usar o método 2 quantitativo, porque Bagre não resolve esse corte.
+2. **Não sei** — o fluxo da V1 pede os ganhos de 6 sessões do método 1, mostra a tabela completa e classifica apenas sequências válidas. Idade não entra.
+3. **Separar Ruim de Terrível** — fora da UI da V1. Bagre não corta esses ranks; quem precisar mede sigma pelo método 2, fora do Lab.
 
 A extrapolação do rank para condições diferentes das do teste — um drill com média em 130%, um jogador de 26 anos, treino profissional em vez de classe mundial — **está resolvida** pelas seções 3.1 e 3.2. O rank é um ponto na tabela; a curva faz o resto.
 
@@ -717,7 +717,7 @@ Cada teste de talento que o usuário rodar produz exatamente o dado que falta �
 
 ### Resolvidas
 
-Brancos por posição (matriz da seção 2, derivada e editável), atributos do goleiro (seção 2), slots por sessão (6), teto de treino (180% por exercício), **curva de ganho por talento e média do exercício (seção 3.1)**, **efeito quantitativo da idade (seção 3.2)**, **custo de condicionamento por drill (seção 4)**, **conversão de condicionamento em maletas (seção 9)**, nível do treinador (seção 3.1), média do time (14 mais fortes), teste de talento (fórmula de sigma, seção 5), perda de virada (20 em todo atributo e no overall, evento único — seção 7), piso de cinza (não existe — seção 8.1), e o algoritmo de cronograma por posição, validado contra o cronograma de MC ditado em vídeo (seção 6).
+Brancos por posição (matriz da seção 2, derivada e editável), atributos do goleiro (seção 2), slots por sessão (6), teto de treino (180% por exercício), **curva de ganho por talento e média do exercício (seção 3.1)**, **efeito quantitativo da idade (seção 3.2)**, **custo de condicionamento por drill (seção 4)**, **conversão de condicionamento em maletas (seção 9)**, nível do treinador (seção 3.1), média do time (14 mais fortes), teste de talento da V1 pelo método 1 (idade fora do classificador; Bagre sem corte Ruim/Terrível — seção 5; método 2 só no motor), perda de virada (20 em todo atributo e no overall, evento único — seção 7), piso de cinza (não existe — seção 8.1), e o algoritmo de cronograma por posição, validado contra o cronograma de MC ditado em vídeo (seção 6).
 
 ---
 
