@@ -2,7 +2,7 @@
 
 > Referência técnica e regras de trabalho do repositório. Este projeto não usa `CLAUDE.md`: tudo o que um agente precisa saber está aqui.
 >
-> O **porquê** do produto: [`PRD.md`](PRD.md). As **regras do jogo**: [`docs/GAME-RULES.md`](docs/GAME-RULES.md). As **etapas**: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> O **porquê** do produto: [`PRD.md`](PRD.md). As **regras do jogo**: [`docs/GAME-RULES.md`](docs/GAME-RULES.md). As **etapas**: [`docs/ROADMAP.md`](docs/ROADMAP.md). O **estado operacional** (fila, andamento, bloqueador, próximo passo) vive no [projeto Linear Top Eleven Lab](https://linear.app/thegal/project/top-eleven-lab-f4819f00d0c5) — os docs do git não espelham o board.
 >
 > Este arquivo descreve o sistema. Quando o código e este arquivo discordarem, um dos dois está errado. Resolva antes de seguir.
 
@@ -214,6 +214,14 @@ Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostr
 ## Como trabalhar neste repositório
 
 Regras de trabalho válidas para qualquer pessoa ou agente que mexer no projeto.
+
+### Linear e documentação
+
+- **Linear** (projeto [Top Eleven Lab](https://linear.app/thegal/project/top-eleven-lab-f4819f00d0c5), time Thegal) é a fonte de verdade do estado operacional: o que está na fila, o que está em andamento, o que bloqueia, o que vem a seguir.
+- Os documentos no git são contratos, regras, roadmap estável e, se um dia existir, ledger de evidência — **não** um segundo kanban.
+- Não criar `PROGRESS.md` nem qualquer arquivo que espelhe colunas do board (In Progress, próximo passo, bloqueador atual).
+- Não sincronizar Linear ↔ markdown. Se um ledger de evidência for criado, o cabeçalho aponta ao Linear e o corpo fica histórico; o estado vivo não mora nele.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) é o plano de produto (etapas da V1). Não apagar. Não tratar como board.
 
 ### Idioma
 
