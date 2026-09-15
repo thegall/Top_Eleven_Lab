@@ -1,12 +1,10 @@
 # Roadmap — Top Eleven Lab
 
-> As etapas do projeto e onde ele está. Uma etapa por commit, salvo onde indicado.
+> Plano de produto: as etapas da V1. Não é o board — estado operacional (fila, andamento, próximo passo) vive no [projeto Linear Top Eleven Lab](https://linear.app/thegal/project/top-eleven-lab-f4819f00d0c5).
 >
-> Contexto de produto: [`PRD.md`](../PRD.md). Regras do jogo: [`GAME-RULES.md`](GAME-RULES.md). Referência técnica: [`AGENTS.md`](../AGENTS.md).
+> Uma etapa por commit, salvo onde indicado. Contexto de produto: [`PRD.md`](../PRD.md). Regras do jogo: [`GAME-RULES.md`](GAME-RULES.md). Referência técnica: [`AGENTS.md`](../AGENTS.md).
 
 ## Etapa 1 — Documentação
-
-**Em andamento.**
 
 Fechar o repositório como documento antes de escrever a primeira linha de código. O projeto é open source e vai ficar exposto; quem chegar pelo GitHub precisa entender o que é, por que existe e como as regras foram levantadas.
 
@@ -20,9 +18,7 @@ Fechar o repositório como documento antes de escrever a primeira linha de códi
 
 ## Etapa 2 — Setup, CI e Dependabot
 
-**Concluída.** PR #1.
-
-Setup mínimo do projeto e a esteira que vai validar tudo daqui pra frente. O setup entra junto porque CI sem nada para rodar não prova nada.
+Setup mínimo do projeto e a esteira que vai validar tudo daqui pra frente. Entrega no PR #1. O setup entra junto porque CI sem nada para rodar não prova nada.
 
 - [x] `package.json` com npm, `tsconfig.json` em modo estrito, Vitest e ESLint
 - [x] Primeira peça do domínio, com teste: custo de condicionamento por dificuldade
@@ -36,8 +32,6 @@ CI antes do motor, e não depois, porque o valor do TDD some se a bateria de tes
 O Next.js fica de fora desta etapa. O motor da etapa 5 é TypeScript puro e não precisa dele; instalar framework antes de usar deixa dependência parada envelhecendo no `package.json`. O step de build entra no CI junto com o Next, na etapa 6.
 
 ## Etapa 3 — Arquitetura
-
-**Em andamento.** Branch `docs/architecture`.
 
 - [x] `docs/ARCHITECTURE.md` — requisitos apurados, camadas, estrutura de pastas, estado, tabelas de regra, projeção, testes, riscos e suposições
 - [x] `docs/adr/` — nove decisões, uma por arquivo
@@ -91,8 +85,6 @@ Primeira tela real, e a mais simples: três campos por jogador. Também é a que
 - [ ] Estimativa de sessões e de maletas, sempre como faixa
 
 ## Etapa 8 — Mobile e acabamento
-
-**Concluída.**
 
 - [x] Layout paisagem no mobile
 - [x] Acessibilidade básica: contraste, foco visível, navegação por teclado

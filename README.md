@@ -26,7 +26,9 @@ Três delas foram conferidas por script antes de virarem documento:
 
 ## Estado do projeto
 
-Documentação escrita, código ainda não. As próximas etapas estão em [`docs/ROADMAP.md`](docs/ROADMAP.md).
+O estado operacional (o que está em andamento, o que bloqueia, o que vem a seguir) vive no [projeto Linear Top Eleven Lab](https://linear.app/thegal/project/top-eleven-lab-f4819f00d0c5). Os documentos neste repositório são contratos, regras e o plano de produto — não um segundo kanban.
+
+As etapas planejadas da V1 estão em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Stack
 
@@ -41,7 +43,7 @@ O motor de cálculo é TypeScript puro, isolado de framework. Ele não importa R
 | [`PRD.md`](PRD.md) | Por que o produto existe, para quem, e o que ficou fora da V1 |
 | [`docs/GAME-RULES.md`](docs/GAME-RULES.md) | As regras do jogo, com fórmulas, origem e validação |
 | [`AGENTS.md`](AGENTS.md) | Referência técnica: fluxos, tipos, schemas e decisões |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | As etapas do projeto e onde ele está |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Plano de produto: as etapas da V1 (não é o board) |
 
 ## Contribuindo
 
