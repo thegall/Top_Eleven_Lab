@@ -189,7 +189,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-3;
 
 /* ---- lista de elenco ---- */
 /* Faixas iguais no cabeçalho e em cada linha — grids separados não compartilham `auto`. */
-.elenco{--squad-cols:36px minmax(72px,1fr) 56px 56px 92px 10rem 80px;width:100%;overflow-x:auto}
+/* a faixa de posição cabe o pior caso: três posições de três letras
+   ("DMC+AMC+AMR" mede 114px), senão o badge corta com reticências. */
+.elenco{--squad-cols:36px minmax(72px,1fr) 56px 56px 120px 10rem 80px;width:100%;overflow-x:auto}
 .thead,.row{display:grid;grid-template-columns:var(--squad-cols);
   grid-template-areas:"rank name age ovr pos sale act";gap:var(--s-xs);align-items:center;
   justify-items:stretch;text-align:center;padding:0 14px;border-left:3px solid transparent}
@@ -464,7 +466,9 @@ h3.sub{font:600 11px/1.3 var(--font-ui),Inter,sans-serif}
   .row-edit .seletor-posicao,.row-edit__btns{grid-column:1/-1}
 }
 @container (max-width: 520px){
-  .elenco{--squad-cols:22px minmax(72px,1fr) 36px 40px 56px 6.75rem 64px}
+  .elenco{--squad-cols:22px minmax(72px,1fr) 36px 40px 104px 6.75rem 64px}
+  /* badge menor para as três posições caberem sem alargar a linha inteira */
+  .row__pos .pos{padding:4px 6px;font-size:10px;letter-spacing:.3px}
   .row,.thead{gap:4px;padding:0 8px;min-width:26rem}
   .row{min-height:auto;padding-top:6px;padding-bottom:6px}
   .row__act .btn{height:36px}
