@@ -9,6 +9,7 @@ import { exportarJSON, importarJSON } from '../state/transfer';
 import { CalloutRegra } from '../ui/callout-regra';
 import { classeBadgePosicao } from '../ui/posicao';
 import { SeletorPosicao } from '../ui/seletor-posicao';
+import { EscudoTalento, rotuloTalento } from '../ui/talento';
 import { POSITION_FIELD_ORDER, sortSquadPlayers, type SquadOrder } from './squad-order';
 
 const SQUAD_ORDER_LABELS: Record<SquadOrder, string> = {
@@ -16,6 +17,7 @@ const SQUAD_ORDER_LABELS: Record<SquadOrder, string> = {
   name: 'nome',
   age: 'idade',
   position: 'posição',
+  talent: 'talento',
 };
 /** Faixa de idade coberta pela curva de treino (GAME-RULES §3.2). */
 const PLAYER_AGE_MIN = 18;
@@ -340,6 +342,7 @@ export default function SquadPage() {
                   <option value="name">Nome</option>
                   <option value="age">Idade</option>
                   <option value="position">Posição</option>
+                  <option value="talent">Talento</option>
                 </select>
               </div>
             </div>
@@ -355,6 +358,9 @@ export default function SquadPage() {
                     </span>
                     <span role="columnheader" className="row__name">
                       Jogador
+                    </span>
+                    <span role="columnheader" className="row__tal">
+                      Talento
                     </span>
                     <span role="columnheader" className="row__age">
                       Idade
@@ -377,7 +383,7 @@ export default function SquadPage() {
                       <Fragment key={linha.jogador.id}>
                         {editandoId === linha.jogador.id ? (
                           <form className="row-edit" role="row" onSubmit={aoSalvarEdicao}>
-                            <div className="row-edit__fields" role="cell" aria-colspan={7}>
+                            <div className="row-edit__fields" role="cell" aria-colspan={8}>
                               <div className="field">
                                 <label htmlFor={`edit-nome-${linha.jogador.id}`}>Nome</label>
                                 <input
@@ -459,6 +465,20 @@ export default function SquadPage() {
                             {linha.jogador.vendido && <span className="tag tag--loss">Vendido</span>}
                             {linha.promovido && (
                               <span className="tag tag--gain">Subiu para os 14</span>
+                            )}
+                          </span>
+                          <span role="cell" className="row__tal">
+                            {linha.jogador.lab?.talento ? (
+                              <span
+                                className="talento talento--sm"
+                                data-rank={linha.jogador.lab.talento}
+                              >
+                                <EscudoTalento rank={linha.jogador.lab.talento} />
+                                <span className="visually-hidden">Talento: </span>
+                                <b>{rotuloTalento(linha.jogador.lab.talento)}</b>
+                              </span>
+                            ) : (
+                              '—'
                             )}
                           </span>
                           <span role="cell" className="row__age num">

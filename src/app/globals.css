@@ -106,6 +106,8 @@ body::before{content:"";position:fixed;inset:0;z-index:-3;
 .panel__head h2{margin:0;font:700 19px/1.2 var(--font-ui),Inter,sans-serif;letter-spacing:.3px;text-transform:uppercase}
 .panel__head .hint{margin-left:auto;font:500 12px/1.35 var(--font-ui),Inter,sans-serif;color:var(--muted);text-transform:none;letter-spacing:0}
 .panel__head--season .btn--season{margin-left:auto}
+/* fita de estrelas do jogo, encostada à direita do cabeçalho (public/estrelas.png) */
+.panel__head .estrelas{margin-left:auto;width:min(230px,42%);height:auto}
 .panel__lede{margin:0 2px 10px;font:500 12px/1.35 var(--font-ui),Inter,sans-serif;color:var(--muted)}
 .gicon{width:26px;height:26px;border-radius:var(--r-sm);display:grid;place-items:center;
   background:var(--group-physical);color:var(--on-primary);font:700 13px/1 var(--font-ui),Inter,sans-serif}
@@ -192,9 +194,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-3;
 /* Faixas iguais no cabeçalho e em cada linha — grids separados não compartilham `auto`. */
 /* a faixa de posição cabe o pior caso: três posições de três letras
    (três retângulos de 42px mais os vãos medem 134px). */
-.elenco{--squad-cols:36px minmax(72px,1fr) 56px 56px 140px 10rem 80px;width:100%;overflow-x:auto}
+.elenco{--squad-cols:36px minmax(72px,1fr) 138px 56px 56px 140px 10rem 80px;width:100%;overflow-x:auto}
 .thead,.row{display:grid;grid-template-columns:var(--squad-cols);
-  grid-template-areas:"rank name age ovr pos sale act";gap:var(--s-xs);align-items:center;
+  grid-template-areas:"rank name tal age ovr pos sale act";gap:var(--s-xs);align-items:center;
   justify-items:stretch;text-align:center;padding:0 14px;border-left:3px solid transparent}
 .thead{padding:0 14px 6px;font:600 11px/1.3 var(--font-ui),Inter,sans-serif;letter-spacing:1.2px;
   text-transform:uppercase;color:var(--muted)}
@@ -204,11 +206,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-3;
 .row--top{background:var(--surface-bright);color:var(--ink);border-left-color:var(--gold)}
 .row--sold{background:var(--surface-muted);color:var(--muted);border-left-color:var(--loss)}
 .row--promoted{border-left-color:var(--gain)}
-.row__rank,.row__age,.row__ovr,.row__pos,.row__sale,.row__act{min-width:0}
+.row__rank,.row__tal,.row__age,.row__ovr,.row__pos,.row__sale,.row__act{min-width:0}
 .row__rank{grid-area:rank}
 .row__name{grid-area:name;min-width:0;text-align:left}
 .row__age{grid-area:age}
 .row__ovr{grid-area:ovr}
+.row__tal{grid-area:tal;display:flex;align-items:center;justify-content:center}
 .row__pos{grid-area:pos;display:flex;align-items:center;justify-content:center;gap:4px}
 .row__sale{grid-area:sale;display:flex;align-items:center;justify-content:center}
 .row__act{grid-area:act;display:flex;justify-content:center;align-items:center;gap:4px;flex-wrap:nowrap}
@@ -298,18 +301,33 @@ body::before{content:"";position:fixed;inset:0;z-index:-3;
 .ficha__talento{display:inline-flex;align-items:center;gap:var(--s-xs);margin-left:auto}
 .ficha__talento .btn--secondary{height:36px;padding:0 14px}
 #teste-talento{scroll-margin-top:calc(var(--topbar-h) + env(safe-area-inset-top,0px) + 12px)}
-.talento{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-sm);
+/* Card no tamanho da logo do topo (206x48 = 48px de altura na proporção 686/160),
+   igual para toda classificação: a maior é "Bom Jogador", que pede 119px. */
+.talento{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  width:206px;height:48px;padding:4px 10px;border-radius:var(--r-sm);
   background:var(--surface-bright);color:var(--ink);border-left:3px solid var(--rank-normal);
   font:600 11px/1.3 var(--font-ui),Inter,sans-serif;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap}
 .talento b{font-weight:700}
+/* escudo da classificação — arte do jogo recortada, em public/talento-*.png */
+.escudo{width:50px;height:50px;object-fit:contain;vertical-align:middle;margin-right:8px}
+/* o escudo transborda o chip: a barra da ficha mantém a altura de antes */
+.talento .escudo{width:60px;height:60px;margin-right:0;margin-block:-19px}
 .talento--empty{border-left-color:var(--hairline-strong);color:var(--muted)}
-.talento[data-rank=fenomeno]{border-left-color:var(--rank-fenomeno)}
-.talento[data-rank=excelente]{border-left-color:var(--rank-excelente)}
-.talento[data-rank=otima]{border-left-color:var(--rank-otima)}
-.talento[data-rank=boa]{border-left-color:var(--rank-boa)}
-.talento[data-rank=normal]{border-left-color:var(--rank-normal)}
-.talento[data-rank=ruim],.talento[data-rank=bagre]{border-left-color:var(--rank-ruim)}
-.talento[data-rank=terrivel]{border-left-color:var(--rank-terrivel)}
+.talento[data-rank=fenomeno]{border-left-color:var(--rank-fenomeno);--card:url("/card-lenda.jpg")}
+.talento[data-rank=excelente]{border-left-color:var(--rank-excelente);--card:url("/card-genio.jpg")}
+.talento[data-rank=otima]{border-left-color:var(--rank-otima);--card:url("/card-craque.jpg")}
+.talento[data-rank=boa]{border-left-color:var(--rank-boa);--card:url("/card-bom-jogador.jpg")}
+.talento[data-rank=normal]{border-left-color:var(--rank-normal);--card:url("/card-normal.jpg")}
+.talento[data-rank=ruim],.talento[data-rank=bagre]{border-left-color:var(--rank-ruim);--card:url("/card-bagre.jpg")}
+.talento[data-rank=terrivel]{border-left-color:var(--rank-terrivel);--card:url("/card-bagre.jpg")}
+/* classificado: o card veste a textura do próprio rank (public/card-*.jpg). O véu
+   escuro é o que segura o contraste do texto — Bagre e Normal são claros demais crus. */
+.talento[data-rank]{background:linear-gradient(rgba(8,12,20,.46),rgba(8,12,20,.58)),var(--card) center/cover;
+  color:var(--on-canvas);text-shadow:0 1px 2px rgba(0,0,0,.55);border-left-color:transparent}
+/* mesmo card na linha do elenco: caixa e escudo ~33% menores que os do
+   cabeçalho do Lab, com a fonte no mesmo corpo de 11px para continuar legível */
+.talento--sm{width:138px;height:32px;gap:4px;padding:4px 7px;font-size:11px;letter-spacing:.6px}
+.talento--sm .escudo{width:40px;height:40px;margin-right:0;margin-block:-4px}
 .talento-manual{margin:var(--s-sm) 0}
 
 /* grade de atributos: 3 grupos lado a lado, como no jogo */
@@ -445,8 +463,10 @@ h3.sub{font:600 11px/1.3 var(--font-ui),Inter,sans-serif}
 
 /* ---- container: o formulário e a tabela acompanham a coluna, não a viewport ---- */
 @media (min-width:1025px){
+  /* A última faixa é 1fr para o painel de exercícios, que cruza duas linhas, não
+     distribuir a própria altura na linha 3 e abrir um vão sob a Sessão recomendada. */
   .lab-page{display:grid;grid-template-columns:minmax(0,7fr) minmax(420px,5fr);
-    grid-template-rows:auto auto auto auto;align-items:start}
+    grid-template-rows:auto auto auto 1fr;align-items:start}
   .lab-page > .ficha{grid-column:1 / -1;grid-row:1}
   .lab-page > .ficha + .panel{grid-column:1 / -1;grid-row:2}
   .lab-page > .ficha + .panel + .panel{grid-column:2;grid-row:3;margin-top:0}
@@ -470,7 +490,7 @@ h3.sub{font:600 11px/1.3 var(--font-ui),Inter,sans-serif}
   .row-edit .seletor-posicao,.row-edit__btns{grid-column:1/-1}
 }
 @container (max-width: 520px){
-  .elenco{--squad-cols:22px minmax(72px,1fr) 36px 40px 104px 6.75rem 64px}
+  .elenco{--squad-cols:22px minmax(72px,1fr) 138px 36px 40px 104px 6.75rem 64px}
   /* retângulos menores para as três posições caberem sem alargar a linha inteira */
   .row__pos{gap:3px}
   .row__pos .pos{width:32px;height:20px;font-size:10px;letter-spacing:.2px}
@@ -502,6 +522,8 @@ h3.sub{font:600 11px/1.3 var(--font-ui),Inter,sans-serif}
   .lhead,.line{grid-template-columns:minmax(0,1fr) 56px 60px}
   .lhead .c-meter,.line .c-meter{display:none}
   .field input,.field select,.seletor-posicao__trigger,.attr__input,.ficha select{font-size:16px}
+  /* chip de talento + botão não cabem lado a lado com o escudo grande */
+  .ficha__talento{flex-wrap:wrap}
   .posgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .band{grid-template-columns:minmax(0,1fr)}
   .stage .hero h1{font-size:36px}

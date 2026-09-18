@@ -11,11 +11,12 @@ import {
   type SpecialAbilityRank,
 } from '../../domain/talent';
 import { conditionCostPerSession } from '../../domain/training';
-import type { Atributo, Posicao, RankTalento } from '../../domain/types';
+import type { Atributo, Posicao } from '../../domain/types';
 import type { DadosLab, Jogador, TalentoLab } from '../../state/schema';
 import { useSquad } from '../../state/store';
 import { CalloutRegra } from '../../ui/callout-regra';
 import { classeBadgePosicao } from '../../ui/posicao';
+import { EscudoTalento, rotuloTalento } from '../../ui/talento';
 import { sortSquadPlayers } from '../squad-order';
 
 const LABELS: Record<Atributo, string> = {
@@ -46,23 +47,6 @@ const GRUPOS = [
   },
 ] as const satisfies readonly { titulo: string; classe: string; atributos: Atributo[] }[];
 
-const RANK_LABELS: Record<RankTalento, string> = {
-  // Ruim e Terrível são a mesma coisa para o jogador: as duas chamam Bagre
-  // (GAME-RULES §3.1, nomenclatura de 2026-09-18). A curva mantém os dois sigmas.
-  terrivel: 'Bagre',
-  ruim: 'Bagre',
-  normal: 'Normal',
-  boa: 'Bom Jogador',
-  otima: 'Craque',
-  excelente: 'Gênio',
-  fenomeno: 'Lenda',
-};
-
-function rotuloTalento(rank: TalentoLab): string {
-  const especial = SPECIAL_ABILITY_PATTERNS.find((pattern) => pattern.rank === rank);
-  if (especial) return especial.label;
-  return RANK_LABELS[rank as RankTalento];
-}
 
 const CATEGORIA_DOT: Record<string, string> = {
   ataque: 'dot c-atk',
@@ -309,7 +293,9 @@ export default function LaboratorioPage() {
                   className={`talento${resultLabel ? '' : ' talento--empty'}`}
                   data-rank={talentoAtual ?? undefined}
                 >
-                  Talento: <b>{resultLabel ?? 'não classificado'}</b>
+                  {talentoAtual && <EscudoTalento rank={talentoAtual} />}
+                  <span className="visually-hidden">Talento: </span>
+                  <b>{resultLabel ?? 'não classificado'}</b>
                 </span>
                 <button className="btn btn--secondary" type="button" onClick={aoAbrirTesteTalento}>
                   {editandoTalento ? 'Cancelar' : lab.talento ? 'Reclassificar' : 'Classificar'}
@@ -607,6 +593,7 @@ export default function LaboratorioPage() {
                 >
                   <div className="panel__head">
                     <h2>Teste de talento</h2>
+                    <img className="estrelas" src="/estrelas.png" alt="" width={520} height={41} />
                   </div>
 
                   <p className="note">
@@ -698,7 +685,10 @@ export default function LaboratorioPage() {
                       <tbody>
                         {SPECIAL_ABILITY_PATTERNS.map((pattern) => (
                           <tr key={pattern.rank}>
-                            <th scope='row'>{pattern.label}</th>
+                            <th scope='row'>
+                              <EscudoTalento rank={pattern.rank} />
+                              {pattern.label}
+                            </th>
                             <td className='num'>
                               {pattern.points?.join(' ') ?? 'Qualquer sequência com 3'}
                             </td>
