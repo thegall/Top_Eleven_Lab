@@ -51,6 +51,8 @@ Correção de regra do jogo é a contribuição mais valiosa. Se alguma coisa em
 
 Para código, os testes vêm antes da implementação e os commits seguem o padrão semântico (`feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`).
 
+Pull requests para a `main` só entram com o CI verde: a branch está protegida e exige o check de qualidade antes do merge.
+
 ## Licença
 
 [MIT](LICENSE).
