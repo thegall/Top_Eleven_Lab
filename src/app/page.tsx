@@ -242,33 +242,35 @@ export default function SquadPage() {
 
   return (
     <>
-      <div className="hero">
-        <h1>Squad</h1>
-        <p className="hero__lead">
-          Simulador da média dos 14 mais fortes, o número que define
-          <br />
-          contra quem você joga na próxima temporada.
-        </p>
-        <p className="hero__actions">
-          <button className="btn btn--secondary" type="button" onClick={() => exportar(documento)}>
-            Exportar elenco
-          </button>
-          <label className="btn btn--secondary hero__import">
-            Importar elenco
-            <input
-              type="file"
-              accept="application/json"
-              className="visually-hidden"
-              onChange={(e) => void aoImportar(e)}
-            />
-          </label>
-        </p>
-        {erroImportacao && (
-          <p className="hero__erro" role="alert">
-            {erroImportacao}
+      <section className="stage">
+        <div className="hero">
+          <h1>Squad</h1>
+          <p className="hero__lead">
+            Simulador da média dos 14 mais fortes, o número que define
+            <br />
+            contra quem você joga na próxima temporada.
           </p>
-        )}
-      </div>
+          <p className="hero__actions">
+            <button className="btn btn--secondary" type="button" onClick={() => exportar(documento)}>
+              Exportar elenco
+            </button>
+            <label className="btn btn--secondary hero__import">
+              Importar elenco
+              <input
+                type="file"
+                accept="application/json"
+                className="visually-hidden"
+                onChange={(e) => void aoImportar(e)}
+              />
+            </label>
+          </p>
+          {erroImportacao && (
+            <p className="hero__erro" role="alert">
+              {erroImportacao}
+            </p>
+          )}
+        </div>
+      </section>
 
       <main className="page">
         <div>

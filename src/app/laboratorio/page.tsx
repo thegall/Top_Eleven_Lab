@@ -258,10 +258,14 @@ export default function LaboratorioPage() {
 
   return (
     <>
-      <div className="hero">
-        <h1>Laboratório</h1>
-        <p>Simulador de treino, um jogador por vez. Qual exercício rende mais neste jogador agora.</p>
-      </div>
+      <section className="stage">
+        <div className="hero">
+          <h1>Laboratório</h1>
+          <p>
+            Simulador de treino, um jogador por vez. Qual exercício rende mais neste jogador agora.
+          </p>
+        </div>
+      </section>
 
       <main className="lab-page">
         {!selecionado || !lab ? (
