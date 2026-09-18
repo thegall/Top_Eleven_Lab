@@ -468,9 +468,11 @@ export default function SquadPage() {
                             {linha.jogador.overall}
                           </span>
                           <span role="cell" className="row__pos">
-                            <span className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}>
-                              {linha.jogador.posicoes.join('+')}
-                            </span>
+                            {linha.jogador.posicoes.map((posicao) => (
+                              <span key={posicao} className={classeBadgePosicao(posicao)}>
+                                {posicao}
+                              </span>
+                            ))}
                           </span>
                           <span role="cell" className="row__sale">
                             {linha.jogador.vendido ? (
