@@ -236,7 +236,7 @@ Regras de trabalho válidas para qualquer pessoa ou agente que mexer no projeto.
 - Commits semânticos: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`, `style:`.
 - **Commitar só quando pedido.** Nunca commitar por iniciativa própria.
 - Trabalhar em branch, nunca direto na `main`. Uma branch por etapa do roadmap, nomeada `<tipo>/<descrição-curta>` em inglês, com o tipo casando com o prefixo do commit: `chore/setup-ci`, `feat/squad-tab`, `docs/architecture`.
-- A `main` não tem proteção enquanto o repositório for privado e de uma pessoa só. O CI roda e reporta, sem bloquear. Isso muda quando o repositório abrir.
+- A `main` tem branch protection exigindo status checks do CI (job Qualidade) verdes antes do merge. Sem check verde, o merge não passa.
 - **Merge é sempre humano.** Agente abre pull request e para. Não mergeia, não fecha PR alheio, não faz push direto na `main`. A revisão antes do merge é o último ponto em que alguém olha o que entrou no projeto, e ele não é automatizável.
 
 ### Testes
