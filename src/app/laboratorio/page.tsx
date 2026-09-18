@@ -47,13 +47,15 @@ const GRUPOS = [
 ] as const satisfies readonly { titulo: string; classe: string; atributos: Atributo[] }[];
 
 const RANK_LABELS: Record<RankTalento, string> = {
-  terrivel: 'Terrível',
-  ruim: 'Ruim',
+  // Ruim e Terrível são a mesma coisa para o jogador: as duas chamam Bagre
+  // (GAME-RULES §3.1, nomenclatura de 2026-09-18). A curva mantém os dois sigmas.
+  terrivel: 'Bagre',
+  ruim: 'Bagre',
   normal: 'Normal',
-  boa: 'Boa',
-  otima: 'Ótima',
-  excelente: 'Excelente',
-  fenomeno: 'Fenômeno',
+  boa: 'Bom Jogador',
+  otima: 'Craque',
+  excelente: 'Gênio',
+  fenomeno: 'Lenda',
 };
 
 function rotuloTalento(rank: TalentoLab): string {
@@ -721,7 +723,7 @@ export default function LaboratorioPage() {
                   )}
 
                   <CalloutRegra marca="comunidade" secao="§5">
-                    A sequência precisa casar exatamente com a tabela. A única exceção é Fenômeno:
+                    A sequência precisa casar exatamente com a tabela. A única exceção é Lenda:
                     basta aparecer um 3 em qualquer uma das 6 sessões.
                   </CalloutRegra>
                 </section>

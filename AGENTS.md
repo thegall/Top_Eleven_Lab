@@ -72,11 +72,13 @@ Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive 
 ```
 1. Usuário treina habilidade especial ou posição nova e anota 1, 2 ou 3 em cada uma das 6 sessões
 2. App classifica só pela sequência (GAME-RULES §5, método 1) — idade não entra
-3. Qualquer 3 → Fenômeno; `1 1 1 1 1 1` → Bagre; demais linhas da tabela
+3. Qualquer 3 → Lenda; `1 1 1 1 1 1` → Bagre; demais linhas da tabela (Gênio, Craque, Bom Jogador, Normal)
 4. Sequência que não casa é recusada, em vez de devolver um rank errado
 ```
 
-O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam ranks distintos nessa curva. Bagre **não** mapeia para nenhum dos dois.
+O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam linhas distintas nessa curva. Bagre é o nome das duas (GAME-RULES §3.1, nomenclatura de 2026-09-18) e **não** escolhe uma delas: o classificador do método 1 devolve `bagre` como valor próprio.
+
+Os rótulos do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`): Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela.
 
 ## Contratos internos
 
@@ -127,7 +129,7 @@ interface Drill {
 
 - Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador.
 - Exercício com média em 180% rende **zero**. A planilha da comunidade erra nisso; nós não.
-- `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre não mapeia para Ruim nem Terrível.
+- `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre nomeia Ruim e Terrível sem escolher uma das duas.
 - `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado. Fica no motor; a UI da V1 não o chama.
 - Toda projeção sai como **faixa**, nunca como número exato — a conversão de atributo em overall é o único elo estimado do modelo (GAME-RULES §11).
 
