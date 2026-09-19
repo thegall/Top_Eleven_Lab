@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { DadosLab, Jogador, PosicaoJogador, TalentoLab } from '../state/schema';
+import type { DadosLabLinha, Jogador, PosicaoJogador, TalentoLab } from '../state/schema';
 import { sortSquadPlayers } from './squad-order';
 
 function player(
@@ -26,7 +26,7 @@ function comTalento(nome: string, talento: TalentoLab | null): Jogador {
   if (talento === null) return base;
   return {
     ...base,
-    lab: { atributos: {} as DadosLab['atributos'], brancosOverride: null, talento },
+    lab: { atributos: {} as DadosLabLinha['atributos'], brancosOverride: null, talento },
   };
 }
 

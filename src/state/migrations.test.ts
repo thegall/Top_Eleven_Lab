@@ -109,6 +109,67 @@ describe('migrar', () => {
     expect(migrar(bruto)).toEqual(bruto);
   });
 
+  const atributosGoleiro = {
+    reflexos: 50,
+    agilidade: 50,
+    antecipacao: 50,
+    sairNaBola: 50,
+    comunicacao: 50,
+    arremesso: 50,
+    chutar: 50,
+    espalmar: 50,
+    jogoAereo: 50,
+    concentracao: 50,
+    condicionamento: 50,
+    forca: 50,
+    agressividade: 50,
+    velocidade: 50,
+    criatividade: 50,
+  };
+
+  it('aceita a ficha de goleiro no lab de um GK (GAME-RULES §2)', () => {
+    const bruto = {
+      schemaVersion: 2,
+      jogadores: [
+        {
+          ...jogadorBase,
+          idade: 21,
+          posicoes: ['GK'],
+          lab: { atributos: atributosGoleiro, brancosOverride: ['reflexos'], talento: 'otima' },
+        },
+      ],
+    };
+    expect(migrar(bruto)).toEqual(bruto);
+  });
+
+  it('cada posição exige a sua ficha: goleiro com atributos de linha, e o inverso, são recusados', () => {
+    expect(() =>
+      migrar({
+        schemaVersion: 2,
+        jogadores: [
+          {
+            ...jogadorBase,
+            idade: 21,
+            posicoes: ['GK'],
+            lab: { atributos: atributosCompletos, brancosOverride: null, talento: null },
+          },
+        ],
+      }),
+    ).toThrow();
+    expect(() =>
+      migrar({
+        schemaVersion: 2,
+        jogadores: [
+          {
+            ...jogadorBase,
+            idade: 21,
+            lab: { atributos: atributosGoleiro, brancosOverride: null, talento: null },
+          },
+        ],
+      }),
+    ).toThrow();
+  });
+
   it('recusa lab com atributos ausentes ou incompletos, pra não virar NaN na média do exercício', () => {
     expect(() =>
       migrar({ schemaVersion: 1, jogadores: [{ ...jogadorBase, lab: {} }] }),

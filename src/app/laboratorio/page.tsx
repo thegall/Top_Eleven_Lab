@@ -2,7 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
-import { ALL_DRILLS, classificarDrill, mediaExercicio, montarCronograma } from '../../domain/drills';
+import {
+  classificarDrillsDeLinha,
+  preencherSlots,
+  type Drill,
+  type DrillClassificado,
+} from '../../domain/drills';
+import {
+  ATRIBUTOS_COMUNS,
+  ATRIBUTOS_DO_GOL,
+  ATRIBUTOS_GOLEIRO,
+  atributosValidosGoleiro,
+  brancosDoGoleiro,
+  classificarDrillsDeGoleiro,
+} from '../../domain/goalkeeper';
 import { brancosDaPosicao } from '../../domain/positions';
 import { applySeasonTurnover } from '../../domain/season';
 import {
@@ -11,8 +24,15 @@ import {
   type SpecialAbilityRank,
 } from '../../domain/talent';
 import { conditionCostPerSession } from '../../domain/training';
-import type { Atributo, Posicao } from '../../domain/types';
-import type { DadosLab, Jogador, TalentoLab } from '../../state/schema';
+import type { Atributo, AtributoGoleiro, Posicao } from '../../domain/types';
+import {
+  ehGoleiro,
+  type DadosLab,
+  type DadosLabGoleiro,
+  type DadosLabLinha,
+  type Jogador,
+  type TalentoLab,
+} from '../../state/schema';
 import { useSquad } from '../../state/store';
 import { CalloutRegra } from '../../ui/callout-regra';
 import { classeBadgePosicao } from '../../ui/posicao';
@@ -46,6 +66,91 @@ const GRUPOS = [
     atributos: ['condicionamento', 'forca', 'agressividade', 'velocidade', 'criatividade'],
   },
 ] as const satisfies readonly { titulo: string; classe: string; atributos: Atributo[] }[];
+
+const LABELS_GOLEIRO: Record<AtributoGoleiro, string> = {
+  reflexos: 'Reflexos',
+  agilidade: 'Agilidade',
+  antecipacao: 'Antecipação',
+  sairNaBola: 'Sair na bola',
+  comunicacao: 'Comunicação',
+  arremesso: 'Arremesso',
+  chutar: 'Chutar',
+  espalmar: 'Espalmar',
+  jogoAereo: 'Jogo aéreo',
+  concentracao: 'Concentração',
+  condicionamento: 'Condicionamento',
+  forca: 'Força',
+  agressividade: 'Agressividade',
+  velocidade: 'Velocidade',
+  criatividade: 'Criatividade',
+};
+
+/**
+ * A tela do goleiro tem 2 blocos, e o de Defesa do gol vem em duas listas de 5
+ * — ocupando a mesma largura dos 3 grupos do jogador de linha (GAME-RULES §2).
+ */
+const GRUPOS_GOLEIRO = [
+  { titulo: 'Defesa do gol', classe: 'g-def', atributos: ATRIBUTOS_DO_GOL, largo: true },
+  { titulo: 'Atributos', classe: 'g-phy', atributos: ATRIBUTOS_COMUNS },
+] as const satisfies readonly {
+  titulo: string;
+  classe: string;
+  atributos: readonly AtributoGoleiro[];
+  largo?: boolean;
+}[];
+
+/**
+ * O que a interface precisa saber da ficha aberta, já resolvido para o tipo de
+ * jogador. Os atributos viram `string` aqui porque o JSX é o mesmo para as duas
+ * fichas — quem faz conta é o domínio, com os tipos estreitos.
+ */
+interface Ficha {
+  labels: Record<string, string>;
+  grupos: readonly {
+    titulo: string;
+    classe: string;
+    atributos: readonly string[];
+    largo?: boolean;
+  }[];
+  atributos: Record<string, number>;
+  brancos: Set<string>;
+  origemDosBrancos: string;
+  drills: DrillClassificado[];
+  cronograma: DrillClassificado[];
+  atributosDoDrill: (drill: Drill) => readonly string[];
+}
+
+function fichaDeLinha(lab: DadosLabLinha, posicoes: Posicao[]): Ficha {
+  const brancos = lab.brancosOverride
+    ? new Set(lab.brancosOverride)
+    : brancosDaPosicao(posicoes);
+  const drills = classificarDrillsDeLinha(lab.atributos, brancos);
+  return {
+    labels: LABELS,
+    grupos: GRUPOS,
+    atributos: lab.atributos,
+    brancos,
+    origemDosBrancos: `da posição ${posicoes.join('+')}`,
+    drills,
+    cronograma: preencherSlots(drills),
+    atributosDoDrill: (drill) => drill.atributos,
+  };
+}
+
+function fichaDeGoleiro(lab: DadosLabGoleiro): Ficha {
+  const brancos = lab.brancosOverride ? new Set(lab.brancosOverride) : brancosDoGoleiro();
+  const drills = classificarDrillsDeGoleiro(lab.atributos, brancos);
+  return {
+    labels: LABELS_GOLEIRO,
+    grupos: GRUPOS_GOLEIRO,
+    atributos: lab.atributos,
+    brancos,
+    origemDosBrancos: 'da tabela de goleiro',
+    drills,
+    cronograma: preencherSlots(drills),
+    atributosDoDrill: atributosValidosGoleiro,
+  };
+}
 
 
 const CATEGORIA_DOT: Record<string, string> = {
@@ -89,14 +194,17 @@ function TituloGrupoExercicios({
 
 const DIFICULDADE_LABEL = ['', 'Muito Fácil', 'Fácil', 'Médio', 'Difícil', 'Muito Difícil'];
 
-function atributosPadrao(): Record<Atributo, number> {
-  const atributos = {} as Record<Atributo, number>;
-  for (const grupo of GRUPOS) for (const atributo of grupo.atributos) atributos[atributo] = 50;
-  return atributos;
-}
+const ATRIBUTOS_LINHA = GRUPOS.flatMap((grupo) => grupo.atributos);
 
+/** Ficha nova começa com 50 em tudo, na lista de atributos do tipo do jogador. */
 function labDoJogador(jogador: Jogador): DadosLab {
-  return jogador.lab ?? { atributos: atributosPadrao(), brancosOverride: null, talento: null };
+  if (jogador.lab) return jogador.lab;
+  const chaves: readonly string[] = ehGoleiro(jogador) ? ATRIBUTOS_GOLEIRO : ATRIBUTOS_LINHA;
+  return {
+    atributos: Object.fromEntries(chaves.map((chave) => [chave, 50])),
+    brancosOverride: null,
+    talento: null,
+  } as DadosLab;
 }
 
 function formatarPct(valor: number): string {
@@ -112,11 +220,7 @@ export default function LaboratorioPage() {
   const { documento, atualizarLab } = useSquad();
 
   const elegiveis = useMemo(
-    () =>
-      sortSquadPlayers(
-        documento.jogadores.filter((j) => !j.vendido && !j.posicoes.includes('GK')),
-        'name',
-      ),
+    () => sortSquadPlayers(documento.jogadores.filter((j) => !j.vendido), 'name'),
     [documento.jogadores],
   );
 
@@ -140,37 +244,23 @@ export default function LaboratorioPage() {
   const talentoAtual: TalentoLab | null = testResult ?? lab?.talento ?? null;
   const resultLabel = talentoAtual ? rotuloTalento(talentoAtual) : null;
 
-  const posicoesLinha = useMemo(
-    () => (selecionado ? selecionado.posicoes.filter((p): p is Posicao => p !== 'GK') : []),
-    [selecionado],
-  );
-  const brancosDerivados = useMemo(() => brancosDaPosicao(posicoesLinha), [posicoesLinha]);
-  const brancosEfetivos = useMemo(
-    () => (lab?.brancosOverride ? new Set(lab.brancosOverride) : brancosDerivados),
-    [lab?.brancosOverride, brancosDerivados],
-  );
+  const ficha = useMemo(() => {
+    if (!selecionado || !lab) return null;
+    if (ehGoleiro(selecionado)) return fichaDeGoleiro(lab as DadosLabGoleiro);
+    const posicoes = selecionado.posicoes.filter((p): p is Posicao => p !== 'GK');
+    return fichaDeLinha(lab as DadosLabLinha, posicoes);
+  }, [selecionado, lab]);
 
-  const drillsInfo = useMemo(() => {
-    if (!lab) return [];
-    return ALL_DRILLS.filter((drill) => !drill.soDeGoleiro)
-      .map((drill) => ({
-        drill,
-        media: mediaExercicio(lab.atributos, drill),
-        classe: classificarDrill(brancosEfetivos, drill),
-      }))
-      .sort((a, b) => a.media - b.media);
-  }, [lab, brancosEfetivos]);
+  const primarios = ficha?.drills.filter((d) => d.classe === 'primario') ?? [];
+  const secundarios = ficha?.drills.filter((d) => d.classe === 'secundario') ?? [];
+  const terciarios = ficha?.drills.filter((d) => d.classe === 'terciario') ?? [];
 
-  const primarios = drillsInfo.filter((d) => d.classe === 'primario');
-  const secundarios = drillsInfo.filter((d) => d.classe === 'secundario');
-  const terciarios = drillsInfo.filter((d) => d.classe === 'terciario');
-
-  const cronograma = useMemo(
-    () => (lab ? montarCronograma(lab.atributos, brancosEfetivos) : []),
-    [lab, brancosEfetivos],
-  );
-
-  function handleAtributoChange(atributo: Atributo, valor: string) {
+  /**
+   * As três escritas abaixo montam um `lab` do mesmo tipo do que entrou — o
+   * TypeScript perde isso ao ver a união, então o `as DadosLab` reafirma o que a
+   * posição do jogador já garante (schema.ts).
+   */
+  function handleAtributoChange(atributo: string, valor: string) {
     if (!selecionado || !lab) return;
     if (valor.trim() === '') return;
     const numero = Number(valor);
@@ -178,16 +268,17 @@ export default function LaboratorioPage() {
     atualizarLab(selecionado.id, {
       ...lab,
       atributos: { ...lab.atributos, [atributo]: numero },
-    });
+    } as DadosLab);
   }
 
-  function handleToggleBranco(atributo: Atributo) {
-    if (!selecionado || !lab) return;
-    const novoSet = new Set(brancosEfetivos);
+  function handleToggleBranco(atributo: string) {
+    if (!selecionado || !lab || !ficha) return;
+    const novoSet = new Set(ficha.brancos);
     if (novoSet.has(atributo)) novoSet.delete(atributo);
     else novoSet.add(atributo);
-    atualizarLab(selecionado.id, { ...lab, brancosOverride: [...novoSet] });
+    atualizarLab(selecionado.id, { ...lab, brancosOverride: [...novoSet] } as DadosLab);
   }
+
   function handleSeasonTurnover() {
     if (!selecionado || !lab) return;
     const confirmed = window.confirm(
@@ -196,7 +287,7 @@ export default function LaboratorioPage() {
     if (!confirmed) return;
     atualizarLab(selecionado.id, {
       ...lab,
-      atributos: applySeasonTurnover(lab.atributos),
+      atributos: applySeasonTurnover<string>(lab.atributos),
     });
   }
 
@@ -254,12 +345,12 @@ export default function LaboratorioPage() {
       </section>
 
       <main className="lab-page">
-        {!selecionado || !lab ? (
+        {!selecionado || !lab || !ficha ? (
           <section className="panel">
-            <p className="empty">Cadastre um jogador de linha na aba Squad pra usar o Laboratório.</p>
-            <CalloutRegra marca="comunidade" secao="§10">
-              O goleiro continua no Squad, mas fica de fora do Laboratório nesta versão. Os
-              atributos de GK são outro conjunto.
+            <p className="empty">Cadastre um jogador na aba Squad pra usar o Laboratório.</p>
+            <CalloutRegra marca="comunidade" secao="§2">
+              Goleiro também entra: a ficha de GK tem 15 atributos em 2 blocos, com brancos e
+              exercícios próprios.
             </CalloutRegra>
           </section>
         ) : (
@@ -317,15 +408,19 @@ export default function LaboratorioPage() {
                 </button>
               </div>
               <p className="panel__lede">
-                Derivadas da posição {posicoesLinha.join('+')}. Confira e ajuste se o jogo divergir.
+                Derivadas {ficha.origemDosBrancos}. Confira e ajuste se o jogo divergir.
               </p>
               <div className="grupos">
-                {GRUPOS.map((grupo) => {
+                {ficha.grupos.map((grupo) => {
                   const total = Math.round(
-                    grupo.atributos.reduce((soma, a) => soma + lab.atributos[a], 0) / grupo.atributos.length,
+                    grupo.atributos.reduce((soma, a) => soma + ficha.atributos[a]!, 0) /
+                      grupo.atributos.length,
                   );
                   return (
-                    <div className={`grupo ${grupo.classe}`} key={grupo.titulo}>
+                    <div
+                      className={`grupo ${grupo.classe}${grupo.largo ? ' grupo--wide' : ''}`}
+                      key={grupo.titulo}
+                    >
                       <div className="grupo__head">
                         <span className="gicon">{grupo.titulo[0]}</span>
                         <h3>{grupo.titulo}</h3>
@@ -333,7 +428,7 @@ export default function LaboratorioPage() {
                       </div>
                       <div className="attrs">
                         {grupo.atributos.map((atributo) => {
-                          const branco = brancosEfetivos.has(atributo);
+                          const branco = ficha.brancos.has(atributo);
                           const idValor = `attr-${atributo}`;
                           return (
                             <div
@@ -344,17 +439,17 @@ export default function LaboratorioPage() {
                                 type="checkbox"
                                 checked={branco}
                                 onChange={() => handleToggleBranco(atributo)}
-                                aria-label={`${LABELS[atributo]}: atributo-chave`}
+                                aria-label={`${ficha.labels[atributo]}: atributo-chave`}
                               />
                               <label className="attr__label" htmlFor={idValor}>
-                                {LABELS[atributo]}
+                                {ficha.labels[atributo]}
                               </label>
                               <input
                                 id={idValor}
                                 className="attr__input num"
                                 type="number"
                                 inputMode="numeric"
-                                value={lab.atributos[atributo]}
+                                value={ficha.atributos[atributo]}
                                 onChange={(e) => handleAtributoChange(atributo, e.target.value)}
                               />
                             </div>
@@ -384,8 +479,7 @@ export default function LaboratorioPage() {
                 <span className="hint">Os 6 slots, da menor média para a maior (GAME-RULES §6)</span>
               </div>
               <div className="lines">
-                {cronograma.map((drill, i) => {
-                  const media = mediaExercicio(lab.atributos, drill);
+                {ficha.cronograma.map(({ drill, media }, i) => {
                   return (
                     <div className="line" key={`${drill.nome}-${i}`}>
                       <span className="line__name">
@@ -420,7 +514,9 @@ export default function LaboratorioPage() {
               <section className="panel">
                 <div className="panel__head">
                   <h2>Exercícios</h2>
-                  <span className="hint">{drillsInfo.length} drills classificados para este jogador</span>
+                  <span className="hint">
+                    {ficha.drills.length} drills classificados para este jogador
+                  </span>
                 </div>
 
                 <div className="cats">
@@ -462,7 +558,7 @@ export default function LaboratorioPage() {
                       <div className="card__body">
                         <div className="card__name">{drill.nome}</div>
                         <div className="card__attrs">
-                          {drill.atributos.map((a) => LABELS[a]).join(' · ')}
+                          {ficha.atributosDoDrill(drill).map((a) => ficha.labels[a]).join(' · ')}
                         </div>
                         <div className="card__nums">
                           <span className="card__media num">{formatarPct(media)}%</span>

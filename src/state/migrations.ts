@@ -3,6 +3,7 @@
  * caminho para `localStorage` e para import — dois caminhos seria um deles
  * sem manutenção.
  */
+import { ATRIBUTOS_GOLEIRO } from '../domain/goalkeeper';
 import {
   CURRENT_SCHEMA_VERSION,
   ehPosicoesValidas,
@@ -16,6 +17,9 @@ function repararJogadorV1(jogador: unknown): unknown {
   const bruto = jogador as Record<string, unknown>;
   return { ...bruto, idade: null, posicoes: repararPosicoesV1(bruto.posicoes) };
 }
+
+/** Os 15 do goleiro: a mesma constante que o Lab usa (GAME-RULES §2). */
+const ATRIBUTOS_GOLEIRO_VALIDOS = new Set<string>(ATRIBUTOS_GOLEIRO);
 
 const ATRIBUTOS_VALIDOS = new Set([
   'corte',
@@ -52,20 +56,23 @@ const RANKS_TALENTO_VALIDOS = new Set([
  * em vez de um erro na hora certa. Valida aqui, no limite de entrada do
  * documento (ADR 0002), em vez de no motor de domínio.
  */
-function ehLabValido(valor: unknown): boolean {
+function ehLabValido(valor: unknown, ehGoleiro: boolean): boolean {
   if (typeof valor !== 'object' || valor === null) return false;
   const lab = valor as Record<string, unknown>;
 
+  /** Goleiro tem a ficha de GK; jogador de linha, a de linha (GAME-RULES §2). */
+  const validos = ehGoleiro ? ATRIBUTOS_GOLEIRO_VALIDOS : ATRIBUTOS_VALIDOS;
+
   if (typeof lab.atributos !== 'object' || lab.atributos === null) return false;
   const atributos = lab.atributos as Record<string, unknown>;
-  for (const atributo of ATRIBUTOS_VALIDOS) {
+  for (const atributo of validos) {
     if (typeof atributos[atributo] !== 'number' || !Number.isFinite(atributos[atributo])) return false;
   }
 
   if (
     lab.brancosOverride !== null &&
     (!Array.isArray(lab.brancosOverride) ||
-      !lab.brancosOverride.every((a) => ATRIBUTOS_VALIDOS.has(a as string)))
+      !lab.brancosOverride.every((a) => validos.has(a as string)))
   ) {
     return false;
   }
@@ -90,7 +97,7 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
     Number.isFinite(j.overall) &&
     ehPosicoesValidas(j.posicoes) &&
     typeof j.vendido === 'boolean' &&
-    (j.lab === null || ehLabValido(j.lab))
+    (j.lab === null || ehLabValido(j.lab, j.posicoes.includes('GK')))
   );
 }
 

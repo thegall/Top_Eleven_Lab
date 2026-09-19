@@ -245,6 +245,13 @@ Quatro regras, cada uma existindo para evitar uma perda de dado concreta:
 schema de duas listas do `AGENTS.md` nunca chegou a ser gravado por ninguém, porque não
 existe interface ainda.
 
+**Ficha de goleiro não virou versão nova (2026-09-18, THE-54).** O Laboratório passou a
+aceitar GK, que guarda outros 15 atributos (GAME-RULES §2), e mesmo assim o formato
+continua na versão 2: qual ficha um `lab` é se lê da posição do jogador, que já está no
+documento, em vez de um campo discriminador novo. Documento v2 antigo segue válido — até
+então nenhum goleiro tinha `lab` — e a validação passou a exigir o conjunto de atributos
+correspondente à posição, recusando a ficha trocada.
+
 ### 5.5. Importar substitui, não mescla
 
 Import troca o documento inteiro, com confirmação explícita antes. Mesclar dois elencos

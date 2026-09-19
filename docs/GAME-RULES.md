@@ -118,6 +118,18 @@ Cuidado com dois pares de nomes parecidos:
 - **Desarmar** (tela de treino) = **Corte** (tela do jogador). Mesmo atributo, tradução diferente entre telas.
 - **Chutar** (goleiro, tiro de meta) != **Chute** (jogador de linha). Atributos distintos.
 
+### Brancos do goleiro
+
+**[COMUNIDADE]** (2026-09-17, fonte: dono do repositório.) A matriz acima é montada sobre os 15 atributos de linha e não descreve o goleiro. Esta é a tabela que o Laboratório usa para classificar drill de GK:
+
+| Brancos (11) | Cinzas (4) |
+|---|---|
+| Os 10 do bloco DEFESA DO GOL — Reflexos, Agilidade, Antecipação, Sair na bola, Comunicação, Arremesso, Chutar, Espalmar, Jogo aéreo, Concentração — mais **Condicionamento** | Força, Agressividade, Velocidade, Criatividade |
+
+Leitura: o goleiro só tem cinza no bloco ATRIBUTOS, e ali o Condicionamento é a exceção branca. São 11 brancos contra 7 a 10 das posições de linha, então exercício primário é mais fácil de achar para o GK — o próprio Treino de Goleiro é primário, já que os 5 atributos que ele treina são todos brancos de goleiro.
+
+**Decisão de produto (2026-09-18):** o Laboratório passa a aceitar goleiro (era exclusão da V1, seção 10). A média do exercício de um GK usa os atributos marcados com ° na seção 4 **mais** os do bloco ATRIBUTOS que o exercício ofereça; os 10 atributos exclusivos de linha ficam fora, espelhando a regra inversa. O campo de brancos continua derivado e editável, como nas posições de linha.
+
 ---
 
 ## 3. A regra central: média do exercício e o teto de 180%
@@ -348,7 +360,7 @@ A planilha diverge em dois pontos, e nos dois ela é que está errada: dá Dribl
 | Academia | Arremesso°, Força, Chutar°, Condicionamento | Muito Difícil |
 | Arrancada | Velocidade, Drible, Sair na bola°, Condicionamento | Muito Difícil |
 
-° = atributo de goleiro. Para jogador de linha, **não entra no cálculo da média** do exercício.
+° = atributo de goleiro. Para jogador de linha, **não entra no cálculo da média** do exercício. Para goleiro vale o inverso: contam os ° e os atributos do bloco ATRIBUTOS, e os 10 exclusivos de linha ficam fora (seção 2, "Brancos do goleiro").
 
 ### Classificação: primário, secundário, terciário
 
@@ -675,7 +687,7 @@ Regras conhecidas e deliberadamente não implementadas.
 - **Entrosamento, Primor e livros táticos** — sistema separado, não melhora atributo. Importa para resultado de partida, não para evolução de jogador.
 - **Treino em grupo** — treinar 3 a 5 jogadores da mesma zona numa sessão. Relevante e bem documentado, mas o Laboratório da V1 raciocina por jogador individual.
 - **Youth Academy** e Centro de Talentos.
-- **Goleiro no Laboratório** — depende dos atributos de GK (seção 2). O goleiro continua no Squad normalmente, que só usa overall e posição.
+- **Goleiro no Laboratório** — **saiu desta lista em 2026-09-18** (THE-54). O Lab aceita GK com os 15 atributos da seção 2 e os brancos de goleiro da mesma seção.
 - **Estilos de jogo (playstyles)**.
 
 ---
