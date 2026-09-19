@@ -58,14 +58,30 @@ const LABELS: Record<Atributo, string> = {
 };
 
 const GRUPOS = [
-  { titulo: 'Defesa', classe: 'g-def', atributos: ['corte', 'marcacao', 'posicionamento', 'cabecada', 'coragem'] },
-  { titulo: 'Ataque', classe: 'g-atk', atributos: ['passe', 'drible', 'cruzamento', 'chute', 'finalizacao'] },
+  {
+    titulo: 'Defesa',
+    classe: 'g-def',
+    icone: '/icone-defesa.png',
+    atributos: ['corte', 'marcacao', 'posicionamento', 'cabecada', 'coragem'],
+  },
+  {
+    titulo: 'Ataque',
+    classe: 'g-atk',
+    icone: '/icone-ataque.png',
+    atributos: ['passe', 'drible', 'cruzamento', 'chute', 'finalizacao'],
+  },
   {
     titulo: 'Atributos',
     classe: 'g-phy',
+    icone: '/icone-atributos.png',
     atributos: ['condicionamento', 'forca', 'agressividade', 'velocidade', 'criatividade'],
   },
-] as const satisfies readonly { titulo: string; classe: string; atributos: Atributo[] }[];
+] as const satisfies readonly {
+  titulo: string;
+  classe: string;
+  icone: string;
+  atributos: Atributo[];
+}[];
 
 const LABELS_GOLEIRO: Record<AtributoGoleiro, string> = {
   reflexos: 'Reflexos',
@@ -90,11 +106,23 @@ const LABELS_GOLEIRO: Record<AtributoGoleiro, string> = {
  * — ocupando a mesma largura dos 3 grupos do jogador de linha (GAME-RULES §2).
  */
 const GRUPOS_GOLEIRO = [
-  { titulo: 'Defesa do gol', classe: 'g-def', atributos: ATRIBUTOS_DO_GOL, largo: true },
-  { titulo: 'Atributos', classe: 'g-phy', atributos: ATRIBUTOS_COMUNS },
+  {
+    titulo: 'Defesa do gol',
+    classe: 'g-gk',
+    icone: '/icone-defesa-do-gol.png',
+    atributos: ATRIBUTOS_DO_GOL,
+    largo: true,
+  },
+  {
+    titulo: 'Atributos',
+    classe: 'g-phy',
+    icone: '/icone-atributos.png',
+    atributos: ATRIBUTOS_COMUNS,
+  },
 ] as const satisfies readonly {
   titulo: string;
   classe: string;
+  icone: string;
   atributos: readonly AtributoGoleiro[];
   largo?: boolean;
 }[];
@@ -109,6 +137,7 @@ interface Ficha {
   grupos: readonly {
     titulo: string;
     classe: string;
+    icone: string;
     atributos: readonly string[];
     largo?: boolean;
   }[];
@@ -422,7 +451,7 @@ export default function LaboratorioPage() {
                       key={grupo.titulo}
                     >
                       <div className="grupo__head">
-                        <span className="gicon">{grupo.titulo[0]}</span>
+                        <img className="gicon" src={grupo.icone} alt="" width={96} height={96} />
                         <h3>{grupo.titulo}</h3>
                         <span className="total num">{total}</span>
                       </div>
