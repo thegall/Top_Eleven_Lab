@@ -550,17 +550,19 @@ Goleiro usa Defesa do Gol no lugar de Defesa — são conjuntos de atributos dif
 
 Sete ranks, na ordem de `docs/GAME-RULES.md`, em rampa de raridade de jogo:
 
-| Rank | Token | Hex |
-|---|---|---|
-| Terrível | `{colors.rank-terrivel}` | #c4323f |
-| Ruim | `{colors.rank-ruim}` | #c26a00 |
-| Normal | `{colors.rank-normal}` | #6b7885 |
-| Boa | `{colors.rank-boa}` | #1c8423 |
-| Ótima | `{colors.rank-otima}` | #1c76ac |
-| Excelente | `{colors.rank-excelente}` | #7b3fd4 |
-| Fenômeno | `{colors.rank-fenomeno}` | #806000 |
+| Rank da curva | Token | Hex | Nome na tela |
+|---|---|---|---|
+| Terrível | `{colors.rank-terrivel}` | #c4323f | Bagre |
+| Ruim | `{colors.rank-ruim}` | #c26a00 | Bagre |
+| Normal | `{colors.rank-normal}` | #6b7885 | Normal |
+| Boa | `{colors.rank-boa}` | #1c8423 | Bom Jogador |
+| Ótima | `{colors.rank-otima}` | #1c76ac | Craque |
+| Excelente | `{colors.rank-excelente}` | #7b3fd4 | Gênio |
+| Fenômeno | `{colors.rank-fenomeno}` | #806000 | Lenda |
 
-A cor nunca carrega a informação sozinha — o `{component.talent-badge}` sempre mostra o nome do rank ao lado. Vale para daltônicos. Bagre é rótulo próprio do método 1 (`1 1 1 1 1 1`); o badge mostra "Bagre", sem mapear para Ruim nem Terrível. Ruim e Terrível existem na curva de ganho (§3.1), não como corte do classificador da V1.
+O rank da curva é o identificador (`{colors.rank-*}`, `data-rank`); o nome na tela é a nomenclatura do dono, de 2026-09-18 (GAME-RULES §3.1 e §5).
+
+A cor nunca carrega a informação sozinha — o `{component.talent-badge}` sempre mostra o nome do rank ao lado. Vale para daltônicos. Bagre é o nome das duas linhas de baixo da curva (Ruim e Terrível) e o rótulo do método 1 para `1 1 1 1 1 1`; o badge mostra "Bagre" sem escolher uma das duas. A distinção entre elas existe na curva de ganho (§3.1), não como corte do classificador da V1 — e aí as duas cores continuam separadas, porque marcam sigmas diferentes.
 
 O badge vive sobre `{colors.surface-bright}` ou `{colors.surface}`. Sobre `{colors.surface-muted}` as cores mais claras da rampa perdem separação.
 
@@ -890,5 +892,5 @@ Preenchimentos com texto branco: `{colors.primary}` 5,69 · `{colors.loss-deep}`
 - Não há tema escuro. Se aparecer demanda, o trabalho é remapear as superfícies claras; os tokens semânticos (grupos, ranks, gain/loss) não mudam.
 - Ícones não estão definidos. O jogo usa um glifo por grupo dentro do `{component.group-icon}`; a escolha do conjunto fica para a etapa 6.
 - Animação e transição não estão em escopo além da regra de `prefers-reduced-motion`.
-- O Lab V1 não corta Ruim versus Terrível: Bagre é o rótulo do método 1 e não mapeia para a curva. O `{component.talent-badge}` mostra Bagre como rótulo próprio, sem estado combinado "Ruim / Terrível".
+- O Lab V1 não corta Ruim versus Terrível: as duas se chamam Bagre (nomenclatura de 2026-09-18) e o método 1 não escolhe entre elas. O `{component.talent-badge}` mostra "Bagre", sem estado combinado "Ruim / Terrível".
 - Não há referência amostrada da barra verde de Defesa em jogador de linha — `{colors.group-defense}` veio do ícone (#07a50d) seguindo o mesmo ajuste de contraste dos outros grupos. Uma captura de zagueiro fecharia isso.

@@ -2,15 +2,15 @@
  * O documento persistido: mesmo formato no `localStorage` e no arquivo de
  * exportação (AGENTS.md § Schemas de dados, ADR 0002, ADR 0006).
  */
-import type { Atributo, Posicao, RankTalento } from '../domain/types';
+import type { Atributo, AtributoGoleiro, Posicao, RankTalento } from '../domain/types';
 
 export const CURRENT_SCHEMA_VERSION = 2;
 
 /**
- * `Posicao` do domínio cobre só as 11 posições de linha — goleiro está fora
- * do escopo do Laboratório (types.ts). O Squad cadastra os 12 jogadores do
- * elenco, GK incluso, então soma `'GK'` aqui em vez de alargar o tipo do
- * domínio.
+ * `Posicao` do domínio cobre só as 11 posições de linha, porque a matriz de
+ * brancos e os drills de linha se apoiam nelas (types.ts). O goleiro tem a
+ * ficha própria de GK (GAME-RULES §2), então soma `'GK'` aqui em vez de
+ * alargar o tipo do domínio.
  */
 export type PosicaoJogador = Posicao | 'GK';
 
@@ -63,10 +63,30 @@ export function repararPosicoesV1(posicoes: unknown): unknown {
  */
 export type TalentoLab = RankTalento | 'bagre';
 
-export interface DadosLab {
-  atributos: Record<Atributo, number>;
-  brancosOverride: Atributo[] | null;
+export interface DadosLabDe<A extends string> {
+  atributos: Record<A, number>;
+  brancosOverride: A[] | null;
   talento: TalentoLab | null;
+}
+
+/** Ficha de jogador de linha: os 15 atributos de linha (GAME-RULES §2). */
+export type DadosLabLinha = DadosLabDe<Atributo>;
+
+/** Ficha de goleiro: os 15 atributos de GK, em 2 blocos (GAME-RULES §2). */
+export type DadosLabGoleiro = DadosLabDe<AtributoGoleiro>;
+
+/**
+ * Qual das duas fichas um `lab` é se decide pela posição do jogador, não por um
+ * campo no documento: goleiro é `GK` no Squad, e essa é a única origem da
+ * diferença. Quem lê já tem o jogador em mão, e `migrar` valida o conjunto de
+ * atributos certo para cada um. Ficha trocada herdada do Squad antigo é
+ * limpa, não recusada como documento.
+ */
+export type DadosLab = DadosLabLinha | DadosLabGoleiro;
+
+/** Goleiro usa a ficha de GK no Laboratório (GAME-RULES §2). */
+export function ehGoleiro(jogador: Pick<Jogador, 'posicoes'>): boolean {
+  return jogador.posicoes.includes('GK');
 }
 
 export interface Jogador {

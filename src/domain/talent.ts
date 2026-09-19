@@ -93,14 +93,17 @@ export interface SpecialAbilityPattern {
 
 /**
  * Tabela do método 1 exibida na interface e usada na classificação.
- * Pontos nulos representam a regra especial do Fenômeno: qualquer uma das
+ * Pontos nulos representam a regra especial da Lenda: qualquer uma das
  * seis sessões com ganho 3 (GAME-RULES §5).
+ *
+ * Os rótulos são os nomes que o dono usa no jogo; os ranks internos seguem
+ * os da curva da GAME-RULES §3.1 (fenomeno, excelente, otima, boa...).
  */
 export const SPECIAL_ABILITY_PATTERNS: readonly SpecialAbilityPattern[] = [
-  { rank: 'fenomeno', label: 'Fenômeno', points: null },
-  { rank: 'excelente', label: 'Excelente', points: [2, 2, 2, 2, 2, 2] },
-  { rank: 'otima', label: 'Ótimo', points: [1, 2, 2, 2, 2, 2] },
-  { rank: 'boa', label: 'Bom', points: [1, 2, 2, 1, 2, 2] },
+  { rank: 'fenomeno', label: 'Lenda', points: null },
+  { rank: 'excelente', label: 'Gênio', points: [2, 2, 2, 2, 2, 2] },
+  { rank: 'otima', label: 'Craque', points: [1, 2, 2, 2, 2, 2] },
+  { rank: 'boa', label: 'Bom Jogador', points: [1, 2, 2, 1, 2, 2] },
   { rank: 'normal', label: 'Normal', points: [1, 2, 1, 2, 1, 2] },
   { rank: 'bagre', label: 'Bagre', points: [1, 1, 1, 1, 1, 1] },
 ];

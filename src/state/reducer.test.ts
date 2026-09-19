@@ -69,6 +69,27 @@ describe('reducer', () => {
     expect(depois.jogadores.find((j) => j.id === '2')?.nome).toBe('Ned Stark');
   });
 
+  it('limpa o lab quando a edição troca o tipo da ficha', () => {
+    const lab = { atributos: {} as Record<string, number>, brancosOverride: null, talento: null };
+
+    for (const [posicoesAntes, posicoesDepois] of [
+      [['DC'], ['GK']],
+      [['GK'], ['DC']],
+    ] as const) {
+      const antes = { schemaVersion: 2, jogadores: [jogador({ posicoes: [...posicoesAntes], lab })] };
+      const depois = reducer(antes, {
+        type: 'jogador/atualizado',
+        id: '1',
+        nome: 'Ned Stark',
+        idade: 18,
+        overall: 78,
+        posicoes: [...posicoesDepois],
+      });
+
+      expect(depois.jogadores[0]?.lab).toBeNull();
+    }
+  });
+
   it('recusa adicionar jogador com posições vazias, repetidas ou acima de 3', () => {
     expect(() =>
       reducer(documentoVazio(), { type: 'jogador/adicionado', jogador: jogador({ posicoes: [] }) }),

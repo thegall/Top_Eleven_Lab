@@ -9,6 +9,7 @@ import { exportarJSON, importarJSON } from '../state/transfer';
 import { CalloutRegra } from '../ui/callout-regra';
 import { classeBadgePosicao } from '../ui/posicao';
 import { SeletorPosicao } from '../ui/seletor-posicao';
+import { EscudoTalento, rotuloTalento } from '../ui/talento';
 import { POSITION_FIELD_ORDER, sortSquadPlayers, type SquadOrder } from './squad-order';
 
 const SQUAD_ORDER_LABELS: Record<SquadOrder, string> = {
@@ -16,6 +17,7 @@ const SQUAD_ORDER_LABELS: Record<SquadOrder, string> = {
   name: 'nome',
   age: 'idade',
   position: 'posição',
+  talent: 'talento',
 };
 /** Faixa de idade coberta pela curva de treino (GAME-RULES §3.2). */
 const PLAYER_AGE_MIN = 18;
@@ -242,33 +244,35 @@ export default function SquadPage() {
 
   return (
     <>
-      <div className="hero">
-        <h1>Squad</h1>
-        <p className="hero__lead">
-          Simulador da média dos 14 mais fortes, o número que define
-          <br />
-          contra quem você joga na próxima temporada.
-        </p>
-        <p className="hero__actions">
-          <button className="btn btn--secondary" type="button" onClick={() => exportar(documento)}>
-            Exportar elenco
-          </button>
-          <label className="btn btn--secondary hero__import">
-            Importar elenco
-            <input
-              type="file"
-              accept="application/json"
-              className="visually-hidden"
-              onChange={(e) => void aoImportar(e)}
-            />
-          </label>
-        </p>
-        {erroImportacao && (
-          <p className="hero__erro" role="alert">
-            {erroImportacao}
+      <section className="stage">
+        <div className="hero">
+          <h1>Squad</h1>
+          <p className="hero__lead">
+            Simulador da média dos 14 mais fortes, o número que define
+            <br />
+            contra quem você joga na próxima temporada.
           </p>
-        )}
-      </div>
+          <p className="hero__actions">
+            <button className="btn btn--secondary" type="button" onClick={() => exportar(documento)}>
+              Exportar elenco
+            </button>
+            <label className="btn btn--secondary hero__import">
+              Importar elenco
+              <input
+                type="file"
+                accept="application/json"
+                className="visually-hidden"
+                onChange={(e) => void aoImportar(e)}
+              />
+            </label>
+          </p>
+          {erroImportacao && (
+            <p className="hero__erro" role="alert">
+              {erroImportacao}
+            </p>
+          )}
+        </div>
+      </section>
 
       <main className="page">
         <div>
@@ -338,6 +342,7 @@ export default function SquadPage() {
                   <option value="name">Nome</option>
                   <option value="age">Idade</option>
                   <option value="position">Posição</option>
+                  <option value="talent">Talento</option>
                 </select>
               </div>
             </div>
@@ -353,6 +358,9 @@ export default function SquadPage() {
                     </span>
                     <span role="columnheader" className="row__name">
                       Jogador
+                    </span>
+                    <span role="columnheader" className="row__tal">
+                      Talento
                     </span>
                     <span role="columnheader" className="row__age">
                       Idade
@@ -375,7 +383,7 @@ export default function SquadPage() {
                       <Fragment key={linha.jogador.id}>
                         {editandoId === linha.jogador.id ? (
                           <form className="row-edit" role="row" onSubmit={aoSalvarEdicao}>
-                            <div className="row-edit__fields" role="cell" aria-colspan={7}>
+                            <div className="row-edit__fields" role="cell" aria-colspan={8}>
                               <div className="field">
                                 <label htmlFor={`edit-nome-${linha.jogador.id}`}>Nome</label>
                                 <input
@@ -459,6 +467,20 @@ export default function SquadPage() {
                               <span className="tag tag--gain">Subiu para os 14</span>
                             )}
                           </span>
+                          <span role="cell" className="row__tal">
+                            {linha.jogador.lab?.talento ? (
+                              <span
+                                className="talento talento--sm"
+                                data-rank={linha.jogador.lab.talento}
+                              >
+                                <EscudoTalento rank={linha.jogador.lab.talento} />
+                                <span className="visually-hidden">Talento: </span>
+                                <b>{rotuloTalento(linha.jogador.lab.talento)}</b>
+                              </span>
+                            ) : (
+                              '—'
+                            )}
+                          </span>
                           <span role="cell" className="row__age num">
                             {linha.jogador.idade ?? '—'}
                           </span>
@@ -466,9 +488,11 @@ export default function SquadPage() {
                             {linha.jogador.overall}
                           </span>
                           <span role="cell" className="row__pos">
-                            <span className={classeBadgePosicao(linha.jogador.posicoes[0] ?? 'DC')}>
-                              {linha.jogador.posicoes.join('+')}
-                            </span>
+                            {linha.jogador.posicoes.map((posicao) => (
+                              <span key={posicao} className={classeBadgePosicao(posicao)}>
+                                {posicao}
+                              </span>
+                            ))}
                           </span>
                           <span role="cell" className="row__sale">
                             {linha.jogador.vendido ? (

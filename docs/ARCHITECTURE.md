@@ -245,6 +245,14 @@ Quatro regras, cada uma existindo para evitar uma perda de dado concreta:
 schema de duas listas do `AGENTS.md` nunca chegou a ser gravado por ninguém, porque não
 existe interface ainda.
 
+**Ficha de goleiro não virou versão nova (2026-09-18, THE-54).** O Laboratório passou a
+aceitar GK, que guarda outros 15 atributos (GAME-RULES §2), e mesmo assim o formato
+continua na versão 2: qual ficha um `lab` é se lê da posição do jogador, que já está no
+documento, em vez de um campo discriminador novo. Documento v2 antigo segue válido. A
+validação exige o conjunto de atributos da posição; se o lab for a ficha completa do outro
+tipo — o Squad antigo preservava o lab ao trocar linha ↔ GK — `migrar` limpa só aquele
+lab, em vez de recusar o documento e apagar o elenco.
+
 ### 5.5. Importar substitui, não mescla
 
 Import troca o documento inteiro, com confirmação explícita antes. Mesclar dois elencos
@@ -443,16 +451,19 @@ de produto datada conta como fonte para o que o Lab faz com a regra, não para a
 mecânica do jogo.
 
 Itens 1 e 2 fechados por decisão de produto do dono (2026-09-14, THE-37), sem nova
-observação de campo: o Lab não inventa fator de idade no classificador e não mapeia
-Bagre para Ruim nem Terrível. O item 3 continua aberto.
+observação de campo: o Lab não inventa fator de idade no classificador e não escolhe
+entre Ruim e Terrível ao mostrar Bagre. O item 3 continua aberto.
 
 1. **Resolvida (2026-09-14).** Idade **não entra** no teste de talento da V1 (método 1).
    Classifica só pela sequência 1/2/3 em 6 sessões. Idade segue na curva de ganho §3.2,
    na projeção, não no classificador. Não se divide o sigma medido do método 2 pelo fator
    da §3.2 para "corrigir" o rank. A V1 **não** oferece o método 2 na UI.
-2. **Resolvida (2026-09-14).** Bagre (`1 1 1 1 1 1`) é rótulo do método 1 e **não** corta
-   Ruim versus Terrível. Ruim e Terrível permanecem ranks distintos na curva §3.1. Quem
-   precisar da distinção mede sigma fora da UI.
+2. **Resolvida (2026-09-14), nomenclatura atualizada (2026-09-18).** Bagre (`1 1 1 1 1 1`)
+   é rótulo do método 1 e **não** corta Ruim versus Terrível. Ruim e Terrível permanecem
+   ranks distintos na curva §3.1, com sigmas diferentes, mas o dono chama as duas de Bagre
+   — o nome é um só, o corte é que não existe. Quem precisar da distinção mede sigma fora
+   da UI. Na mesma data os rótulos do método 1 viraram Lenda, Gênio, Craque, Bom Jogador,
+   Normal e Bagre; os ranks internos da curva não mudaram.
 3. **GAME-RULES §6 passo 5 versus §3 — o corte de 140%.** A §6 manda tirar da rotação o drill
    acima de ~140%; a §3 diz que acima disso ainda rende, só custa mais. Tratado na §7 acima:
    regra dura do motor é 180%, o corte de 140% é aviso de interface. **Ação:** confirmar a

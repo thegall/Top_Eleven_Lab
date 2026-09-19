@@ -45,8 +45,9 @@ Dependência aponta só para dentro: interface conhece aplicação, aplicação 
 ```
 1. Usuário cadastra jogador: idade, posições, 15 atributos
 2. Brancos são derivados da matriz de posições (GAME-RULES §2) e ficam editáveis
-3. Para cada um dos 29 drills: descartar atributos de goleiro, calcular a média
-   do exercício sobre o que sobrou, classificar em primário/secundário/terciário
+3. Para cada um dos 29 drills: ficar só com os atributos da ficha do jogador
+   (de linha, ou de goleiro se for GK), calcular a média do exercício sobre o que
+   sobrou, classificar em primário/secundário/terciário
 4. Ordenar os primários pela menor média (mais longe do teto de 180%)
 5. Preencher os 6 slots, repetindo drill quando houver menos de 6 primários
 6. Calcular ganho e custo da sessão (GAME-RULES §3.1, §3.2, §4, §9)
@@ -72,21 +73,33 @@ Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive 
 ```
 1. Usuário treina habilidade especial ou posição nova e anota 1, 2 ou 3 em cada uma das 6 sessões
 2. App classifica só pela sequência (GAME-RULES §5, método 1) — idade não entra
-3. Qualquer 3 → Fenômeno; `1 1 1 1 1 1` → Bagre; demais linhas da tabela
+3. Qualquer 3 → Lenda; `1 1 1 1 1 1` → Bagre; demais linhas da tabela (Gênio, Craque, Bom Jogador, Normal)
 4. Sequência que não casa é recusada, em vez de devolver um rank errado
 ```
 
-O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam ranks distintos nessa curva. Bagre **não** mapeia para nenhum dos dois.
+O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam linhas distintas nessa curva. Bagre é o nome das duas (GAME-RULES §3.1, nomenclatura de 2026-09-18) e **não** escolhe uma delas: o classificador do método 1 devolve `bagre` como valor próprio.
+
+Os rótulos do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`): Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela.
 
 ## Contratos internos
 
 Os tipos abaixo são o contrato entre o domínio e o resto. Cada função corresponde a uma seção do GAME-RULES, que é onde está a fórmula e a validação de campo.
 
 ```ts
+type AtributoComum = 'condicionamento' | 'forca' | 'agressividade'
+                   | 'velocidade' | 'criatividade';
+
 type Atributo =
   | 'corte' | 'marcacao' | 'posicionamento' | 'cabecada' | 'coragem'
   | 'passe' | 'drible' | 'cruzamento' | 'chute' | 'finalizacao'
-  | 'condicionamento' | 'forca' | 'agressividade' | 'velocidade' | 'criatividade';
+  | AtributoComum;
+
+// bloco DEFESA DO GOL — GAME-RULES §2
+type AtributoGoleiroExclusivo =
+  | 'reflexos' | 'agilidade' | 'antecipacao' | 'sairNaBola' | 'comunicacao'
+  | 'arremesso' | 'chutar' | 'espalmar' | 'jogoAereo' | 'concentracao';
+
+type AtributoGoleiro = AtributoGoleiroExclusivo | AtributoComum;
 
 type Posicao = 'GK' | 'DL' | 'DC' | 'DR' | 'DMC' | 'ML' | 'MC' | 'MR'
              | 'AML' | 'AMC' | 'AMR' | 'ST';
@@ -102,7 +115,8 @@ interface Drill {
   nome: string;
   categoria: 'ataque' | 'defesa' | 'posse' | 'fisico';
   dificuldade: Dificuldade;
-  atributos: Atributo[];      // já sem os de goleiro — GAME-RULES §6
+  atributos: Atributo[];                      // só os de linha — GAME-RULES §6
+  atributosGoleiro: AtributoGoleiroExclusivo[]; // os marcados com ° na §4
   soDeGoleiro: boolean;       // Treino de Goleiro: nunca válido para jogador de linha
 }
 ```
@@ -117,6 +131,9 @@ interface Drill {
 | `ganhoSessao` | jogador, slots, nível → pontos por atributo | §3.1 × §3.2 × nível |
 | `custoEmMaletas` | condicionamento `%` → `number` | `teto(gasto ÷ 15)`. §9 |
 | `montarCronograma` | jogador → `Drill[6]` | Menor média primeiro. §6 |
+| `brancosDoGoleiro` | — → `Set<AtributoGoleiro>` | Os 11 brancos de GK. §2 |
+| `atributosValidosGoleiro` | drill → `AtributoGoleiro[]` | Os ° mais os do bloco ATRIBUTOS. §2, §4 |
+| `mediaExercicioGoleiro` / `classificarDrillGoleiro` / `montarCronogramaGoleiro` | goleiro, drill → média, classe, `Drill[6]` | Mesmas regras, sobre a ficha de GK. §3, §4, §6 |
 | `projetarAteMeta` | jogador, overall alvo → faixa de sessões | Iterativo, recalcula cascata. §11 |
 | `mediaDos14` | `Jogador[]` → `number` | Soma dos 14 maiores ÷ 14, ignorando os vendidos. §8 |
 | `applySeasonTurnover` | atributos → atributos | Retira 20 de cada atributo, com piso em zero. §7 |
@@ -125,9 +142,10 @@ interface Drill {
 
 **Invariantes que o motor não pode violar:**
 
-- Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador.
+- Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador. O inverso também vale: atributo exclusivo de linha não entra no cálculo de goleiro.
+- Qual ficha um `lab` é se decide pela posição do jogador (`GK` ou não), não por um campo do documento. `migrar` valida o conjunto de atributos correspondente; ficha trocada (legado de edição de posição no Squad) é limpa, não recusada como documento.
 - Exercício com média em 180% rende **zero**. A planilha da comunidade erra nisso; nós não.
-- `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre não mapeia para Ruim nem Terrível.
+- `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre nomeia Ruim e Terrível sem escolher uma das duas.
 - `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado. Fica no motor; a UI da V1 não o chama.
 - Toda projeção sai como **faixa**, nunca como número exato — a conversão de atributo em overall é o único elo estimado do modelo (GAME-RULES §11).
 
@@ -196,8 +214,8 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 | `idade` | `number \| null` | Inteiro de 18 a 35; `null` apenas após migração da versão 1 |
 | `posicoes` | `Posicao[]` | Sempre array, mesmo com uma posição só. Até 3 |
 | `vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
-| `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad |
-| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições. Preenchido = usuário corrigiu |
+| `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad. Goleiro (`posicoes` com `GK`) guarda os 15 atributos de GK; os demais, os 15 de linha — GAME-RULES §2 |
+| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições (do goleiro, da tabela de GK). Preenchido = usuário corrigiu |
 | `talento` | `RankTalento \| 'bagre' \| null` | `null` = não classificado; `bagre` é rank visual do método 1 (GAME-RULES §5), fora da curva |
 | `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
 

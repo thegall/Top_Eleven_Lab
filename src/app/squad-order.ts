@@ -1,6 +1,22 @@
-import type { Jogador, PosicaoJogador } from '../state/schema';
+import type { Jogador, PosicaoJogador, TalentoLab } from '../state/schema';
 
-export type SquadOrder = 'overall' | 'name' | 'age' | 'position';
+export type SquadOrder = 'overall' | 'name' | 'age' | 'position' | 'talent';
+
+/**
+ * Do melhor para o pior, na ordem da tabela do método 1 (GAME-RULES §5):
+ * Lenda, Gênio, Craque, Bom Jogador, Normal e Bagre. `bagre`, `ruim` e
+ * `terrivel` empatam porque as três aparecem como Bagre na tela (§3.1).
+ */
+const TALENT_RANK: Record<TalentoLab, number> = {
+  fenomeno: 0,
+  excelente: 1,
+  otima: 2,
+  boa: 3,
+  normal: 4,
+  bagre: 5,
+  ruim: 5,
+  terrivel: 5,
+};
 
 /** Ordem tática do campo, de trás para frente — não é alfabética. */
 export const POSITION_FIELD_ORDER: readonly PosicaoJogador[] = [
@@ -37,6 +53,13 @@ function positionRank(jogador: Jogador): number {
   return POSITION_RANK.get(primeira) ?? POSITION_FIELD_ORDER.length;
 }
 
+/** Sem classificação vai para o fim da lista, como a idade ausente. */
+function talentRank(jogador: Jogador): number {
+  const talento = jogador.lab?.talento;
+  if (!talento) return Number.POSITIVE_INFINITY;
+  return TALENT_RANK[talento];
+}
+
 export function sortSquadPlayers(
   players: readonly Jogador[],
   order: SquadOrder,
@@ -54,6 +77,10 @@ export function sortSquadPlayers(
 
     if (order === 'position') {
       return positionRank(a) - positionRank(b) || compareNames(a, b);
+    }
+
+    if (order === 'talent') {
+      return talentRank(a) - talentRank(b) || compareNames(a, b);
     }
 
     return compareNames(a, b);

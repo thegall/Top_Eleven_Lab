@@ -118,6 +118,18 @@ Cuidado com dois pares de nomes parecidos:
 - **Desarmar** (tela de treino) = **Corte** (tela do jogador). Mesmo atributo, tradução diferente entre telas.
 - **Chutar** (goleiro, tiro de meta) != **Chute** (jogador de linha). Atributos distintos.
 
+### Brancos do goleiro
+
+**[COMUNIDADE]** (2026-09-17, fonte: dono do repositório.) A matriz acima é montada sobre os 15 atributos de linha e não descreve o goleiro. Esta é a tabela que o Laboratório usa para classificar drill de GK:
+
+| Brancos (11) | Cinzas (4) |
+|---|---|
+| Os 10 do bloco DEFESA DO GOL — Reflexos, Agilidade, Antecipação, Sair na bola, Comunicação, Arremesso, Chutar, Espalmar, Jogo aéreo, Concentração — mais **Condicionamento** | Força, Agressividade, Velocidade, Criatividade |
+
+Leitura: o goleiro só tem cinza no bloco ATRIBUTOS, e ali o Condicionamento é a exceção branca. São 11 brancos contra 7 a 10 das posições de linha, então exercício primário é mais fácil de achar para o GK — o próprio Treino de Goleiro é primário, já que os 5 atributos que ele treina são todos brancos de goleiro.
+
+**Decisão de produto (2026-09-18):** o Laboratório passa a aceitar goleiro (era exclusão da V1, seção 10). A média do exercício de um GK usa os atributos marcados com ° na seção 4 **mais** os do bloco ATRIBUTOS que o exercício ofereça; os 10 atributos exclusivos de linha ficam fora, espelhando a regra inversa. O campo de brancos continua derivado e editável, como nas posições de linha.
+
 ---
 
 ## 3. A regra central: média do exercício e o teto de 180%
@@ -225,14 +237,16 @@ A planilha usa sete ranks; o teste por habilidade especial descrito na seção 5
 
 | Padrão observado | Média de pontos/sessão | Classificação do método 1 | Rank da curva |
 |---|---|---|---|
-| qualquer sessão com 3 | variável | Fenômeno | Fenômeno |
-| `2 2 2 2 2 2` | 2,00 | Excelente | Excelente |
-| `1 2 2 2 2 2` | 1,83 | Ótimo | Ótima |
-| `1 2 2 1 2 2` | 1,67 | Bom | Boa |
+| qualquer sessão com 3 | variável | Lenda | Fenômeno |
+| `2 2 2 2 2 2` | 2,00 | Gênio | Excelente |
+| `1 2 2 2 2 2` | 1,83 | Craque | Ótima |
+| `1 2 2 1 2 2` | 1,67 | Bom Jogador | Boa |
 | `1 2 1 2 1 2` | 1,50 | Normal | Normal |
-| `1 1 1 1 1 1` | 1,00 | Bagre | — |
+| `1 1 1 1 1 1` | 1,00 | Bagre | Ruim e Terrível |
 
 **Decisão de produto (2026-09-14):** Bagre é o rótulo do método 1 para `1 1 1 1 1 1`. Não cria um oitavo rank na curva e **não** corta Ruim versus Terrível. Ruim (0,163 a 100%) e Terrível (0,130 a 100%) continuam valores distintos na curva da seção 3.1 e no método 2. O Lab V1 classifica **só pelo método 1** (barra); **não** oferece teste por ganho de pontos na interface. Quem precisar da distinção mede sigma pelo método 2, fora da UI.
+
+**Nomenclatura (2026-09-18, fonte: dono do repositório).** Os nomes do método 1 passam a ser **Lenda, Gênio, Craque, Bom Jogador, Normal e Bagre**, na ordem da tabela acima. No vocabulário do dono, **Ruim e Terrível são a mesma coisa: as duas chamam Bagre**. O que muda é só o nome exibido — as duas linhas da curva da seção 3.1 continuam com sigma distinto (0,163 e 0,130 a 100%), e por isso o classificador do método 1 segue devolvendo `bagre` como valor próprio, sem escolher uma das duas. Os nomes internos dos ranks (`fenomeno`, `excelente`, `otima`, `boa`, `normal`, `ruim`, `terrivel`) não mudam: são identificadores da curva, não texto de tela.
 
 ---
 
@@ -346,7 +360,7 @@ A planilha diverge em dois pontos, e nos dois ela é que está errada: dá Dribl
 | Academia | Arremesso°, Força, Chutar°, Condicionamento | Muito Difícil |
 | Arrancada | Velocidade, Drible, Sair na bola°, Condicionamento | Muito Difícil |
 
-° = atributo de goleiro. Para jogador de linha, **não entra no cálculo da média** do exercício.
+° = atributo de goleiro. Para jogador de linha, **não entra no cálculo da média** do exercício. Para goleiro vale o inverso: contam os ° e os atributos do bloco ATRIBUTOS, e os 10 exclusivos de linha ficam fora (seção 2, "Brancos do goleiro").
 
 ### Classificação: primário, secundário, terciário
 
@@ -370,16 +384,18 @@ Variável mais importante do Laboratório, e que o jogo **não mostra em lugar n
 
 ### Método 1 — teste de habilidade especial ou posição nova
 
-**[COMUNIDADE]** Durante o treino de uma habilidade especial ou posição nova (as que custam 40–50 pontos), a barra avança em casas e o jogador ganha 1, 2 ou 3 pontos por sessão. O teste usa exatamente 6 sessões. Qualquer sessão com ganho 3 classifica como Fenômeno; sem 3, a sequência precisa casar exatamente com uma das demais linhas:
+**[COMUNIDADE]** Durante o treino de uma habilidade especial ou posição nova (as que custam 40–50 pontos), a barra avança em casas e o jogador ganha 1, 2 ou 3 pontos por sessão. O teste usa exatamente 6 sessões. Qualquer sessão com ganho 3 classifica como Lenda; sem 3, a sequência precisa casar exatamente com uma das demais linhas:
 
 | Rank | Sequência |
 |---|---|
-| Fenômeno | Qualquer sequência com 3 em uma das sessões |
-| Excelente | `2 2 2 2 2 2` |
-| Ótimo | `1 2 2 2 2 2` |
-| Bom | `1 2 2 1 2 2` |
+| Lenda | Qualquer sequência com 3 em uma das sessões |
+| Gênio | `2 2 2 2 2 2` |
+| Craque | `1 2 2 2 2 2` |
+| Bom Jogador | `1 2 2 1 2 2` |
 | Normal | `1 2 1 2 1 2` |
 | Bagre | `1 1 1 1 1 1` |
+
+Nomes desta tabela definidos pelo dono em 2026-09-18 (ver Nomenclatura na seção 3.1). Os ranks da curva da seção 3.1 mantêm os nomes antigos, que são a nomenclatura da planilha.
 
 Sequências que usam apenas 1 e 2, mas não casam exatamente com a tabela, são inválidas. Exemplo: `1 2 1 2 2 2`.
 
@@ -415,7 +431,7 @@ Depois basta olhar a coluna da média do exercício e ver em que linha de talent
 
 > Cortes válidos **somente** para 6 slots de Pressione o Play com média perto de 55%. Fora disso, usar a fórmula.
 
-Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e média de 55%. Pela fórmula, `31 ÷ (5 × 18) = 0,344`, que a 55% de média cai entre Ótima (0,301) e Excelente (0,366). O mesmo jogador confirmou o padrão Ótimo no método 1. **Os dois métodos concordam**, e a curva reproduz a medição de campo.
+Caso real documentado: 6 + 7 + 7 + 5 + 6 = 31 pontos, com Pressione o Play e média de 55%. Pela fórmula, `31 ÷ (5 × 18) = 0,344`, que a 55% de média cai entre Ótima (0,301) e Excelente (0,366). O mesmo jogador confirmou o padrão Craque (Ótima na curva) no método 1. **Os dois métodos concordam**, e a curva reproduz a medição de campo.
 
 **Por que este método continua no motor, e não na UI da V1:** não queima a habilidade especial, dá um número em vez de um padrão subjetivo, e as três condições de validade (drill primário, média abaixo de 80%, treino classe mundial) são coisas que o Lab sabe calcular. Fica disponível para quem medir sigma fora da interface. A V1 **não** oferece o teste por ganho de pontos.
 
@@ -445,7 +461,7 @@ Só há coeficientes para 18, 19 e 20 anos — é um método de scout de jovem, 
 
 1. **Já sei o rank** — escolhe direto.
 2. **Não sei** — o fluxo da V1 pede os ganhos de 6 sessões do método 1, mostra a tabela completa e classifica apenas sequências válidas. Idade não entra.
-3. **Separar Ruim de Terrível** — fora da UI da V1. Bagre não corta esses ranks; quem precisar mede sigma pelo método 2, fora do Lab.
+3. **Separar Ruim de Terrível** — fora da UI da V1. As duas se chamam Bagre (nomenclatura de 2026-09-18) e o método 1 não as corta; quem precisar do sigma de cada uma mede pelo método 2, fora do Lab.
 
 A extrapolação do rank para condições diferentes das do teste — um drill com média em 130%, um jogador de 26 anos, treino profissional em vez de classe mundial — **está resolvida** pelas seções 3.1 e 3.2. O rank é um ponto na tabela; a curva faz o resto.
 
@@ -671,7 +687,7 @@ Regras conhecidas e deliberadamente não implementadas.
 - **Entrosamento, Primor e livros táticos** — sistema separado, não melhora atributo. Importa para resultado de partida, não para evolução de jogador.
 - **Treino em grupo** — treinar 3 a 5 jogadores da mesma zona numa sessão. Relevante e bem documentado, mas o Laboratório da V1 raciocina por jogador individual.
 - **Youth Academy** e Centro de Talentos.
-- **Goleiro no Laboratório** — depende dos atributos de GK (seção 2). O goleiro continua no Squad normalmente, que só usa overall e posição.
+- **Goleiro no Laboratório** — **saiu desta lista em 2026-09-18** (THE-54). O Lab aceita GK com os 15 atributos da seção 2 e os brancos de goleiro da mesma seção.
 - **Estilos de jogo (playstyles)**.
 
 ---
@@ -717,7 +733,7 @@ Cada teste de talento que o usuário rodar produz exatamente o dado que falta �
 
 ### Resolvidas
 
-Brancos por posição (matriz da seção 2, derivada e editável), atributos do goleiro (seção 2), slots por sessão (6), teto de treino (180% por exercício), **curva de ganho por talento e média do exercício (seção 3.1)**, **efeito quantitativo da idade (seção 3.2)**, **custo de condicionamento por drill (seção 4)**, **conversão de condicionamento em maletas (seção 9)**, nível do treinador (seção 3.1), média do time (14 mais fortes), teste de talento da V1 pelo método 1 (idade fora do classificador; Bagre sem corte Ruim/Terrível — seção 5; método 2 só no motor), perda de virada (20 em todo atributo e no overall, evento único — seção 7), piso de cinza (não existe — seção 8.1), e o algoritmo de cronograma por posição, validado contra o cronograma de MC ditado em vídeo (seção 6).
+Brancos por posição (matriz da seção 2, derivada e editável), atributos do goleiro (seção 2), slots por sessão (6), teto de treino (180% por exercício), **curva de ganho por talento e média do exercício (seção 3.1)**, **efeito quantitativo da idade (seção 3.2)**, **custo de condicionamento por drill (seção 4)**, **conversão de condicionamento em maletas (seção 9)**, nível do treinador (seção 3.1), média do time (14 mais fortes), teste de talento da V1 pelo método 1 (nomes Lenda/Gênio/Craque/Bom Jogador/Normal/Bagre, idade fora do classificador; Bagre nomeia Ruim e Terrível sem cortar as duas — seção 5; método 2 só no motor), perda de virada (20 em todo atributo e no overall, evento único — seção 7), piso de cinza (não existe — seção 8.1), e o algoritmo de cronograma por posição, validado contra o cronograma de MC ditado em vídeo (seção 6).
 
 ---
 

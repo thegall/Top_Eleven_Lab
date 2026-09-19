@@ -55,6 +55,7 @@ Contra a alternativa atual, três diferenças concretas:
 **Aba Laboratório — simulador de treino**
 
 - Cadastro detalhado espelhando a tela do jogo: idade, posição, habilidade especial e os 15 atributos. Os brancos vêm **derivados da posição** e ficam editáveis — o usuário confere em vez de digitar.
+- **Goleiro incluído (2026-09-18):** a ficha de GK tem os 15 atributos em 2 blocos, brancos próprios e classificação de exercício sobre os atributos de goleiro (GAME-RULES §2). Jogador de linha e goleiro nunca misturam atributos no cálculo.
 - **Recomendação de exercício:** os 29 drills classificados em primário, secundário e terciário para aquele jogador, com a média de cada um e a distância até o teto de 180%. Esta é a entrega central, e é cálculo exato.
 - **Teste de talento guiado:** o app pede os pontos da barra (1, 2 ou 3) em 6 sessões de habilidade especial ou posição nova, classifica pela sequência (método 1) e explica o que aquilo significa. A V1 **não** oferece o teste por ganho de pontos (método 2).
 - **Estimativa de sessões e de maletas até a meta de overall**, apresentada como faixa. O custo em maletas é cálculo fechado; a conversão final para overall é o único trecho estimado (ver riscos).
@@ -68,7 +69,6 @@ Contra a alternativa atual, três diferenças concretas:
 
 ### Fora da V1
 
-- Goleiro no Laboratório (continua normalmente no Squad).
 - Treino em grupo por zona, entrosamento, Primor e livros táticos.
 - Classes/Tiers e Gems, Player Academy como sistema de treino, Youth Academy, estilos de jogo.
 - Conversão da estimativa em dias de temporada.

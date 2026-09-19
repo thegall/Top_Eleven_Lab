@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Jogador, PosicaoJogador } from '../state/schema';
+import type { DadosLabLinha, Jogador, PosicaoJogador, TalentoLab } from '../state/schema';
 import { sortSquadPlayers } from './squad-order';
 
 function player(
@@ -17,6 +17,16 @@ function player(
     posicoes: [posicao],
     vendido: false,
     lab: null,
+  };
+}
+
+/** A ordenação por talento só lê `lab.talento`; os atributos não entram na conta. */
+function comTalento(nome: string, talento: TalentoLab | null): Jogador {
+  const base = player(nome, 70, 'ST');
+  if (talento === null) return base;
+  return {
+    ...base,
+    lab: { atributos: {} as DadosLabLinha['atributos'], brancosOverride: null, talento },
   };
 }
 
@@ -84,6 +94,42 @@ describe('sortSquadPlayers', () => {
       'Meio',
       'Velho',
       'Migrado',
+    ]);
+  });
+
+  it('ordena por talento de Lenda a Bagre, com os sem classificação no fim', () => {
+    const players = [
+      comTalento('Bagre', 'bagre'),
+      comTalento('Lenda', 'fenomeno'),
+      comTalento('Sem teste', null),
+      comTalento('Normal', 'normal'),
+      comTalento('Craque', 'otima'),
+      comTalento('Bom Jogador', 'boa'),
+      comTalento('Gênio', 'excelente'),
+    ];
+
+    expect(sortSquadPlayers(players, 'talent').map(({ nome }) => nome)).toEqual([
+      'Lenda',
+      'Gênio',
+      'Craque',
+      'Bom Jogador',
+      'Normal',
+      'Bagre',
+      'Sem teste',
+    ]);
+  });
+
+  it('empata Ruim, Terrível e Bagre, que aparecem com o mesmo nome na tela', () => {
+    const players = [
+      comTalento('Zeca', 'ruim'),
+      comTalento('Ana', 'terrivel'),
+      comTalento('Bia', 'bagre'),
+    ];
+
+    expect(sortSquadPlayers(players, 'talent').map(({ nome }) => nome)).toEqual([
+      'Ana',
+      'Bia',
+      'Zeca',
     ]);
   });
 

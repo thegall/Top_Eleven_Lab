@@ -83,6 +83,7 @@ Primeira tela real, e a mais simples: três campos por jogador. Também é a que
 - [ ] Recomendação dos 6 slots, com a média e a distância até o teto de cada drill
 - [ ] Teste de talento guiado, com verificação das condições de validade
 - [ ] Estimativa de sessões e de maletas, sempre como faixa
+- [x] Ficha de goleiro: 15 atributos em 2 blocos, brancos de GK, exercícios e teste de talento (THE-54)
 
 ## Etapa 8 — Mobile e acabamento
 
@@ -92,4 +93,4 @@ Primeira tela real, e a mais simples: três campos por jogador. Também é a que
 
 ## Depois da V1
 
-Fora do escopo por decisão, registrado para não voltar como ideia nova: goleiro no Laboratório, treino em grupo, detecção de talento pelo valor de mercado no leilão, contas de usuário e sincronização, outros idiomas, e qualquer coisa que dependa de dados agregados de muitos usuários. Os motivos estão no `PRD.md` e na seção 10 de `GAME-RULES.md`.
+Fora do escopo por decisão, registrado para não voltar como ideia nova: treino em grupo, detecção de talento pelo valor de mercado no leilão, contas de usuário e sincronização, outros idiomas, e qualquer coisa que dependa de dados agregados de muitos usuários. Os motivos estão no `PRD.md` e na seção 10 de `GAME-RULES.md`.

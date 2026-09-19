@@ -3,6 +3,7 @@
  * caminho para `localStorage` e para import — dois caminhos seria um deles
  * sem manutenção.
  */
+import { ATRIBUTOS_GOLEIRO } from '../domain/goalkeeper';
 import {
   CURRENT_SCHEMA_VERSION,
   ehPosicoesValidas,
@@ -16,6 +17,9 @@ function repararJogadorV1(jogador: unknown): unknown {
   const bruto = jogador as Record<string, unknown>;
   return { ...bruto, idade: null, posicoes: repararPosicoesV1(bruto.posicoes) };
 }
+
+/** Os 15 do goleiro: a mesma constante que o Lab usa (GAME-RULES §2). */
+const ATRIBUTOS_GOLEIRO_VALIDOS = new Set<string>(ATRIBUTOS_GOLEIRO);
 
 const ATRIBUTOS_VALIDOS = new Set([
   'corte',
@@ -52,20 +56,23 @@ const RANKS_TALENTO_VALIDOS = new Set([
  * em vez de um erro na hora certa. Valida aqui, no limite de entrada do
  * documento (ADR 0002), em vez de no motor de domínio.
  */
-function ehLabValido(valor: unknown): boolean {
+function ehLabValido(valor: unknown, ehGoleiro: boolean): boolean {
   if (typeof valor !== 'object' || valor === null) return false;
   const lab = valor as Record<string, unknown>;
 
+  /** Goleiro tem a ficha de GK; jogador de linha, a de linha (GAME-RULES §2). */
+  const validos = ehGoleiro ? ATRIBUTOS_GOLEIRO_VALIDOS : ATRIBUTOS_VALIDOS;
+
   if (typeof lab.atributos !== 'object' || lab.atributos === null) return false;
   const atributos = lab.atributos as Record<string, unknown>;
-  for (const atributo of ATRIBUTOS_VALIDOS) {
+  for (const atributo of validos) {
     if (typeof atributos[atributo] !== 'number' || !Number.isFinite(atributos[atributo])) return false;
   }
 
   if (
     lab.brancosOverride !== null &&
     (!Array.isArray(lab.brancosOverride) ||
-      !lab.brancosOverride.every((a) => ATRIBUTOS_VALIDOS.has(a as string)))
+      !lab.brancosOverride.every((a) => validos.has(a as string)))
   ) {
     return false;
   }
@@ -90,8 +97,25 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
     Number.isFinite(j.overall) &&
     ehPosicoesValidas(j.posicoes) &&
     typeof j.vendido === 'boolean' &&
-    (j.lab === null || ehLabValido(j.lab))
+    (j.lab === null || ehLabValido(j.lab, j.posicoes.includes('GK')))
   );
+}
+
+/**
+ * Release anterior aceitava lab de linha num GK (e o inverso): a edição de
+ * posição no Squad preservava o lab, e o validador não olhava a posição.
+ * Recusar o documento inteiro faria `carregar()` devolver vazio e o provider
+ * gravar por cima, apagando o elenco. Limpa só a ficha trocada.
+ */
+function repararLabTrocado(jogador: unknown): unknown {
+  if (typeof jogador !== 'object' || jogador === null) return jogador;
+  const j = jogador as Record<string, unknown>;
+  if (j.lab === null || !Array.isArray(j.posicoes)) return jogador;
+
+  const ehGk = j.posicoes.includes('GK');
+  if (ehLabValido(j.lab, ehGk)) return jogador;
+  if (ehLabValido(j.lab, !ehGk)) return { ...j, lab: null };
+  return jogador;
 }
 
 /**
@@ -119,10 +143,11 @@ export function migrar(bruto: unknown): Documento {
     throw new Error('Documento inválido: jogadores deve ser uma lista.');
   }
   const jogadoresDesconhecidos: unknown[] = jogadores;
-  const jogadoresAtuais: unknown[] =
+  const jogadoresAtuais: unknown[] = (
     schemaVersion === 1
       ? jogadoresDesconhecidos.map((jogador) => repararJogadorV1(jogador))
-      : jogadoresDesconhecidos;
+      : jogadoresDesconhecidos
+  ).map(repararLabTrocado);
 
   if (!jogadoresAtuais.every(ehJogadorValido)) {
     throw new Error('Documento inválido: um ou mais jogadores têm formato inválido.');
