@@ -3,7 +3,13 @@
  * documento novo. Toda mutação passa por aqui — nenhum componente altera o
  * documento direto.
  */
-import { ehPosicoesValidas, type DadosLab, type Documento, type Jogador } from './schema';
+import {
+  ehGoleiro,
+  ehPosicoesValidas,
+  type DadosLab,
+  type Documento,
+  type Jogador,
+} from './schema';
 
 function exigirPosicoes(posicoes: Jogador['posicoes']): void {
   if (!ehPosicoesValidas(posicoes)) {
@@ -53,6 +59,10 @@ export function reducer(documento: Documento, acao: Acao): Documento {
                 idade: acao.idade,
                 overall: acao.overall,
                 posicoes: acao.posicoes,
+                lab:
+                  ehGoleiro(jogador) === ehGoleiro({ posicoes: acao.posicoes })
+                    ? jogador.lab
+                    : null,
               }
             : jogador,
         ),
