@@ -143,7 +143,7 @@ interface Drill {
 **Invariantes que o motor não pode violar:**
 
 - Atributo de goleiro nunca entra no cálculo de jogador de linha — nem no numerador, nem no denominador. O inverso também vale: atributo exclusivo de linha não entra no cálculo de goleiro.
-- Qual ficha um `lab` é se decide pela posição do jogador (`GK` ou não), não por um campo do documento. `migrar` valida o conjunto de atributos correspondente e recusa a ficha trocada.
+- Qual ficha um `lab` é se decide pela posição do jogador (`GK` ou não), não por um campo do documento. `migrar` valida o conjunto de atributos correspondente; ficha trocada (legado de edição de posição no Squad) é limpa, não recusada como documento.
 - Exercício com média em 180% rende **zero**. A planilha da comunidade erra nisso; nós não.
 - `classificarTalentoPorHabilidadeEspecial` classifica só pela sequência; idade não entra; Bagre nomeia Ruim e Terrível sem escolher uma das duas.
 - `classificarTalento` recusa entrada quando as condições de validade não são atendidas, em vez de devolver um rank errado. Fica no motor; a UI da V1 não o chama.

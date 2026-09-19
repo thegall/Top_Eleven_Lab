@@ -248,9 +248,10 @@ existe interface ainda.
 **Ficha de goleiro não virou versão nova (2026-09-18, THE-54).** O Laboratório passou a
 aceitar GK, que guarda outros 15 atributos (GAME-RULES §2), e mesmo assim o formato
 continua na versão 2: qual ficha um `lab` é se lê da posição do jogador, que já está no
-documento, em vez de um campo discriminador novo. Documento v2 antigo segue válido — até
-então nenhum goleiro tinha `lab` — e a validação passou a exigir o conjunto de atributos
-correspondente à posição, recusando a ficha trocada.
+documento, em vez de um campo discriminador novo. Documento v2 antigo segue válido. A
+validação exige o conjunto de atributos da posição; se o lab for a ficha completa do outro
+tipo — o Squad antigo preservava o lab ao trocar linha ↔ GK — `migrar` limpa só aquele
+lab, em vez de recusar o documento e apagar o elenco.
 
 ### 5.5. Importar substitui, não mescla
 

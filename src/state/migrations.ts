@@ -102,6 +102,23 @@ function ehJogadorValido(valor: unknown): valor is Jogador {
 }
 
 /**
+ * Release anterior aceitava lab de linha num GK (e o inverso): a edição de
+ * posição no Squad preservava o lab, e o validador não olhava a posição.
+ * Recusar o documento inteiro faria `carregar()` devolver vazio e o provider
+ * gravar por cima, apagando o elenco. Limpa só a ficha trocada.
+ */
+function repararLabTrocado(jogador: unknown): unknown {
+  if (typeof jogador !== 'object' || jogador === null) return jogador;
+  const j = jogador as Record<string, unknown>;
+  if (j.lab === null || !Array.isArray(j.posicoes)) return jogador;
+
+  const ehGk = j.posicoes.includes('GK');
+  if (ehLabValido(j.lab, ehGk)) return jogador;
+  if (ehLabValido(j.lab, !ehGk)) return { ...j, lab: null };
+  return jogador;
+}
+
+/**
  * Valida e migra um documento bruto (de `localStorage` ou de um arquivo
  * importado) para o formato atual. Versão maior que a conhecida é recusada,
  * não adivinhada — regra 4 da ADR 0002.
@@ -126,10 +143,11 @@ export function migrar(bruto: unknown): Documento {
     throw new Error('Documento inválido: jogadores deve ser uma lista.');
   }
   const jogadoresDesconhecidos: unknown[] = jogadores;
-  const jogadoresAtuais: unknown[] =
+  const jogadoresAtuais: unknown[] = (
     schemaVersion === 1
       ? jogadoresDesconhecidos.map((jogador) => repararJogadorV1(jogador))
-      : jogadoresDesconhecidos;
+      : jogadoresDesconhecidos
+  ).map(repararLabTrocado);
 
   if (!jogadoresAtuais.every(ehJogadorValido)) {
     throw new Error('Documento inválido: um ou mais jogadores têm formato inválido.');

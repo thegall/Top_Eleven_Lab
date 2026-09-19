@@ -142,32 +142,48 @@ describe('migrar', () => {
     expect(migrar(bruto)).toEqual(bruto);
   });
 
-  it('cada posição exige a sua ficha: goleiro com atributos de linha, e o inverso, são recusados', () => {
-    expect(() =>
-      migrar({
-        schemaVersion: 2,
-        jogadores: [
-          {
-            ...jogadorBase,
-            idade: 21,
-            posicoes: ['GK'],
-            lab: { atributos: atributosCompletos, brancosOverride: null, talento: null },
-          },
-        ],
-      }),
-    ).toThrow();
-    expect(() =>
-      migrar({
-        schemaVersion: 2,
-        jogadores: [
-          {
-            ...jogadorBase,
-            idade: 21,
-            lab: { atributos: atributosGoleiro, brancosOverride: null, talento: null },
-          },
-        ],
-      }),
-    ).toThrow();
+  it('limpa o lab legado com ficha trocada, em vez de recusar o elenco', () => {
+    const goleiroComLabDeLinha = {
+      ...jogadorBase,
+      idade: 21,
+      posicoes: ['GK'],
+      lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'boa' },
+    };
+    const linhaComLabDeGoleiro = {
+      ...jogadorBase,
+      idade: 21,
+      lab: { atributos: atributosGoleiro, brancosOverride: null, talento: 'otima' },
+    };
+
+    expect(migrar({ schemaVersion: 2, jogadores: [goleiroComLabDeLinha] })).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...goleiroComLabDeLinha, lab: null }],
+    });
+    expect(migrar({ schemaVersion: 2, jogadores: [linhaComLabDeGoleiro] })).toEqual({
+      schemaVersion: 2,
+      jogadores: [{ ...linhaComLabDeGoleiro, lab: null }],
+    });
+  });
+
+  it('preserva o restante do elenco quando só um lab está trocado', () => {
+    const dc = {
+      ...jogadorBase,
+      idade: 21,
+      lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'boa' },
+    };
+    const gk = {
+      ...jogadorBase,
+      id: '2',
+      nome: 'Goleiro',
+      idade: 21,
+      posicoes: ['GK'],
+      lab: { atributos: atributosCompletos, brancosOverride: null, talento: null },
+    };
+
+    expect(migrar({ schemaVersion: 2, jogadores: [dc, gk] })).toEqual({
+      schemaVersion: 2,
+      jogadores: [dc, { ...gk, lab: null }],
+    });
   });
 
   it('recusa lab com atributos ausentes ou incompletos, pra não virar NaN na média do exercício', () => {

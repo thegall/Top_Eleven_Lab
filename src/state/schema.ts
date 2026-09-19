@@ -79,7 +79,8 @@ export type DadosLabGoleiro = DadosLabDe<AtributoGoleiro>;
  * Qual das duas fichas um `lab` é se decide pela posição do jogador, não por um
  * campo no documento: goleiro é `GK` no Squad, e essa é a única origem da
  * diferença. Quem lê já tem o jogador em mão, e `migrar` valida o conjunto de
- * atributos certo para cada um.
+ * atributos certo para cada um. Ficha trocada herdada do Squad antigo é
+ * limpa, não recusada como documento.
  */
 export type DadosLab = DadosLabLinha | DadosLabGoleiro;
 

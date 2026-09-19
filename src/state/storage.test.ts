@@ -46,4 +46,51 @@ describe('carregar / salvar', () => {
     localStorage.setItem('top-eleven-lab:documento', '{ isso não é JSON');
     expect(carregar()).toEqual({ schemaVersion: 2, jogadores: [] });
   });
+
+  it('carrega elenco com lab legado trocado sem apagar o documento', () => {
+    const atributosDeLinha = {
+      corte: 50,
+      marcacao: 50,
+      posicionamento: 50,
+      cabecada: 50,
+      coragem: 50,
+      passe: 50,
+      drible: 50,
+      cruzamento: 50,
+      chute: 50,
+      finalizacao: 50,
+      condicionamento: 50,
+      forca: 50,
+      agressividade: 50,
+      velocidade: 50,
+      criatividade: 50,
+    };
+    const dc = {
+      id: '1',
+      nome: 'Ned Stark',
+      idade: 21,
+      overall: 78,
+      posicoes: ['DC' as const],
+      vendido: false,
+      lab: { atributos: atributosDeLinha, brancosOverride: null, talento: 'boa' as const },
+    };
+    const gk = {
+      id: '2',
+      nome: 'Goleiro',
+      idade: 21,
+      overall: 70,
+      posicoes: ['GK' as const],
+      vendido: false,
+      lab: { atributos: atributosDeLinha, brancosOverride: null, talento: null },
+    };
+    localStorage.setItem(
+      'top-eleven-lab:documento',
+      JSON.stringify({ schemaVersion: 2, jogadores: [dc, gk] }),
+    );
+
+    expect(carregar()).toEqual({
+      schemaVersion: 2,
+      jogadores: [dc, { ...gk, lab: null }],
+    });
+  });
 });
