@@ -5,8 +5,8 @@ import { useState } from 'react';
 
 const GITHUB_URL = 'https://github.com/thegall/Top_Eleven_Lab';
 
-// Chave fictícia — THE-55 aguarda a chave Pix real do dono para substituir.
-const PIX_KEY_PLACEHOLDER = 'pix@topelevenlab.exemplo';
+// Chave Pix pública do dono, pra receber contribuições — não é credencial.
+const PIX_KEY = '93f107c7-1525-4ad8-b0c1-7ec46d7d141e';
 
 const GITHUB_ICON_PATH =
   `M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56
@@ -26,7 +26,7 @@ export function TopbarActions() {
 
   async function copiarChave() {
     try {
-      await navigator.clipboard.writeText(PIX_KEY_PLACEHOLDER);
+      await navigator.clipboard.writeText(PIX_KEY);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
     } catch {
@@ -103,7 +103,7 @@ export function TopbarActions() {
               <strong>Apoie com um Pix</strong>
             </div>
             <p>Apoie esse projeto para ter um domínio oficial, com qualquer valor.</p>
-            <code>{PIX_KEY_PLACEHOLDER}</code>
+            <code>{PIX_KEY}</code>
             <button
               type="button"
               className="btn btn--secondary"
