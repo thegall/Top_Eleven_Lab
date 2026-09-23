@@ -278,7 +278,6 @@ export default function SquadPage() {
         <div>
           <section className="panel">
             <div className="panel__head">
-              <span className="gicon">+</span>
               <h2>Adicionar jogador</h2>
               <span className="hint">4 campos, poucos segundos por jogador</span>
             </div>
