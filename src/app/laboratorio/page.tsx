@@ -377,7 +377,7 @@ export default function LaboratorioPage() {
         {!selecionado || !lab || !ficha ? (
           <section className="panel">
             <p className="empty">Cadastre um jogador na aba Squad pra usar o Laboratório.</p>
-            <CalloutRegra marca="comunidade" secao="§2">
+            <CalloutRegra marca="comunidade">
               Goleiro também entra: a ficha de GK tem 15 atributos em 2 blocos, com brancos e
               exercícios próprios.
             </CalloutRegra>
@@ -837,7 +837,7 @@ export default function LaboratorioPage() {
                     </div>
                   )}
 
-                  <CalloutRegra marca="comunidade" secao="§5">
+                  <CalloutRegra marca="comunidade">
                     A sequência precisa casar exatamente com a tabela. A única exceção é Lenda:
                     basta aparecer um 3 em qualquer uma das 6 sessões.
                   </CalloutRegra>

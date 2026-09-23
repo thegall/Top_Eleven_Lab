@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import { SquadProvider } from '../state/store';
 import { Nav } from './nav';
+import { TopbarActions } from './topbar-actions';
 import './globals.css';
 
 const inter = Inter({
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               />
             </span>
             <Nav />
+            <TopbarActions />
           </header>
           <div id="conteudo" tabIndex={-1}>
             {children}

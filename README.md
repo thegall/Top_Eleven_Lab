@@ -1,6 +1,18 @@
 # Top Eleven Lab
 
+<div align="center">
+
 Calculadora de treino e de elenco para o Top Eleven, feita para a comunidade brasileira do jogo.
+
+**[top11lab.vercel.app](https://top11lab.vercel.app/)**
+
+![Squad: elenco ordenado por overall, média dos 14 e o efeito de marcar uma venda](docs/screenshots/01-squad.png)
+
+![Laboratório: ficha do jogador com os brancos herdados da posição](docs/screenshots/02-laboratorio-ficha.png)
+
+![Laboratório: exercícios classificados, sessão de 6 slots e teste de talento](docs/screenshots/03-laboratorio-exercicios.png)
+
+</div>
 
 O Top Eleven esconde as contas que decidem a temporada. Cada exercício tem uma média própria que trava aos 180%, o talento do jogador nunca aparece na tela e muda o rendimento de cada maleta em mais de três vezes, e a liga do ano seguinte é sorteada pela média dos 14 jogadores mais fortes do elenco, não pelos 11 que entram em campo. Hoje isso se resolve com planilha de Excel passada em grupo de Facebook.
 
