@@ -546,7 +546,7 @@ export default function SquadPage() {
                   </div>
                 </div>
 
-                <CalloutRegra marca="comunidade" secao="§8">
+                <CalloutRegra marca="comunidade">
                   Barra dourada marca quem está nos 14 que contam. Cada venda simulada tira um
                   jogador da conta e <b>puxa o próximo reserva para dentro</b>, então o efeito
                   quase nunca é o óbvio. A média da tela de escalação (os 11) é outra conta e
@@ -600,7 +600,7 @@ export default function SquadPage() {
                 </div>
               ))}
             </div>
-            <CalloutRegra marca="comunidade" secao="§8">
+            <CalloutRegra marca="comunidade">
               O jogo emparelha a temporada seguinte pela média dos <b>14 jogadores mais fortes</b>,
               não pela dos 11 escalados. As faixas acima são observação da comunidade brasileira,
               não número publicado pela Nordeus.
