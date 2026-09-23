@@ -1,8 +1,18 @@
 # Top Eleven Lab
 
+<div align="center">
+
 Calculadora de treino e de elenco para o Top Eleven, feita para a comunidade brasileira do jogo.
 
-**Acesse:** [top11lab.vercel.app](https://top11lab.vercel.app/)
+**[top11lab.vercel.app](https://top11lab.vercel.app/)**
+
+![Squad: elenco ordenado por overall, média dos 14 e o efeito de marcar uma venda](docs/screenshots/01-squad.png)
+
+![Laboratório: ficha do jogador com os brancos herdados da posição](docs/screenshots/02-laboratorio-ficha.png)
+
+![Laboratório: exercícios classificados, sessão de 6 slots e teste de talento](docs/screenshots/03-laboratorio-exercicios.png)
+
+</div>
 
 O Top Eleven esconde as contas que decidem a temporada. Cada exercício tem uma média própria que trava aos 180%, o talento do jogador nunca aparece na tela e muda o rendimento de cada maleta em mais de três vezes, e a liga do ano seguinte é sorteada pela média dos 14 jogadores mais fortes do elenco, não pelos 11 que entram em campo. Hoje isso se resolve com planilha de Excel passada em grupo de Facebook.
 
@@ -13,14 +23,6 @@ O Top Eleven esconde as contas que decidem a temporada. Cada exercício tem uma 
 **Aba Laboratório.** Você replica a tela do jogador, com idade, posições e os 15 atributos. O Lab calcula a média dos 29 exercícios para aquele jogador, classifica cada um em primário, secundário e terciário, e monta os 6 slots da sessão começando pelo que está mais longe do teto. Depois estima quantas sessões e quantas maletas verdes faltam até o overall que você quer.
 
 A conta de maleta é exata. Subir 8 pontos de atributo num jogador de talento máximo custa 2 maletas enquanto o exercício está em 100% de média, e 6 maletas quando ele chega a 160%. É por isso que a comunidade troca de exercício por volta dos 140%, e é o tipo de coisa que o Lab mostra antes de você gastar.
-
-## Capturas de tela
-
-![Squad: elenco ordenado por overall, média dos 14 e o efeito de marcar uma venda](docs/screenshots/01-squad.png)
-
-![Laboratório: ficha do jogador com os brancos herdados da posição](docs/screenshots/02-laboratorio-ficha.png)
-
-![Laboratório: exercícios classificados, sessão de 6 slots e teste de talento](docs/screenshots/03-laboratorio-exercicios.png)
 
 ## De onde vêm as regras
 
