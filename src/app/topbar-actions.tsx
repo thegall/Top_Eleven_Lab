@@ -3,6 +3,8 @@
 import * as Popover from '@radix-ui/react-popover';
 import { useState } from 'react';
 
+import { useTextos } from '../ui/idioma';
+
 const GITHUB_URL = 'https://github.com/thegall/Top_Eleven_Lab';
 
 // Chave Pix pública do dono, pra receber contribuições — não é credencial.
@@ -23,6 +25,7 @@ type PainelAberto = 'github' | 'pix' | null;
 export function TopbarActions() {
   const [painelAberto, setPainelAberto] = useState<PainelAberto>(null);
   const [copiado, setCopiado] = useState(false);
+  const t = useTextos().topbar;
 
   async function copiarChave() {
     try {
@@ -41,7 +44,7 @@ export function TopbarActions() {
         onOpenChange={(aberto) => setPainelAberto(aberto ? 'github' : null)}
       >
         <Popover.Trigger asChild>
-          <button type="button" className="topbar__icon-btn" aria-label="Apoiar no GitHub">
+          <button type="button" className="topbar__icon-btn" aria-label={t.githubAria}>
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
               <path fill="currentColor" d={GITHUB_ICON_PATH} />
             </svg>
@@ -52,10 +55,10 @@ export function TopbarActions() {
             className="topbar__panel"
             align="end"
             sideOffset={10}
-            aria-label="Apoiar no GitHub"
+            aria-label={t.githubAria}
           >
             <Popover.Close asChild>
-              <button type="button" className="topbar__panel-close" aria-label="Fechar">
+              <button type="button" className="topbar__panel-close" aria-label={t.fechar}>
                 ×
               </button>
             </Popover.Close>
@@ -65,11 +68,11 @@ export function TopbarActions() {
                   <path fill="currentColor" d={GITHUB_ICON_PATH} />
                 </svg>
               </span>
-              <strong>Apoie o projeto</strong>
+              <strong>{t.githubTitulo}</strong>
             </div>
-            <p>Apoie esse projeto no GitHub com uma estrela. É gratuito!</p>
+            <p>{t.githubTexto}</p>
             <a className="btn btn--primary" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-              Favoritar
+              {t.favoritar}
             </a>
           </Popover.Content>
         </Popover.Portal>
@@ -80,7 +83,7 @@ export function TopbarActions() {
         onOpenChange={(aberto) => setPainelAberto(aberto ? 'pix' : null)}
       >
         <Popover.Trigger asChild>
-          <button type="button" className="topbar__pix-badge" aria-label="Contribuir via Pix">
+          <button type="button" className="topbar__pix-badge" aria-label={t.pixAria}>
             Pix
           </button>
         </Popover.Trigger>
@@ -89,10 +92,10 @@ export function TopbarActions() {
             className="topbar__panel topbar__panel--pix"
             align="end"
             sideOffset={10}
-            aria-label="Contribuir via Pix"
+            aria-label={t.pixAria}
           >
             <Popover.Close asChild>
-              <button type="button" className="topbar__panel-close" aria-label="Fechar">
+              <button type="button" className="topbar__panel-close" aria-label={t.fechar}>
                 ×
               </button>
             </Popover.Close>
@@ -100,9 +103,9 @@ export function TopbarActions() {
               <span className="topbar__panel-icon topbar__panel-icon--pix" aria-hidden="true">
                 Pix
               </span>
-              <strong>Apoie com um Pix</strong>
+              <strong>{t.pixTitulo}</strong>
             </div>
-            <p>Apoie esse projeto para ter um domínio oficial, com qualquer valor.</p>
+            <p>{t.pixTexto}</p>
             <code>{PIX_KEY}</code>
             <button
               type="button"
@@ -111,7 +114,7 @@ export function TopbarActions() {
                 void copiarChave();
               }}
             >
-              {copiado ? 'Copiado!' : 'Copiar chave'}
+              {copiado ? t.copiado : t.copiarChave}
             </button>
           </Popover.Content>
         </Popover.Portal>

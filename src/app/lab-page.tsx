@@ -7,7 +7,7 @@ import {
   preencherSlots,
   type Drill,
   type DrillClassificado,
-} from '../../domain/drills';
+} from '../domain/drills';
 import {
   ATRIBUTOS_COMUNS,
   ATRIBUTOS_DO_GOL,
@@ -15,16 +15,16 @@ import {
   atributosValidosGoleiro,
   brancosDoGoleiro,
   classificarDrillsDeGoleiro,
-} from '../../domain/goalkeeper';
-import { brancosDaPosicao } from '../../domain/positions';
-import { applySeasonTurnover } from '../../domain/season';
+} from '../domain/goalkeeper';
+import { brancosDaPosicao } from '../domain/positions';
+import { applySeasonTurnover } from '../domain/season';
 import {
   SPECIAL_ABILITY_PATTERNS,
   classificarTalentoPorHabilidadeEspecial,
   type SpecialAbilityRank,
-} from '../../domain/talent';
-import { conditionCostPerSession } from '../../domain/training';
-import type { Atributo, AtributoGoleiro, Posicao } from '../../domain/types';
+} from '../domain/talent';
+import { conditionCostPerSession } from '../domain/training';
+import type { Atributo, AtributoGoleiro, Posicao } from '../domain/types';
 import {
   ehGoleiro,
   type DadosLab,
@@ -32,75 +32,40 @@ import {
   type DadosLabLinha,
   type Jogador,
   type TalentoLab,
-} from '../../state/schema';
-import { useSquad } from '../../state/store';
-import { CalloutRegra } from '../../ui/callout-regra';
-import { classeBadgePosicao } from '../../ui/posicao';
-import { pt } from '../../ui/i18n';
-import { EscudoTalento, rotuloTalento } from '../../ui/talento';
-import { sortSquadPlayers } from '../squad-order';
-
-const LABELS: Record<Atributo, string> = {
-  corte: 'Corte',
-  marcacao: 'Marcação',
-  posicionamento: 'Posicionamento',
-  cabecada: 'Cabeçada',
-  coragem: 'Coragem',
-  passe: 'Passe',
-  drible: 'Drible',
-  cruzamento: 'Cruzamento',
-  chute: 'Chute',
-  finalizacao: 'Finalização',
-  condicionamento: 'Condicionamento',
-  forca: 'Força',
-  agressividade: 'Agressividade',
-  velocidade: 'Velocidade',
-  criatividade: 'Criatividade',
-};
+} from '../state/schema';
+import { useSquad } from '../state/store';
+import { CalloutRegra } from '../ui/callout-regra';
+import { classeBadgePosicao } from '../ui/posicao';
+import { formatarDecimal, type Textos } from '../ui/i18n';
+import { useTextos } from '../ui/idioma';
+import { EscudoTalento } from '../ui/talento';
+import { sortSquadPlayers } from './squad-order';
 
 const GRUPOS = [
   {
-    titulo: 'Defesa',
+    titulo: 'defesa',
     classe: 'g-def',
     icone: '/icone-defesa.png',
     atributos: ['corte', 'marcacao', 'posicionamento', 'cabecada', 'coragem'],
   },
   {
-    titulo: 'Ataque',
+    titulo: 'ataque',
     classe: 'g-atk',
     icone: '/icone-ataque.png',
     atributos: ['passe', 'drible', 'cruzamento', 'chute', 'finalizacao'],
   },
   {
-    titulo: 'Atributos',
+    titulo: 'atributos',
     classe: 'g-phy',
     icone: '/icone-atributos.png',
     atributos: ['condicionamento', 'forca', 'agressividade', 'velocidade', 'criatividade'],
   },
 ] as const satisfies readonly {
-  titulo: string;
+  titulo: GrupoAtributos;
   classe: string;
   icone: string;
   atributos: Atributo[];
 }[];
-
-const LABELS_GOLEIRO: Record<AtributoGoleiro, string> = {
-  reflexos: 'Reflexos',
-  agilidade: 'Agilidade',
-  antecipacao: 'Antecipação',
-  sairNaBola: 'Sair na bola',
-  comunicacao: 'Comunicação',
-  arremesso: 'Arremesso',
-  chutar: 'Chutar',
-  espalmar: 'Espalmar',
-  jogoAereo: 'Jogo aéreo',
-  concentracao: 'Concentração',
-  condicionamento: 'Condicionamento',
-  forca: 'Força',
-  agressividade: 'Agressividade',
-  velocidade: 'Velocidade',
-  criatividade: 'Criatividade',
-};
 
 /**
  * A tela do goleiro tem 2 blocos, e o de Defesa do gol vem em duas listas de 5
@@ -108,25 +73,28 @@ const LABELS_GOLEIRO: Record<AtributoGoleiro, string> = {
  */
 const GRUPOS_GOLEIRO = [
   {
-    titulo: 'Defesa do gol',
+    titulo: 'defesaDoGol',
     classe: 'g-gk',
     icone: '/icone-defesa-do-gol.png',
     atributos: ATRIBUTOS_DO_GOL,
     largo: true,
   },
   {
-    titulo: 'Atributos',
+    titulo: 'atributos',
     classe: 'g-phy',
     icone: '/icone-atributos.png',
     atributos: ATRIBUTOS_COMUNS,
   },
 ] as const satisfies readonly {
-  titulo: string;
+  titulo: GrupoAtributos;
   classe: string;
   icone: string;
   atributos: readonly AtributoGoleiro[];
   largo?: boolean;
 }[];
+
+/** Chave do título do grupo no dicionário (`grupos` em i18n.tsx). */
+type GrupoAtributos = keyof Textos['grupos'];
 
 /**
  * O que a interface precisa saber da ficha aberta, já resolvido para o tipo de
@@ -134,9 +102,8 @@ const GRUPOS_GOLEIRO = [
  * fichas — quem faz conta é o domínio, com os tipos estreitos.
  */
 interface Ficha {
-  labels: Record<string, string>;
   grupos: readonly {
-    titulo: string;
+    titulo: GrupoAtributos;
     classe: string;
     icone: string;
     atributos: readonly string[];
@@ -144,7 +111,8 @@ interface Ficha {
   }[];
   atributos: Record<string, number>;
   brancos: Set<string>;
-  origemDosBrancos: string;
+  /** Posições de onde vieram os brancos; `null` = tabela de goleiro. */
+  origemDosBrancos: string | null;
   drills: DrillClassificado[];
   cronograma: DrillClassificado[];
   atributosDoDrill: (drill: Drill) => readonly string[];
@@ -156,11 +124,10 @@ function fichaDeLinha(lab: DadosLabLinha, posicoes: Posicao[]): Ficha {
     : brancosDaPosicao(posicoes);
   const drills = classificarDrillsDeLinha(lab.atributos, brancos);
   return {
-    labels: LABELS,
     grupos: GRUPOS,
     atributos: lab.atributos,
     brancos,
-    origemDosBrancos: `da posição ${posicoes.join('+')}`,
+    origemDosBrancos: posicoes.join('+'),
     drills,
     cronograma: preencherSlots(drills),
     atributosDoDrill: (drill) => drill.atributos,
@@ -171,11 +138,10 @@ function fichaDeGoleiro(lab: DadosLabGoleiro): Ficha {
   const brancos = lab.brancosOverride ? new Set(lab.brancosOverride) : brancosDoGoleiro();
   const drills = classificarDrillsDeGoleiro(lab.atributos, brancos);
   return {
-    labels: LABELS_GOLEIRO,
     grupos: GRUPOS_GOLEIRO,
     atributos: lab.atributos,
     brancos,
-    origemDosBrancos: 'da tabela de goleiro',
+    origemDosBrancos: null,
     drills,
     cronograma: preencherSlots(drills),
     atributosDoDrill: atributosValidosGoleiro,
@@ -197,13 +163,6 @@ const CATEGORIA_CARD: Record<string, string> = {
   fisico: 'card--f-fis',
 };
 
-const CATEGORIA_LABEL: Record<string, string> = {
-  ataque: 'Ataque',
-  defesa: 'Defesa',
-  posse: 'Posse de bola',
-  fisico: 'Físico e mental',
-};
-
 function TituloGrupoExercicios({
   quantidade,
   titulo,
@@ -222,8 +181,6 @@ function TituloGrupoExercicios({
   );
 }
 
-const DIFICULDADE_LABEL = ['', 'Muito Fácil', 'Fácil', 'Médio', 'Difícil', 'Muito Difícil'];
-
 const ATRIBUTOS_LINHA = GRUPOS.flatMap((grupo) => grupo.atributos);
 
 /** Ficha nova começa com 50 em tudo, na lista de atributos do tipo do jogador. */
@@ -237,10 +194,6 @@ function labDoJogador(jogador: Jogador): DadosLab {
   } as DadosLab;
 }
 
-function formatarPct(valor: number): string {
-  return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
-
 /** `aria-valuenow` de role="meter" precisa ficar entre min e max. */
 function valorMeter(media: number): number {
   return Math.min(180, Math.max(0, Math.round(media)));
@@ -248,6 +201,10 @@ function valorMeter(media: number): number {
 
 export default function LaboratorioPage() {
   const { documento, atualizarLab } = useSquad();
+  const textos = useTextos();
+  const t = textos.lab;
+  const formatarPct = (valor: number) => formatarDecimal(textos, valor);
+  const rotulo = (atributo: string) => textos.atributos[atributo as Atributo | AtributoGoleiro];
 
   const elegiveis = useMemo(
     () => sortSquadPlayers(documento.jogadores.filter((j) => !j.vendido), 'name'),
@@ -272,7 +229,7 @@ export default function LaboratorioPage() {
 
   const lab = useMemo(() => (selecionado ? labDoJogador(selecionado) : null), [selecionado]);
   const talentoAtual: TalentoLab | null = testResult ?? lab?.talento ?? null;
-  const resultLabel = talentoAtual ? rotuloTalento(talentoAtual) : null;
+  const resultLabel = talentoAtual ? textos.talento[talentoAtual] : null;
 
   const ficha = useMemo(() => {
     if (!selecionado || !lab) return null;
@@ -311,9 +268,7 @@ export default function LaboratorioPage() {
 
   function handleSeasonTurnover() {
     if (!selecionado || !lab) return;
-    const confirmed = window.confirm(
-      'Esta ação simula a virada de temporada e irá abaixar 20 pontos de cada atributo. Confirmar?',
-    );
+    const confirmed = window.confirm(t.viradaConfirm);
     if (!confirmed) return;
     atualizarLab(selecionado.id, {
       ...lab,
@@ -346,7 +301,7 @@ export default function LaboratorioPage() {
     if (!selecionado || !lab) return;
     const preenchidas = sessoes.map((s) => s.trim());
     if (preenchidas.some((s) => s === '')) {
-      setErroTeste('Teste de talento inválido: informe exatamente 6 sessões (GAME-RULES §5).');
+      setErroTeste(t.erroVazio);
       setTestResult(null);
       return;
     }
@@ -359,7 +314,7 @@ export default function LaboratorioPage() {
       setEditandoTalento(false);
     } catch {
       // A mensagem do motor é para quem desenvolve; a tela tem a sua (THE-63).
-      setErroTeste('Teste de talento inválido: a sequência não casa com nenhuma linha da tabela.');
+      setErroTeste(t.erroSequencia);
       setTestResult(null);
     }
   }
@@ -368,27 +323,22 @@ export default function LaboratorioPage() {
     <>
       <section className="stage">
         <div className="hero">
-          <h1>Laboratório</h1>
-          <p>
-            Simulador de treino, um jogador por vez. Qual exercício rende mais neste jogador agora.
-          </p>
+          <h1>{t.titulo}</h1>
+          <p>{t.lead}</p>
         </div>
       </section>
 
       <main className="lab-page">
         {!selecionado || !lab || !ficha ? (
           <section className="panel">
-            <p className="empty">Cadastre um jogador na aba Squad pra usar o Laboratório.</p>
-            <CalloutRegra marca="comunidade">
-              Goleiro também entra: a ficha de GK tem 15 atributos em 2 blocos, com brancos e
-              exercícios próprios.
-            </CalloutRegra>
+            <p className="empty">{t.vazio}</p>
+            <CalloutRegra marca="comunidade">{t.calloutGoleiro}</CalloutRegra>
           </section>
         ) : (
           <>
             <section className="ficha">
               <label htmlFor="jogador-lab" className="visually-hidden">
-                Jogador
+                {t.jogador}
               </label>
               <select
                 id="jogador-lab"
@@ -408,7 +358,7 @@ export default function LaboratorioPage() {
                 </span>
               ))}
               <span className="ficha__age">
-                {selecionado.idade === null ? 'Idade não informada' : `${selecionado.idade} anos`}
+                {selecionado.idade === null ? t.idadeNaoInformada : t.anos(selecionado.idade)}
               </span>
               <div className="ficha__talento">
                 <span
@@ -416,30 +366,32 @@ export default function LaboratorioPage() {
                   data-rank={talentoAtual ?? undefined}
                 >
                   {talentoAtual && <EscudoTalento rank={talentoAtual} />}
-                  <span className="visually-hidden">Talento: </span>
-                  <b>{resultLabel ?? 'não classificado'}</b>
+                  <span className="visually-hidden">{t.talentoSr}</span>
+                  <b>{resultLabel ?? t.naoClassificado}</b>
                 </span>
                 <button className="btn btn--secondary" type="button" onClick={aoAbrirTesteTalento}>
-                  {editandoTalento ? 'Cancelar' : lab.talento ? 'Reclassificar' : 'Classificar'}
+                  {editandoTalento ? t.cancelar : lab.talento ? t.reclassificar : t.classificar}
                 </button>
               </div>
             </section>
 
             <section className="panel">
               <div className="panel__head panel__head--season">
-                <h2>Habilidades</h2>
+                <h2>{t.habilidades}</h2>
                 <button
                   className="btn btn--season"
                   type="button"
-                  aria-label="Virada de temporada: reduzir 20 pontos de cada atributo"
+                  aria-label={t.viradaAria}
                   onClick={handleSeasonTurnover}
                 >
-                  Virada de temporada
+                  {t.virada}
                   <span className="btn__delta" aria-hidden="true">−20</span>
                 </button>
               </div>
               <p className="panel__lede">
-                Derivadas {ficha.origemDosBrancos}. Confira e ajuste se o jogo divergir.
+                {ficha.origemDosBrancos === null
+                  ? t.origemGoleiro
+                  : t.origemLinha(ficha.origemDosBrancos)}
               </p>
               <div className="grupos">
                 {ficha.grupos.map((grupo) => {
@@ -454,7 +406,7 @@ export default function LaboratorioPage() {
                     >
                       <div className="grupo__head">
                         <img className="gicon" src={grupo.icone} alt="" width={96} height={96} />
-                        <h3>{grupo.titulo}</h3>
+                        <h3>{textos.grupos[grupo.titulo]}</h3>
                         <span className="total num">{total}</span>
                       </div>
                       <div className="attrs">
@@ -470,10 +422,10 @@ export default function LaboratorioPage() {
                                 type="checkbox"
                                 checked={branco}
                                 onChange={() => handleToggleBranco(atributo)}
-                                aria-label={`${ficha.labels[atributo]}: atributo-chave`}
+                                aria-label={t.atributoChaveAria(rotulo(atributo))}
                               />
                               <label className="attr__label" htmlFor={idValor}>
-                                {ficha.labels[atributo]}
+                                {rotulo(atributo)}
                               </label>
                               <input
                                 id={idValor}
@@ -495,19 +447,19 @@ export default function LaboratorioPage() {
               <p className="legenda">
                 <span>
                   <i className="legenda__key" />
-                  Atributo-chave (branco). Cresce ao dobro da velocidade.
+                  {t.legendaBranco}
                 </span>
                 <span>
                   <i className="legenda__gray" />
-                  Atributo cinza. Entra no overall, quase não muda o jogo.
+                  {t.legendaCinza}
                 </span>
               </p>
             </section>
 
             <section className="panel">
               <div className="panel__head">
-                <h2>Sessão recomendada</h2>
-                <span className="hint">Os 6 slots, da menor média para a maior (GAME-RULES §6)</span>
+                <h2>{t.sessaoTitulo}</h2>
+                <span className="hint">{t.sessaoHint}</span>
               </div>
               <div className="lines">
                 {ficha.cronograma.map(({ drill, media }, i) => {
@@ -515,7 +467,7 @@ export default function LaboratorioPage() {
                     <div className="line" key={`${drill.id}-${i}`}>
                       <span className="line__name">
                         <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                        {i + 1}. {pt.drills[drill.id]}
+                        {i + 1}. {textos.drills[drill.id]}
                       </span>
                       <span className="c-meter">
                         <span
@@ -524,7 +476,7 @@ export default function LaboratorioPage() {
                           aria-valuemin={0}
                           aria-valuemax={180}
                           aria-valuenow={valorMeter(media)}
-                          aria-label={`Média de ${pt.drills[drill.id]}`}
+                          aria-label={t.mediaDe(textos.drills[drill.id])}
                         >
                           <span
                             className="meter__fill"
@@ -534,7 +486,7 @@ export default function LaboratorioPage() {
                         </span>
                       </span>
                       <span className="line__media num">{formatarPct(media)}%</span>
-                      <span className="line__falta num">faltam {formatarPct(Math.max(0, 180 - media))}</span>
+                      <span className="line__falta num">{t.faltam(formatarPct(Math.max(0, 180 - media)))}</span>
                     </div>
                   );
                 })}
@@ -544,35 +496,23 @@ export default function LaboratorioPage() {
             <div className="split">
               <section className="panel">
                 <div className="panel__head">
-                  <h2>Exercícios</h2>
-                  <span className="hint">
-                    {ficha.drills.length} drills classificados para este jogador
-                  </span>
+                  <h2>{t.exercicios}</h2>
+                  <span className="hint">{t.exerciciosHint(ficha.drills.length)}</span>
                 </div>
 
                 <div className="cats">
-                  <span>
-                    <i className="dot c-atk" aria-hidden="true" />
-                    Ataque
-                  </span>
-                  <span>
-                    <i className="dot c-def" aria-hidden="true" />
-                    Defesa
-                  </span>
-                  <span>
-                    <i className="dot c-pos" aria-hidden="true" />
-                    Posse de bola
-                  </span>
-                  <span>
-                    <i className="dot c-fis" aria-hidden="true" />
-                    Físico e mental
-                  </span>
+                  {(['ataque', 'defesa', 'posse', 'fisico'] as const).map((categoria) => (
+                    <span key={categoria}>
+                      <i className={CATEGORIA_DOT[categoria]} aria-hidden="true" />
+                      {textos.categoria[categoria]}
+                    </span>
+                  ))}
                 </div>
 
                 <TituloGrupoExercicios
                   quantidade={primarios.length}
-                  titulo="Exercícios Primários"
-                  explicacao="Todos os atributos que contam são chave"
+                  titulo={t.primarios}
+                  explicacao={t.primariosExplicacao}
                 />
                 <div className="cards">
                   {primarios.map(({ drill, media }, i) => (
@@ -583,17 +523,17 @@ export default function LaboratorioPage() {
                       key={drill.id}
                     >
                       <div className="card__flag">
-                        {CATEGORIA_LABEL[drill.categoria]}
-                        {i === 0 && <span className="rec">Recomendado</span>}
+                        {textos.categoria[drill.categoria]}
+                        {i === 0 && <span className="rec">{t.recomendado}</span>}
                       </div>
                       <div className="card__body">
-                        <div className="card__name">{pt.drills[drill.id]}</div>
+                        <div className="card__name">{textos.drills[drill.id]}</div>
                         <div className="card__attrs">
-                          {ficha.atributosDoDrill(drill).map((a) => ficha.labels[a]).join(' · ')}
+                          {ficha.atributosDoDrill(drill).map(rotulo).join(' · ')}
                         </div>
                         <div className="card__nums">
                           <span className="card__media num">{formatarPct(media)}%</span>
-                          <span className="card__falta num">faltam {formatarPct(Math.max(0, 180 - media))}</span>
+                          <span className="card__falta num">{t.faltam(formatarPct(Math.max(0, 180 - media)))}</span>
                         </div>
                         <div
                           className="meter"
@@ -601,7 +541,7 @@ export default function LaboratorioPage() {
                           aria-valuemin={0}
                           aria-valuemax={180}
                           aria-valuenow={valorMeter(media)}
-                          aria-label={`Média de ${pt.drills[drill.id]}`}
+                          aria-label={t.mediaDe(textos.drills[drill.id])}
                         >
                           <div
                             className="meter__fill"
@@ -612,12 +552,14 @@ export default function LaboratorioPage() {
                         </div>
                         <div className="escala">
                           <span>0%</span>
-                          <span>140% trocar</span>
-                          <span>180% trava</span>
+                          <span>140% {t.escalaTrocar}</span>
+                          <span>180% {t.escalaTrava}</span>
                         </div>
                         <div className="card__foot">
-                          <span>{DIFICULDADE_LABEL[drill.dificuldade]}</span>
-                          <b>{formatarPct(conditionCostPerSession(drill.dificuldade))}% / sessão</b>
+                          <span>{textos.dificuldade[drill.dificuldade]}</span>
+                          <b>
+                            {formatarPct(conditionCostPerSession(drill.dificuldade))}% {t.porSessao}
+                          </b>
                         </div>
                       </div>
                     </div>
@@ -628,21 +570,21 @@ export default function LaboratorioPage() {
                   <>
                     <TituloGrupoExercicios
                       quantidade={secundarios.length}
-                      titulo="Exercícios Secundários"
-                      explicacao="Um atributo cinza entra na conta"
+                      titulo={t.secundarios}
+                      explicacao={t.secundariosExplicacao}
                     />
                     <div className="lhead">
-                      <span>Exercício</span>
-                      <span className="c-meter">Até o teto</span>
-                      <span className="r">Média</span>
-                      <span className="r">Faltam</span>
+                      <span>{t.colExercicio}</span>
+                      <span className="c-meter">{t.colAteOTeto}</span>
+                      <span className="r">{t.colMedia}</span>
+                      <span className="r">{t.colFaltam}</span>
                     </div>
                     <div className="lines">
                       {secundarios.map(({ drill, media }) => (
                         <div className="line" key={drill.id}>
                           <span className="line__name">
                             <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                            {pt.drills[drill.id]}
+                            {textos.drills[drill.id]}
                           </span>
                           <span className="c-meter">
                             <span
@@ -651,7 +593,7 @@ export default function LaboratorioPage() {
                               aria-valuemin={0}
                               aria-valuemax={180}
                               aria-valuenow={valorMeter(media)}
-                              aria-label={`Média de ${pt.drills[drill.id]}`}
+                              aria-label={t.mediaDe(textos.drills[drill.id])}
                             >
                               <span
                                 className="meter__fill"
@@ -672,15 +614,15 @@ export default function LaboratorioPage() {
                   <>
                     <TituloGrupoExercicios
                       quantidade={terciarios.length}
-                      titulo="Exercícios Terciários"
-                      explicacao="Dois ou mais atributos cinzas"
+                      titulo={t.terciarios}
+                      explicacao={t.terciariosExplicacao}
                     />
                     <div className="lines">
                       {terciarios.map(({ drill, media }) => (
                         <div className="line line--ter" key={drill.id}>
                           <span className="line__name">
                             <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                            {pt.drills[drill.id]}
+                            {textos.drills[drill.id]}
                           </span>
                           <span className="c-meter">
                             <span
@@ -689,7 +631,7 @@ export default function LaboratorioPage() {
                               aria-valuemin={0}
                               aria-valuemax={180}
                               aria-valuenow={valorMeter(media)}
-                              aria-label={`Média de ${pt.drills[drill.id]}`}
+                              aria-label={t.mediaDe(textos.drills[drill.id])}
                             >
                               <span
                                 className="meter__fill"
@@ -719,43 +661,31 @@ export default function LaboratorioPage() {
                   }}
                 >
                   <div className="panel__head">
-                    <h2>Teste de talento</h2>
+                    <h2>{t.testeTitulo}</h2>
                     <img className="estrelas" src="/estrelas.png" alt="" width={520} height={41} />
                   </div>
 
-                  <p className="note">
-                    Isolado do treino de atributos. No jogo, treine uma{' '}
-                    <b>habilidade especial</b> ou posição nova (40–50 pontos) e anote quanto a barra
-                    andou em cada uma das 6 sessões: 1, 2 ou 3.
-                  </p>
+                  <p className="note">{t.testeNota}</p>
 
                   {!editandoTalento ? (
                     <p className="note">
-                      {lab.talento ? (
-                        <>
-                          Classificado como <b>{rotuloTalento(lab.talento)}</b>. Use Reclassificar
-                          na ficha para testar de novo ou informar outro talento.
-                        </>
-                      ) : (
-                        <>
-                          Ainda não classificado. Use <b>Classificar</b> na ficha para fazer o teste
-                          ou informar o talento manualmente.
-                        </>
-                      )}
+                      {lab.talento
+                        ? t.classificadoComo(textos.talento[lab.talento])
+                        : t.aindaNaoClassificado}
                     </p>
                   ) : (
                     <>
                       <ol className="steps">
-                        <li>Comece uma habilidade especial. Não troque depois de iniciada.</li>
-                        <li>Rode exatamente 6 sessões e anote os pontos da barra (1, 2 ou 3).</li>
-                        <li>Informe a sequência, ou lance o talento manualmente se já souber.</li>
+                        {t.passos.map((passo) => (
+                          <li key={passo}>{passo}</li>
+                        ))}
                       </ol>
 
                       <form onSubmit={aoClassificarEspecial}>
                         <div className="sessoes-especial">
                           {sessoes.map((valor, i) => (
                             <div className="field" key={i}>
-                              <label htmlFor={`sessao-${i}`}>S{i + 1}</label>
+                              <label htmlFor={`sessao-${i}`}>{t.sessaoCurta(i + 1)}</label>
                               <input
                                 id={`sessao-${i}`}
                                 className="num"
@@ -776,12 +706,12 @@ export default function LaboratorioPage() {
                           ))}
                         </div>
                         <button className="btn btn--primary" type="submit">
-                          Classificar pela barra
+                          {t.classificarPelaBarra}
                         </button>
                       </form>
 
                       <div className="field talento-manual">
-                        <label htmlFor="talento-manual">Informar manualmente</label>
+                        <label htmlFor="talento-manual">{t.informarManual}</label>
                         <select
                           id="talento-manual"
                           value=""
@@ -789,10 +719,10 @@ export default function LaboratorioPage() {
                             aoEscolherTalento(e.target.value)
                           }
                         >
-                          <option value="">Escolher talento</option>
+                          <option value="">{t.escolherTalento}</option>
                           {SPECIAL_ABILITY_PATTERNS.map((pattern) => (
                             <option key={pattern.rank} value={pattern.rank}>
-                              {rotuloTalento(pattern.rank)}
+                              {textos.talento[pattern.rank]}
                             </option>
                           ))}
                         </select>
@@ -802,11 +732,11 @@ export default function LaboratorioPage() {
 
                   <div className='tabela-talento-wrap'>
                     <table className='tabela-talento'>
-                      <caption>Classificação pelas 6 sessões</caption>
+                      <caption>{t.tabelaCaption}</caption>
                       <thead>
                         <tr>
-                          <th scope='col'>Resultado</th>
-                          <th scope='col'>Sequência</th>
+                          <th scope='col'>{t.colResultado}</th>
+                          <th scope='col'>{t.colSequencia}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -814,10 +744,10 @@ export default function LaboratorioPage() {
                           <tr key={pattern.rank}>
                             <th scope='row'>
                               <EscudoTalento rank={pattern.rank} />
-                              {rotuloTalento(pattern.rank)}
+                              {textos.talento[pattern.rank]}
                             </th>
                             <td className='num'>
-                              {pattern.points?.join(' ') ?? 'Qualquer sequência com 3'}
+                              {pattern.points?.join(' ') ?? t.qualquer3}
                             </td>
                           </tr>
                         ))}
@@ -827,22 +757,19 @@ export default function LaboratorioPage() {
 
                   {erroTeste && (
                     <p className="callout callout--warn" role="alert">
-                      <span className="callout__src">Atenção</span>
+                      <span className="callout__src">{t.atencao}</span>
                       {erroTeste}
                     </p>
                   )}
 
                   {testResult && resultLabel && (
                     <div className="resultado" data-rank={testResult}>
-                      <div className="tile__label">Talento</div>
+                      <div className="tile__label">{t.talento}</div>
                       <div className="resultado__nome">{resultLabel}</div>
                     </div>
                   )}
 
-                  <CalloutRegra marca="comunidade">
-                    A sequência precisa casar exatamente com a tabela. A única exceção é Lenda:
-                    basta aparecer um 3 em qualquer uma das 6 sessões.
-                  </CalloutRegra>
+                  <CalloutRegra marca="comunidade">{t.calloutTeste}</CalloutRegra>
                 </section>
               </aside>
             </div>

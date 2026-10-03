@@ -9,16 +9,11 @@ import { exportarJSON, importarJSON } from '../state/transfer';
 import { CalloutRegra } from '../ui/callout-regra';
 import { classeBadgePosicao } from '../ui/posicao';
 import { SeletorPosicao } from '../ui/seletor-posicao';
-import { EscudoTalento, rotuloTalento } from '../ui/talento';
+import { formatarDecimal } from '../ui/i18n';
+import { useTextos } from '../ui/idioma';
+import { EscudoTalento } from '../ui/talento';
 import { POSITION_FIELD_ORDER, sortSquadPlayers, type SquadOrder } from './squad-order';
 
-const SQUAD_ORDER_LABELS: Record<SquadOrder, string> = {
-  overall: 'overall',
-  name: 'nome',
-  age: 'idade',
-  position: 'posição',
-  talent: 'talento',
-};
 /** Faixa de idade coberta pela curva de treino (GAME-RULES §3.2). */
 const PLAYER_AGE_MIN = 18;
 const PLAYER_AGE_MAX = 35;
@@ -27,36 +22,8 @@ function isValidPlayerAge(age: number): boolean {
   return Number.isInteger(age) && age >= PLAYER_AGE_MIN && age <= PLAYER_AGE_MAX;
 }
 
-const FAIXAS = [
-  {
-    min: 0,
-    max: 85,
-    faixa: 'até 85',
-    texto: 'Liga confortável. Adversários no seu nível ou abaixo.',
-  },
-  {
-    min: 86,
-    max: 100,
-    faixa: '86 – 100',
-    texto: 'Liga equilibrada. Dá para brigar pelo título montando bem.',
-  },
-  {
-    min: 101,
-    max: 115,
-    faixa: '101 – 115',
-    texto: 'Liga puxada. Encontra times de quem investe dinheiro.',
-  },
-  {
-    min: 116,
-    max: Infinity,
-    faixa: 'acima de 115',
-    texto: 'Liga de pagantes. Desvantagem estrutural na temporada inteira.',
-  },
-] as const;
-
-function formatarNumero(valor: number): string {
-  return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
+/** Piso de cada faixa de média; o texto de cada uma fica no dicionário, na mesma ordem. */
+const FAIXAS_MIN = [0, 86, 101, 116] as const;
 
 interface LinhaElenco {
   jogador: Jogador;
@@ -131,6 +98,9 @@ export default function SquadPage() {
     desfazerVenda,
     substituirDocumento,
   } = useSquad();
+  const textos = useTextos();
+  const t = textos.squad;
+  const formatarNumero = (valor: number) => formatarDecimal(textos, valor);
   const [nome, setNome] = useState('');
   const [idade, setIdade] = useState('');
   const [overall, setOverall] = useState('');
@@ -185,7 +155,7 @@ export default function SquadPage() {
     return contagem;
   }, [jogadores]);
 
-  const faixaAtual = [...FAIXAS].reverse().find((f) => mediaComVendas >= f.min);
+  const faixaAtual = FAIXAS_MIN.filter((min) => mediaComVendas >= min).length - 1;
 
   function aoSubmeter(evento: FormEvent) {
     evento.preventDefault();
@@ -225,7 +195,7 @@ export default function SquadPage() {
   }
 
   function aoExcluir(jogador: Jogador) {
-    if (!window.confirm(`Excluir ${jogador.nome} do elenco?`)) return;
+    if (!window.confirm(t.excluirConfirm(jogador.nome))) return;
     if (editandoId === jogador.id) setEditandoId(null);
     excluirJogador(jogador.id);
   }
@@ -238,7 +208,7 @@ export default function SquadPage() {
       substituirDocumento(importarJSON(await arquivo.text()));
       setErroImportacao(null);
     } catch {
-      setErroImportacao('Arquivo inválido. Não deu para importar.');
+      setErroImportacao(t.erroImportacao);
     }
   }
 
@@ -246,18 +216,14 @@ export default function SquadPage() {
     <>
       <section className="stage">
         <div className="hero">
-          <h1>Squad</h1>
-          <p className="hero__lead">
-            Simulador da média dos 14 mais fortes, o número que define
-            <br />
-            contra quem você joga na próxima temporada.
-          </p>
+          <h1>{t.titulo}</h1>
+          <p className="hero__lead">{t.lead}</p>
           <p className="hero__actions">
             <button className="btn btn--secondary" type="button" onClick={() => exportar(documento)}>
-              Exportar elenco
+              {t.exportar}
             </button>
             <label className="btn btn--secondary hero__import">
-              Importar elenco
+              {t.importar}
               <input
                 type="file"
                 accept="application/json"
@@ -278,22 +244,22 @@ export default function SquadPage() {
         <div>
           <section className="panel">
             <div className="panel__head">
-              <h2>Adicionar jogador</h2>
-              <span className="hint">4 campos, poucos segundos por jogador</span>
+              <h2>{t.adicionarTitulo}</h2>
+              <span className="hint">{t.adicionarHint}</span>
             </div>
             <form className="form" onSubmit={aoSubmeter}>
               <div className="field">
-                <label htmlFor="nome">Nome</label>
+                <label htmlFor="nome">{t.nome}</label>
                 <input
                   id="nome"
                   type="text"
-                  placeholder="Ex.: Grenn Aemon"
+                  placeholder={t.nomePlaceholder}
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                 />
               </div>
               <div className="field">
-                <label htmlFor="idade">Idade</label>
+                <label htmlFor="idade">{t.idade}</label>
                 <input
                   id="idade"
                   className="num"
@@ -309,7 +275,7 @@ export default function SquadPage() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="ovr">Overall</label>
+                <label htmlFor="ovr">{t.overall}</label>
                 <input
                   id="ovr"
                   className="num"
@@ -322,59 +288,59 @@ export default function SquadPage() {
               </div>
               <SeletorPosicao id="pos-novo" valor={posicoes} onChange={setPosicoes} />
               <button className="btn btn--primary" type="submit">
-                Adicionar
+                {t.adicionar}
               </button>
             </form>
           </section>
 
           <section className="panel">
             <div className="panel__head">
-              <h2>Elenco</h2>
+              <h2>{t.elenco}</h2>
               <div className="squad-order">
-                <label htmlFor="squad-order">Ordenar por</label>
+                <label htmlFor="squad-order">{t.ordenarPor}</label>
                 <select
                   id="squad-order"
                   value={squadOrder}
                   onChange={(event) => setSquadOrder(event.target.value as SquadOrder)}
                 >
-                  <option value="overall">Overall</option>
-                  <option value="name">Nome</option>
-                  <option value="age">Idade</option>
-                  <option value="position">Posição</option>
-                  <option value="talent">Talento</option>
+                  {(Object.keys(t.ordem) as SquadOrder[]).map((ordem) => (
+                    <option key={ordem} value={ordem}>
+                      {t.ordem[ordem]}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             {linhas.length === 0 ? (
-              <p className="empty">Nenhum jogador cadastrado ainda.</p>
+              <p className="empty">{t.vazio}</p>
             ) : (
               <>
-                <div className="elenco" role="table" aria-label={`Elenco ordenado por ${SQUAD_ORDER_LABELS[squadOrder]}`}>
+                <div className="elenco" role="table" aria-label={t.ordemAria(t.ordem[squadOrder])}>
                   <div className="thead" role="row">
                     <span role="columnheader" className="row__rank">
                       #
                     </span>
                     <span role="columnheader" className="row__name">
-                      Jogador
+                      {t.colJogador}
                     </span>
                     <span role="columnheader" className="row__tal">
-                      Talento
+                      {t.colTalento}
                     </span>
                     <span role="columnheader" className="row__age">
-                      Idade
+                      {t.colIdade}
                     </span>
                     <span role="columnheader" className="row__ovr">
-                      Ovr
+                      {t.colOvr}
                     </span>
                     <span role="columnheader" className="row__pos">
-                      Pos.
+                      {t.colPos}
                     </span>
                     <span role="columnheader" className="row__sale">
-                      Simulação
+                      {t.colSimulacao}
                     </span>
                     <span role="columnheader" className="row__act c-act">
-                      <span className="visually-hidden">Ações</span>
+                      <span className="visually-hidden">{t.colAcoes}</span>
                     </span>
                   </div>
                   <div className="rows">
@@ -384,7 +350,7 @@ export default function SquadPage() {
                           <form className="row-edit" role="row" onSubmit={aoSalvarEdicao}>
                             <div className="row-edit__fields" role="cell" aria-colspan={8}>
                               <div className="field">
-                                <label htmlFor={`edit-nome-${linha.jogador.id}`}>Nome</label>
+                                <label htmlFor={`edit-nome-${linha.jogador.id}`}>{t.nome}</label>
                                 <input
                                   id={`edit-nome-${linha.jogador.id}`}
                                   type="text"
@@ -393,7 +359,7 @@ export default function SquadPage() {
                                 />
                               </div>
                               <div className="field">
-                                <label htmlFor={`edit-idade-${linha.jogador.id}`}>Idade</label>
+                                <label htmlFor={`edit-idade-${linha.jogador.id}`}>{t.idade}</label>
                                 <input
                                   id={`edit-idade-${linha.jogador.id}`}
                                   className="num"
@@ -408,7 +374,7 @@ export default function SquadPage() {
                                 />
                               </div>
                               <div className="field">
-                                <label htmlFor={`edit-ovr-${linha.jogador.id}`}>Overall</label>
+                                <label htmlFor={`edit-ovr-${linha.jogador.id}`}>{t.overall}</label>
                                 <input
                                   id={`edit-ovr-${linha.jogador.id}`}
                                   className="num"
@@ -429,14 +395,14 @@ export default function SquadPage() {
                                   type="submit"
                                   disabled={editPosicoes.length === 0}
                                 >
-                                  Salvar
+                                  {t.salvar}
                                 </button>
                                 <button
                                   className="btn btn--ghost"
                                   type="button"
                                   onClick={() => setEditandoId(null)}
                                 >
-                                  Cancelar
+                                  {t.cancelar}
                                 </button>
                               </div>
                             </div>
@@ -458,12 +424,12 @@ export default function SquadPage() {
                           </span>
                           <span role="cell" className="row__name">
                             {linha.top14 && (
-                              <span className="visually-hidden">Nos 14 que contam. </span>
+                              <span className="visually-hidden">{t.nos14}</span>
                             )}
                             <span>{linha.jogador.nome}</span>
-                            {linha.jogador.vendido && <span className="tag tag--loss">Vendido</span>}
+                            {linha.jogador.vendido && <span className="tag tag--loss">{t.vendido}</span>}
                             {linha.promovido && (
-                              <span className="tag tag--gain">Subiu para os 14</span>
+                              <span className="tag tag--gain">{t.subiu}</span>
                             )}
                           </span>
                           <span role="cell" className="row__tal">
@@ -473,8 +439,8 @@ export default function SquadPage() {
                                 data-rank={linha.jogador.lab.talento}
                               >
                                 <EscudoTalento rank={linha.jogador.lab.talento} />
-                                <span className="visually-hidden">Talento: </span>
-                                <b>{rotuloTalento(linha.jogador.lab.talento)}</b>
+                                <span className="visually-hidden">{t.talentoSr}</span>
+                                <b>{textos.talento[linha.jogador.lab.talento]}</b>
                               </span>
                             ) : (
                               '—'
@@ -499,18 +465,18 @@ export default function SquadPage() {
                                 className="btn btn--undo"
                                 type="button"
                                 onClick={() => desfazerVenda(linha.jogador.id)}
-                                aria-label={`Desfazer venda de ${linha.jogador.nome}`}
+                                aria-label={t.desfazerAria(linha.jogador.nome)}
                               >
-                                Desfazer
+                                {t.desfazer}
                               </button>
                             ) : (
                               <button
                                 className="btn btn--ghost"
                                 type="button"
                                 onClick={() => marcarVendido(linha.jogador.id)}
-                                aria-label={`Marcar ${linha.jogador.nome} como vendido`}
+                                aria-label={t.marcarVendaAria(linha.jogador.nome)}
                               >
-                                Marcar venda
+                                {t.marcarVenda}
                               </button>
                             )}
                           </span>
@@ -519,7 +485,7 @@ export default function SquadPage() {
                               className="btn btn--icon"
                               type="button"
                               onClick={() => comecarEdicao(linha.jogador)}
-                              aria-label={`Editar ${linha.jogador.nome}`}
+                              aria-label={t.editarAria(linha.jogador.nome)}
                             >
                               <IconeLapis />
                             </button>
@@ -527,7 +493,7 @@ export default function SquadPage() {
                               className="btn btn--icon btn--icon-danger"
                               type="button"
                               onClick={() => aoExcluir(linha.jogador)}
-                              aria-label={`Excluir ${linha.jogador.nome}`}
+                              aria-label={t.excluirAria(linha.jogador.nome)}
                             >
                               <IconeLixeira />
                             </button>
@@ -536,9 +502,7 @@ export default function SquadPage() {
                         )}
                         {indiceDoCorte === i && (
                           <div className="cut" role="row">
-                            <span role="cell">
-                              Corte do 14º. Daqui para baixo não entra na média.
-                            </span>
+                            <span role="cell">{t.corte}</span>
                           </div>
                         )}
                       </Fragment>
@@ -546,12 +510,7 @@ export default function SquadPage() {
                   </div>
                 </div>
 
-                <CalloutRegra marca="comunidade">
-                  Barra dourada marca quem está nos 14 que contam. Cada venda simulada tira um
-                  jogador da conta e <b>puxa o próximo reserva para dentro</b>, então o efeito
-                  quase nunca é o óbvio. A média da tela de escalação (os 11) é outra conta e
-                  induz ao erro.
-                </CalloutRegra>
+                <CalloutRegra marca="comunidade">{t.calloutTop14}</CalloutRegra>
               </>
             )}
           </section>
@@ -559,7 +518,7 @@ export default function SquadPage() {
 
         <aside>
           <div className="tile" aria-live="polite" aria-atomic="true">
-            <div className="tile__label">Média dos 14, com as vendas simuladas</div>
+            <div className="tile__label">{t.tileLabel}</div>
             <div className="tile__row">
               <div className="tile__value num">{formatarNumero(mediaComVendas)}</div>
               {delta !== 0 && (
@@ -570,13 +529,15 @@ export default function SquadPage() {
               )}
             </div>
             <p className="note">
-              Sem vendas: <b className="num">{formatarNumero(mediaSemVendas)}</b> · elenco de{' '}
-              <b className="num">{jogadores.length}</b> jogadores.
+              {t.semVendas(formatarNumero(mediaSemVendas), jogadores.length)}
               {vendidos.length > 0 && promovido && (
                 <>
                   <br />
-                  <b>{vendidos[vendidos.length - 1]?.nome}</b> saiu dos 14 e{' '}
-                  <b>{promovido.nome}</b> ({promovido.overall}) subiu no lugar dele.
+                  {t.trocaNos14(
+                    vendidos[vendidos.length - 1]?.nome ?? '',
+                    promovido.nome,
+                    promovido.overall,
+                  )}
                 </>
               )}
             </p>
@@ -584,33 +545,29 @@ export default function SquadPage() {
 
           <section className="panel">
             <div className="panel__head">
-              <h2>O que essa média significa</h2>
+              <h2>{t.faixasTitulo}</h2>
             </div>
             <div className="bands">
-              {FAIXAS.map((faixa) => (
+              {t.faixas.map((faixa, i) => (
                 <div
-                  key={faixa.min}
-                  className={`band${faixa === faixaAtual ? ' band--now' : ''}`}
+                  key={FAIXAS_MIN[i]}
+                  className={`band${i === faixaAtual ? ' band--now' : ''}`}
                 >
                   <span className="band__range num">
                     {faixa.faixa}
-                    {faixa === faixaAtual && <span className="band__here">Você está aqui</span>}
+                    {i === faixaAtual && <span className="band__here">{t.voceAqui}</span>}
                   </span>
                   <span className="band__text">{faixa.texto}</span>
                 </div>
               ))}
             </div>
-            <CalloutRegra marca="comunidade">
-              O jogo emparelha a temporada seguinte pela média dos <b>14 jogadores mais fortes</b>,
-              não pela dos 11 escalados. As faixas acima são observação da comunidade brasileira,
-              não número publicado pela Nordeus.
-            </CalloutRegra>
+            <CalloutRegra marca="comunidade">{t.calloutFaixas}</CalloutRegra>
           </section>
 
           <section className="panel">
             <div className="panel__head">
-              <h2>Por posição</h2>
-              <span className="hint">{jogadores.length} jogadores</span>
+              <h2>{t.porPosicao}</h2>
+              <span className="hint">{t.jogadores(jogadores.length)}</span>
             </div>
             <div className="posgrid">
               {POSITION_FIELD_ORDER.map((p) => {
