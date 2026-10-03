@@ -36,6 +36,7 @@ import {
 import { useSquad } from '../../state/store';
 import { CalloutRegra } from '../../ui/callout-regra';
 import { classeBadgePosicao } from '../../ui/posicao';
+import { pt } from '../../ui/i18n';
 import { EscudoTalento, rotuloTalento } from '../../ui/talento';
 import { sortSquadPlayers } from '../squad-order';
 
@@ -356,8 +357,9 @@ export default function LaboratorioPage() {
       setTestResult(resultado.rank);
       setErroTeste(null);
       setEditandoTalento(false);
-    } catch (erro) {
-      setErroTeste(erro instanceof Error ? erro.message : 'Teste inválido.');
+    } catch {
+      // A mensagem do motor é para quem desenvolve; a tela tem a sua (THE-63).
+      setErroTeste('Teste de talento inválido: a sequência não casa com nenhuma linha da tabela.');
       setTestResult(null);
     }
   }
@@ -510,10 +512,10 @@ export default function LaboratorioPage() {
               <div className="lines">
                 {ficha.cronograma.map(({ drill, media }, i) => {
                   return (
-                    <div className="line" key={`${drill.nome}-${i}`}>
+                    <div className="line" key={`${drill.id}-${i}`}>
                       <span className="line__name">
                         <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                        {i + 1}. {drill.nome}
+                        {i + 1}. {pt.drills[drill.id]}
                       </span>
                       <span className="c-meter">
                         <span
@@ -522,7 +524,7 @@ export default function LaboratorioPage() {
                           aria-valuemin={0}
                           aria-valuemax={180}
                           aria-valuenow={valorMeter(media)}
-                          aria-label={`Média de ${drill.nome}`}
+                          aria-label={`Média de ${pt.drills[drill.id]}`}
                         >
                           <span
                             className="meter__fill"
@@ -578,14 +580,14 @@ export default function LaboratorioPage() {
                       className={['card', i === 0 && 'card--rec', CATEGORIA_CARD[drill.categoria]]
                         .filter(Boolean)
                         .join(' ')}
-                      key={drill.nome}
+                      key={drill.id}
                     >
                       <div className="card__flag">
                         {CATEGORIA_LABEL[drill.categoria]}
                         {i === 0 && <span className="rec">Recomendado</span>}
                       </div>
                       <div className="card__body">
-                        <div className="card__name">{drill.nome}</div>
+                        <div className="card__name">{pt.drills[drill.id]}</div>
                         <div className="card__attrs">
                           {ficha.atributosDoDrill(drill).map((a) => ficha.labels[a]).join(' · ')}
                         </div>
@@ -599,7 +601,7 @@ export default function LaboratorioPage() {
                           aria-valuemin={0}
                           aria-valuemax={180}
                           aria-valuenow={valorMeter(media)}
-                          aria-label={`Média de ${drill.nome}`}
+                          aria-label={`Média de ${pt.drills[drill.id]}`}
                         >
                           <div
                             className="meter__fill"
@@ -637,10 +639,10 @@ export default function LaboratorioPage() {
                     </div>
                     <div className="lines">
                       {secundarios.map(({ drill, media }) => (
-                        <div className="line" key={drill.nome}>
+                        <div className="line" key={drill.id}>
                           <span className="line__name">
                             <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                            {drill.nome}
+                            {pt.drills[drill.id]}
                           </span>
                           <span className="c-meter">
                             <span
@@ -649,7 +651,7 @@ export default function LaboratorioPage() {
                               aria-valuemin={0}
                               aria-valuemax={180}
                               aria-valuenow={valorMeter(media)}
-                              aria-label={`Média de ${drill.nome}`}
+                              aria-label={`Média de ${pt.drills[drill.id]}`}
                             >
                               <span
                                 className="meter__fill"
@@ -675,10 +677,10 @@ export default function LaboratorioPage() {
                     />
                     <div className="lines">
                       {terciarios.map(({ drill, media }) => (
-                        <div className="line line--ter" key={drill.nome}>
+                        <div className="line line--ter" key={drill.id}>
                           <span className="line__name">
                             <i className={CATEGORIA_DOT[drill.categoria]} aria-hidden="true" />
-                            {drill.nome}
+                            {pt.drills[drill.id]}
                           </span>
                           <span className="c-meter">
                             <span
@@ -687,7 +689,7 @@ export default function LaboratorioPage() {
                               aria-valuemin={0}
                               aria-valuemax={180}
                               aria-valuenow={valorMeter(media)}
-                              aria-label={`Média de ${drill.nome}`}
+                              aria-label={`Média de ${pt.drills[drill.id]}`}
                             >
                               <span
                                 className="meter__fill"
@@ -790,7 +792,7 @@ export default function LaboratorioPage() {
                           <option value="">Escolher talento</option>
                           {SPECIAL_ABILITY_PATTERNS.map((pattern) => (
                             <option key={pattern.rank} value={pattern.rank}>
-                              {pattern.label}
+                              {rotuloTalento(pattern.rank)}
                             </option>
                           ))}
                         </select>
@@ -812,7 +814,7 @@ export default function LaboratorioPage() {
                           <tr key={pattern.rank}>
                             <th scope='row'>
                               <EscudoTalento rank={pattern.rank} />
-                              {pattern.label}
+                              {rotuloTalento(pattern.rank)}
                             </th>
                             <td className='num'>
                               {pattern.points?.join(' ') ?? 'Qualquer sequência com 3'}

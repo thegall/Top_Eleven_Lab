@@ -87,7 +87,6 @@ export type SpecialAbilityRank =
 
 export interface SpecialAbilityPattern {
   rank: SpecialAbilityRank;
-  label: string;
   points: readonly [number, number, number, number, number, number] | null;
 }
 
@@ -96,16 +95,16 @@ export interface SpecialAbilityPattern {
  * Pontos nulos representam a regra especial da Lenda: qualquer uma das
  * seis sessões com ganho 3 (GAME-RULES §5).
  *
- * Os rótulos são os nomes que o dono usa no jogo; os ranks internos seguem
- * os da curva da GAME-RULES §3.1 (fenomeno, excelente, otima, boa...).
+ * Os ranks seguem os da curva da GAME-RULES §3.1 (fenomeno, excelente, otima,
+ * boa...); o rótulo exibido (Lenda, Gênio...) mora na interface (THE-63).
  */
 export const SPECIAL_ABILITY_PATTERNS: readonly SpecialAbilityPattern[] = [
-  { rank: 'fenomeno', label: 'Lenda', points: null },
-  { rank: 'excelente', label: 'Gênio', points: [2, 2, 2, 2, 2, 2] },
-  { rank: 'otima', label: 'Craque', points: [1, 2, 2, 2, 2, 2] },
-  { rank: 'boa', label: 'Bom Jogador', points: [1, 2, 2, 1, 2, 2] },
-  { rank: 'normal', label: 'Normal', points: [1, 2, 1, 2, 1, 2] },
-  { rank: 'bagre', label: 'Bagre', points: [1, 1, 1, 1, 1, 1] },
+  { rank: 'fenomeno', points: null },
+  { rank: 'excelente', points: [2, 2, 2, 2, 2, 2] },
+  { rank: 'otima', points: [1, 2, 2, 2, 2, 2] },
+  { rank: 'boa', points: [1, 2, 2, 1, 2, 2] },
+  { rank: 'normal', points: [1, 2, 1, 2, 1, 2] },
+  { rank: 'bagre', points: [1, 1, 1, 1, 1, 1] },
 ];
 
 export type SpecialAbilityResult = { rank: SpecialAbilityRank };

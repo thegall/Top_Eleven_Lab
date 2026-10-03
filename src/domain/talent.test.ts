@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { ALL_DRILLS } from './drills.js';
-import { classificarTalento, classificarTalentoPorHabilidadeEspecial, sigma } from './talent.js';
+import {
+  SPECIAL_ABILITY_PATTERNS,
+  classificarTalento,
+  classificarTalentoPorHabilidadeEspecial,
+  sigma,
+} from './talent.js';
 import { custoEmMaletas } from './training.js';
 import type { Atributo } from './types.js';
 
@@ -18,7 +23,7 @@ describe('sigma', () => {
 });
 
 describe('classificarTalento', () => {
-  const pressioneOPlay = ALL_DRILLS.find((drill) => drill.nome === 'Pressione o Play')!;
+  const pressioneOPlay = ALL_DRILLS.find((drill) => drill.id === 'pressione-o-play')!;
   // Brancos do jogador do caso real: cobrem todos os atributos de Pressione o
   // Play, tornando-o primário — condição de validade do método 2 (GAME-RULES §5).
   const brancosDoCasoReal = new Set<Atributo>(pressioneOPlay.atributos);
@@ -41,6 +46,12 @@ describe('classificarTalento', () => {
 });
 
 describe('classificarTalentoPorHabilidadeEspecial (GAME-RULES §5, método 1)', () => {
+  it('a tabela de padrões não carrega rótulo de tela (THE-63)', () => {
+    for (const pattern of SPECIAL_ABILITY_PATTERNS) {
+      expect(Object.keys(pattern).sort()).toEqual(['points', 'rank']);
+    }
+  });
+
   it('qualquer sessão com 3 entre as seis classifica como fenômeno', () => {
     expect(classificarTalentoPorHabilidadeEspecial([1, 2, 3, 1, 1, 2])).toEqual({ rank: 'fenomeno' });
   });

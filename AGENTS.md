@@ -79,7 +79,7 @@ Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive 
 
 O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam linhas distintas nessa curva. Bagre é o nome das duas (GAME-RULES §3.1, nomenclatura de 2026-09-18) e **não** escolhe uma delas: o classificador do método 1 devolve `bagre` como valor próprio.
 
-Os rótulos do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`): Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela.
+Os padrões do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`), só com rank e sequência. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela. Os rótulos (Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre) e os nomes dos drills moram no dicionário da interface, `src/ui/i18n.tsx`, um por idioma (THE-63).
 
 ## Contratos internos
 
@@ -112,7 +112,7 @@ type NivelTreinador = 'amador' | 'semiprofissional' | 'profissional' | 'mundial'
 type Dificuldade = 1 | 2 | 3 | 4 | 5;   // desgaste = Dificuldade × 0,75%
 
 interface Drill {
-  nome: string;
+  id: DrillId;                // slug estável, ex.: 'pressione-o-play'; o nome exibido fica na interface
   categoria: 'ataque' | 'defesa' | 'posse' | 'fisico';
   dificuldade: Dificuldade;
   atributos: Atributo[];                      // só os de linha — GAME-RULES §6

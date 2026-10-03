@@ -81,7 +81,7 @@ export function mediaExercicioGoleiro(
 ): number {
   const validos = atributosValidosGoleiro(drill);
   if (validos.length === 0) {
-    throw new Error(`Drill inválido para goleiro: ${drill.nome}.`);
+    throw new Error(`Drill inválido para goleiro: ${drill.id}.`);
   }
   return mediaDeAtributos(atributosGoleiro, validos);
 }

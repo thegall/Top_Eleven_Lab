@@ -21,6 +21,15 @@ describe('ALL_DRILLS', () => {
       expect(conditionCostPerSlot(drill.dificuldade)).toBeCloseTo(drill.dificuldade * 0.75, 10);
     }
   });
+
+  it('identifica cada drill por slug único, sem texto de tela no motor (THE-63)', () => {
+    const ids = ALL_DRILLS.map((drill) => drill.id);
+    expect(new Set(ids).size).toBe(29);
+    for (const drill of ALL_DRILLS) {
+      expect(drill.id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(drill).not.toHaveProperty('nome');
+    }
+  });
 });
 
 describe('classificarDrill / drillsPrimarios', () => {
@@ -40,32 +49,32 @@ describe('classificarDrill / drillsPrimarios', () => {
     ]);
 
     const nomes = drillsPrimarios(brancosDoVideo)
-      .map((drill) => drill.nome)
+      .map((drill) => drill.id)
       .sort();
 
     expect(nomes).toEqual(
       [
-        'Análise do Vídeo',
-        'Arrancada',
-        'Corrida Longa',
-        'Drible de Slalom',
-        'Matada de Bola',
-        'Passe, Vá e Dispare!',
-        'Posicionamento',
-        'Uma Linha de Defesa',
+        'analise-do-video',
+        'arrancada',
+        'corrida-longa',
+        'drible-de-slalom',
+        'matada-de-bola',
+        'passe-va-e-dispare',
+        'posicionamento',
+        'uma-linha-de-defesa',
       ].sort(),
     );
   });
 
   it('Treino de Goleiro nunca é válido para jogador de linha (GAME-RULES §6)', () => {
-    const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.nome === 'Treino de Goleiro')!;
+    const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.id === 'treino-de-goleiro')!;
     expect(classificarDrill(new Set<Atributo>(), treinoDeGoleiro)).toBe('invalido');
   });
 });
 
 describe('mediaExercicio', () => {
   it('recusa drill sem atributo de linha, para não dividir por zero (GAME-RULES §3)', () => {
-    const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.nome === 'Treino de Goleiro')!;
+    const treinoDeGoleiro = ALL_DRILLS.find((drill) => drill.id === 'treino-de-goleiro')!;
     expect(() => mediaExercicio({} as Record<Atributo, number>, treinoDeGoleiro)).toThrow();
   });
 });
@@ -105,15 +114,15 @@ describe('montarCronograma', () => {
     };
     const brancos = brancosDaPosicao(['DL']);
 
-    const nomes = montarCronograma(atributos, brancos).map((drill) => drill.nome);
+    const nomes = montarCronograma(atributos, brancos).map((drill) => drill.id);
 
     expect(nomes).toEqual([
-      'Uma Linha de Defesa',
-      'Pressione o Play',
-      'Posicionamento',
-      'Carioca com Escadas',
-      'Corrida Longa',
-      'Uma Linha de Defesa', // repete o de menor média pra fechar o 6º slot
+      'uma-linha-de-defesa',
+      'pressione-o-play',
+      'posicionamento',
+      'carioca-com-escadas',
+      'corrida-longa',
+      'uma-linha-de-defesa', // repete o de menor média pra fechar o 6º slot
     ]);
   });
 
@@ -123,28 +132,28 @@ describe('montarCronograma', () => {
     for (const atributo of brancos) atributos[atributo] = 50;
 
     const cronograma = montarCronograma(atributos, brancos);
-    const nomes = cronograma.map((drill) => drill.nome);
+    const nomes = cronograma.map((drill) => drill.id);
 
     expect(cronograma).toHaveLength(6);
     expect(new Set(nomes).size).toBe(6);
-    expect(new Set(nomes)).toEqual(new Set(drillsPrimarios(brancos).map((d) => d.nome)));
+    expect(new Set(nomes)).toEqual(new Set(drillsPrimarios(brancos).map((d) => d.id)));
   });
 });
 
 describe('treino inflado (GAME-RULES §8.2)', () => {
   it('os 6 drills da combinação cobrem os 15 de 15 atributos de linha', () => {
     const nomesDaCombinacao = [
-      'Pressione o Play',
-      'Contra-Ataque Rápido',
-      'Drible de Slalom',
-      'Jogo na Ponta',
-      'Academia',
-      'Corrida de Ir e Vir',
+      'pressione-o-play',
+      'contra-ataque-rapido',
+      'drible-de-slalom',
+      'jogo-na-ponta',
+      'academia',
+      'corrida-de-ir-e-vir',
     ];
 
     const cobertura = new Set<Atributo>();
     for (const nome of nomesDaCombinacao) {
-      const drill = ALL_DRILLS.find((d) => d.nome === nome)!;
+      const drill = ALL_DRILLS.find((d) => d.id === nome)!;
       for (const atributo of drill.atributos) cobertura.add(atributo);
     }
 
