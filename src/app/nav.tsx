@@ -12,8 +12,6 @@ export function Nav() {
   const pathname = usePathname();
   const idioma = useIdioma();
   const t = TEXTOS[idioma];
-  const outro = idioma === 'pt' ? 'en' : 'pt';
-  const atual = PAGINAS.find((p) => caminho(idioma, p) === pathname) ?? 'squad';
 
   return (
     <nav className="tabs" aria-label={t.nav.aria}>
@@ -30,14 +28,6 @@ export function Nav() {
           </Link>
         );
       })}
-      <Link
-        className="tab"
-        href={caminho(outro, atual)}
-        hrefLang={TEXTOS[outro].locale}
-        lang={TEXTOS[outro].locale}
-      >
-        {t.nav.outroIdioma}
-      </Link>
     </nav>
   );
 }

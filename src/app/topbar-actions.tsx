@@ -1,9 +1,12 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-import { useTextos } from '../ui/idioma';
+import { caminho, TEXTOS, type Pagina } from '../ui/i18n';
+import { useIdioma, useTextos } from '../ui/idioma';
 
 const GITHUB_URL = 'https://github.com/thegall/Top_Eleven_Lab';
 
@@ -25,7 +28,11 @@ type PainelAberto = 'github' | 'pix' | null;
 export function TopbarActions() {
   const [painelAberto, setPainelAberto] = useState<PainelAberto>(null);
   const [copiado, setCopiado] = useState(false);
+  const idioma = useIdioma();
+  const pathname = usePathname();
   const t = useTextos().topbar;
+  const outro = idioma === 'pt' ? 'en' : 'pt';
+  const pagina: Pagina = pathname === caminho(idioma, 'laboratorio') ? 'laboratorio' : 'squad';
 
   async function copiarChave() {
     try {
@@ -39,6 +46,16 @@ export function TopbarActions() {
 
   return (
     <div className="topbar__actions">
+      <Link
+        className="topbar__language"
+        href={caminho(outro, pagina)}
+        hrefLang={TEXTOS[outro].locale}
+        lang={TEXTOS[outro].locale}
+        aria-label={TEXTOS[idioma].nav.outroIdioma}
+        title={TEXTOS[idioma].nav.outroIdioma}
+      >
+        {outro.toUpperCase()}
+      </Link>
       <Popover.Root
         open={painelAberto === 'github'}
         onOpenChange={(aberto) => setPainelAberto(aberto ? 'github' : null)}
