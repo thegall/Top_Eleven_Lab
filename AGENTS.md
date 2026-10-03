@@ -195,13 +195,8 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
       "vendido": false,
       "lab": {                        // preenchido = promovido ao Laboratório
         "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
-        "brancosManuais": null,       // null = derivar da união das posições
-        "talento": "otima",           // null enquanto não testado
-        "nivelTreinador": "mundial",
-        "testes": [
-          { "data": "2026-09-07", "drill": "pressione-o-play",
-            "mediaAntes": 55, "soma5Sessoes": 31 }
-        ]
+        "brancosOverride": null,      // null = derivar da união das posições
+        "talento": "otima"            // null enquanto não testado
       }
     }
   ]
@@ -215,9 +210,10 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 | `posicoes` | `Posicao[]` | Sempre array, mesmo com uma posição só. Até 3 |
 | `vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
 | `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad. Goleiro (`posicoes` com `GK`) guarda os 15 atributos de GK; os demais, os 15 de linha — GAME-RULES §2 |
-| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições (do goleiro, da tabela de GK). Preenchido = usuário corrigiu |
+| `brancosOverride` | `Atributo[] \| null` | `null` = derivar da união das posições (do goleiro, da tabela de GK). Preenchido = usuário corrigiu |
 | `talento` | `RankTalento \| 'bagre' \| null` | `null` = não classificado; `bagre` é rank visual do método 1 (GAME-RULES §5), fora da curva |
-| `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
+
+O schema descreve o que `src/state/schema.ts` grava hoje. O histórico de testes de talento que o PRD prevê para apertar a estimativa (PRD, riscos) e o nível do treinador ainda não são persistidos; entram com um novo `schemaVersion` e migração quando forem implementados.
 
 Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostra. A fórmula real da Nordeus não é conhecida, e inventá-la produziria número errado numa tela em que o usuário compara com o jogo aberto do lado.
 
