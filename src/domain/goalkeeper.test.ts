@@ -20,7 +20,7 @@ function atributos(valores: Partial<Record<AtributoGoleiro, number>>): Record<At
 }
 
 function drill(nome: string) {
-  return ALL_DRILLS.find((d) => d.nome === nome)!;
+  return ALL_DRILLS.find((d) => d.id === nome)!;
 }
 
 describe('ficha do goleiro (GAME-RULES §2)', () => {
@@ -42,7 +42,7 @@ describe('ficha do goleiro (GAME-RULES §2)', () => {
 describe('atributosValidosGoleiro (GAME-RULES §4)', () => {
   it('pega o atributo de goleiro e o do bloco ATRIBUTOS, descartando os de linha', () => {
     // Passe, Vá e Dispare!: Velocidade, Antecipação°, Passe, Chute.
-    expect(atributosValidosGoleiro(drill('Passe, Vá e Dispare!'))).toEqual([
+    expect(atributosValidosGoleiro(drill('passe-va-e-dispare'))).toEqual([
       'antecipacao',
       'velocidade',
     ]);
@@ -67,7 +67,7 @@ describe('atributosValidosGoleiro (GAME-RULES §4)', () => {
 
 describe('classificação para goleiro (GAME-RULES §4)', () => {
   it('Treino de Goleiro é primário para GK e inválido para jogador de linha', () => {
-    const treino = drill('Treino de Goleiro');
+    const treino = drill('treino-de-goleiro');
 
     expect(classificarDrillGoleiro(brancosDoGoleiro(), treino)).toBe('primario');
     expect(classificarDrill(new Set<Atributo>(), treino)).toBe('invalido');
@@ -75,7 +75,7 @@ describe('classificação para goleiro (GAME-RULES §4)', () => {
 
   it('exercício que só oferece cinza ao goleiro é terciário', () => {
     // Cabeceada: Posicionamento, Passe, Cabeçada, Criatividade — sobra só o cinza.
-    expect(classificarDrillGoleiro(brancosDoGoleiro(), drill('Cabeceada'))).toBe('terciario');
+    expect(classificarDrillGoleiro(brancosDoGoleiro(), drill('cabeceada'))).toBe('terciario');
   });
 });
 
@@ -85,7 +85,7 @@ describe('mediaExercicioGoleiro (GAME-RULES §3)', () => {
       atributos({ antecipacao: 120, velocidade: 60, passe: 999 } as Partial<
         Record<AtributoGoleiro, number>
       >),
-      drill('Passe, Vá e Dispare!'),
+      drill('passe-va-e-dispare'),
     );
 
     expect(media).toBe(90);
@@ -115,7 +115,7 @@ describe('montarCronogramaGoleiro (GAME-RULES §6)', () => {
     expect(cronograma).toHaveLength(6);
     // Treino de Goleiro é o de menor média (12) entre os primários deste goleiro:
     // Cruzamento de Defesa, o outro candidato, fica em 20 por causa do Jogo aéreo.
-    expect(cronograma[0]!.nome).toBe('Treino de Goleiro');
+    expect(cronograma[0]!.id).toBe('treino-de-goleiro');
     for (const item of cronograma) {
       expect(classificarDrillGoleiro(brancos, item)).toBe('primario');
     }

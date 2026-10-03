@@ -64,7 +64,7 @@ Contra a alternativa atual, três diferenças concretas:
 
 **Transversal**
 
-- Interface em português do Brasil.
+- Interface em português do Brasil, o idioma principal. Versão em inglês em `/en` (THE-63), com os termos de jogo em [`docs/GLOSSARY-EN.md`](docs/GLOSSARY-EN.md) e revisão de um jogador de língua inglesa antes da divulgação.
 - As regras aplicadas ficam visíveis ao usuário, com a origem declarada — o app ensina a mecânica enquanto calcula.
 
 ### Fora da V1
@@ -74,7 +74,7 @@ Contra a alternativa atual, três diferenças concretas:
 - Conversão da estimativa em dias de temporada.
 - Detecção de talento pelo valor de mercado no leilão — método conhecido e documentado, mas depende de dados que a V1 não guarda.
 - Contas de usuário e sincronização entre dispositivos.
-- Outros idiomas.
+- Idiomas além de português e inglês.
 - Qualquer funcionalidade que dependa de dados agregados de muitos usuários.
 
 ## Riscos e premissas

@@ -79,7 +79,7 @@ Elenco com menos de 14 jogadores completa a lista com o que tiver — inclusive 
 
 O Lab V1 **não** oferece o teste por ganho de pontos (método 2). `classificarTalento` (sigma) permanece no motor para a curva e para quem medir fora da UI; Ruim e Terrível continuam linhas distintas nessa curva. Bagre é o nome das duas (GAME-RULES §3.1, nomenclatura de 2026-09-18) e **não** escolhe uma delas: o classificador do método 1 devolve `bagre` como valor próprio.
 
-Os rótulos do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`): Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela.
+Os padrões do método 1 vivem em `SPECIAL_ABILITY_PATTERNS` (`src/domain/talent.ts`), só com rank e sequência. Os ranks internos (`fenomeno`, `excelente`, `otima`, `boa`, ...) são os da curva e não mudam — são identificadores, não texto de tela. Os rótulos (Lenda, Gênio, Craque, Bom Jogador, Normal, Bagre) e os nomes dos drills moram no dicionário da interface, `src/ui/i18n.tsx`, um por idioma (THE-63).
 
 ## Contratos internos
 
@@ -112,7 +112,7 @@ type NivelTreinador = 'amador' | 'semiprofissional' | 'profissional' | 'mundial'
 type Dificuldade = 1 | 2 | 3 | 4 | 5;   // desgaste = Dificuldade × 0,75%
 
 interface Drill {
-  nome: string;
+  id: DrillId;                // slug estável, ex.: 'pressione-o-play'; o nome exibido fica na interface
   categoria: 'ataque' | 'defesa' | 'posse' | 'fisico';
   dificuldade: Dificuldade;
   atributos: Atributo[];                      // só os de linha — GAME-RULES §6
@@ -195,13 +195,8 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
       "vendido": false,
       "lab": {                        // preenchido = promovido ao Laboratório
         "atributos": { "corte": 61, "marcacao": 63, "…": 0 },
-        "brancosManuais": null,       // null = derivar da união das posições
-        "talento": "otima",           // null enquanto não testado
-        "nivelTreinador": "mundial",
-        "testes": [
-          { "data": "2026-09-07", "drill": "pressione-o-play",
-            "mediaAntes": 55, "soma5Sessoes": 31 }
-        ]
+        "brancosOverride": null,      // null = derivar da união das posições
+        "talento": "otima"            // null enquanto não testado
       }
     }
   ]
@@ -215,9 +210,10 @@ Um documento no `localStorage`, e o mesmo formato no arquivo de exportação. `s
 | `posicoes` | `Posicao[]` | Sempre array, mesmo com uma posição só. Até 3 |
 | `vendido` | `boolean` | Estado de simulação, não é exclusão. Reversível |
 | `lab` | `FichaLab \| null` | `null` = o jogador existe só no Squad. Goleiro (`posicoes` com `GK`) guarda os 15 atributos de GK; os demais, os 15 de linha — GAME-RULES §2 |
-| `brancosManuais` | `Atributo[] \| null` | `null` = derivar da união das posições (do goleiro, da tabela de GK). Preenchido = usuário corrigiu |
+| `brancosOverride` | `Atributo[] \| null` | `null` = derivar da união das posições (do goleiro, da tabela de GK). Preenchido = usuário corrigiu |
 | `talento` | `RankTalento \| 'bagre' \| null` | `null` = não classificado; `bagre` é rank visual do método 1 (GAME-RULES §5), fora da curva |
-| `testes[]` | `Teste[]` | Histórico. É o que vai apertar a estimativa com o uso (PRD, riscos) |
+
+O schema descreve o que `src/state/schema.ts` grava hoje. O histórico de testes de talento que o PRD prevê para apertar a estimativa (PRD, riscos) e o nível do treinador ainda não são persistidos; entram com um novo `schemaVersion` e migração quando forem implementados.
 
 Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostra. A fórmula real da Nordeus não é conhecida, e inventá-la produziria número errado numa tela em que o usuário compara com o jogo aberto do lado.
 
@@ -226,6 +222,7 @@ Overall **não** é derivado dos atributos: o usuário digita o que o jogo mostr
 - **Next.js App Router com export estático, na Vercel.** Não há backend nem necessidade de SSR — o Next entra pelo deploy trivial e pelo SEO da landing, que importa porque a distribuição do produto é alguém achar e compartilhar no grupo da comunidade. Reverter para Vite é barato enquanto não houver rota dinâmica.
 - **Persistência em `localStorage`, com exportar e importar JSON.** Sem conta, sem servidor, sem custo, sem dado pessoal e sem LGPD. O botão de exportar é o que cobre troca de aparelho e limpeza de navegador. Reverter para backend significa introduzir autenticação — decisão cara, fica para uma V2 que tenha motivo.
 - **Um codebase, layout paisagem no mobile.** O jogo é mobile e horizontal; o Lab acompanha. Sem app nativo: não usa câmera, notificação nem nada de hardware, então loja e build nativo seriam custo puro.
+- **Dois idiomas por rota, sem biblioteca de i18n (THE-63).** Português em `/` e `/laboratorio`; inglês em `/en` e `/en/laboratorio`. Cada idioma tem o próprio root layout (`src/app/(pt)` e `src/app/(en)`), porque `<html lang>` só se define ali, e os dois montam o mesmo `Shell` e as mesmas páginas (`squad-page.tsx`, `lab-page.tsx`). O texto de tela fica em `src/ui/i18n.tsx`, com `en` tipado pelo `pt`: chave faltando quebra o typecheck e o build, e `i18n.test.ts` confere de novo em tempo de execução. Não detecta o idioma do navegador nem redireciona. Os termos de jogo em inglês seguem `docs/GLOSSARY-EN.md`.
 - **Domínio isolado de framework.** É o que torna o motor testável sem navegador e o que permite trocar a camada de UI sem tocar em regra de jogo. Também é o que deixa o projeto legível para quem chegar pelo GitHub.
 - **`docs/GAME-RULES.md` é fonte única de regra de jogo.** Nenhuma constante de jogo é inventada no código: toda uma delas aponta para uma seção do documento. A Nordeus muda mecânica sem avisar, e quando isso acontecer o conserto tem que ter um lugar só.
 

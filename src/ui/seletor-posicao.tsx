@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { PosicaoJogador } from '../state/schema';
+import { useTextos } from './idioma';
 import { alternarPosicao } from './posicao';
 
 const LINHAS: (PosicaoJogador | null)[][] = [
@@ -23,6 +24,7 @@ export function SeletorPosicao({
   valor: PosicaoJogador[];
   onChange: (posicoes: PosicaoJogador[]) => void;
 }) {
+  const t = useTextos().seletorPosicao;
   const [aberto, setAberto] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
   const gatilho = useRef<HTMLButtonElement>(null);
@@ -55,7 +57,7 @@ export function SeletorPosicao({
   return (
     <div className="field seletor-posicao" ref={raiz}>
       <label id={rotuloId} className="seletor-posicao__label" htmlFor={id}>
-        Posição
+        {t.rotulo}
       </label>
       <button
         ref={gatilho}
@@ -80,7 +82,7 @@ export function SeletorPosicao({
           aria-labelledby={rotuloId}
           aria-describedby={hintId}
         >
-          <div className="pitch" role="group" aria-label="Campo de posições">
+          <div className="pitch" role="group" aria-label={t.campo}>
             {LINHAS.flatMap((linha, i) =>
               linha.map((posicao, j) =>
                 posicao === null ? (
@@ -100,7 +102,7 @@ export function SeletorPosicao({
             )}
           </div>
           <span id={hintId} className="seletor-posicao__hint">
-            Até 3.{valor.length > 0 ? ` ${valor.join(' + ')}` : ''}
+            {t.ate3}{valor.length > 0 ? ` ${valor.join(' + ')}` : ''}
           </span>
         </div>
       ) : null}
