@@ -9,6 +9,12 @@ updates:
       time: "09:00"
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
+    # THE-38: permanece no TypeScript 5.x até o typescript-eslint suportar TS 7.
+    # semver-major cobre 6 e 7. Patch e minor do 5.x continuam.
+    ignore:
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       npm-minor-patch:
         patterns:
