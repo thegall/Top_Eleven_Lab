@@ -16,7 +16,7 @@ export function iniciais(nome: string): string {
 
 export default function GaleriaPage() {
   const t = useTextos().galeria;
-  const { documento, adicionarJogadorGaleria } = useSquad();
+  const { documento, carregado, adicionarJogadorGaleria } = useSquad();
   const [nome, setNome] = useState('');
   const [erro, setErro] = useState(false);
 
@@ -77,7 +77,7 @@ export default function GaleriaPage() {
             <div className="panel__head">
               <h2>{t.listaTitulo}</h2>
             </div>
-            {documento.galeria.length === 0 ? (
+            {!carregado ? null : documento.galeria.length === 0 ? (
               <div className="empty">
                 <strong>{t.vazioTitulo}</strong>
                 <p>{t.vazioTexto}</p>
