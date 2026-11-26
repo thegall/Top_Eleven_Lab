@@ -628,3 +628,11 @@ h3.sub{font:600 11px/1.3 var(--font-ui),Inter,sans-serif}
     scroll-behavior:auto !important;
   }
 }
+
+/* Galeria do Clube (THE-90) */
+.form--galeria{grid-template-columns:minmax(0,1fr) auto}
+.form__erro{margin-top:var(--s-xs);color:#b3261e;font:600 13px/1.4 var(--font-ui),Inter,sans-serif}
+.galeria-lista{list-style:none;margin:0;padding:0;display:grid;gap:var(--s-xxs)}
+.galeria-item{display:flex;align-items:center;gap:var(--s-xs);padding:var(--s-xxs) var(--s-xs);border-radius:var(--r-md);background:var(--canvas,#f3f4f6)}
+.galeria-item__iniciais{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font:700 13px/1 var(--font-ui),Inter,sans-serif}
+.galeria-item__nome{min-width:0;overflow-wrap:anywhere;font-weight:600}

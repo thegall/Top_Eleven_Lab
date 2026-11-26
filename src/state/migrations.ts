@@ -10,6 +10,7 @@ import {
   repararPosicoesV1,
   type Documento,
   type Jogador,
+  type JogadorGaleria,
 } from './schema';
 
 function repararJogadorV1(jogador: unknown): unknown {
@@ -80,6 +81,12 @@ function ehLabValido(valor: unknown, ehGoleiro: boolean): boolean {
   if (lab.talento !== null && !RANKS_TALENTO_VALIDOS.has(lab.talento as string)) return false;
 
   return true;
+}
+
+function ehJogadorGaleriaValido(valor: unknown): valor is JogadorGaleria {
+  if (typeof valor !== 'object' || valor === null) return false;
+  const j = valor as Record<string, unknown>;
+  return typeof j.id === 'string' && typeof j.nome === 'string' && j.nome.trim() !== '';
 }
 
 function ehJogadorValido(valor: unknown): valor is Jogador {
@@ -153,5 +160,11 @@ export function migrar(bruto: unknown): Documento {
     throw new Error('Documento inválido: um ou mais jogadores têm formato inválido.');
   }
 
-  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: jogadoresAtuais };
+  // v1 e v2 não têm Galeria: ela nasce vazia, sem tocar em Squad e Laboratório.
+  const galeria: unknown = schemaVersion < 3 ? [] : documento.galeria;
+  if (!Array.isArray(galeria) || !galeria.every(ehJogadorGaleriaValido)) {
+    throw new Error('Documento inválido: galeria deve ser uma lista de jogadores com nome.');
+  }
+
+  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: jogadoresAtuais, galeria };
 }

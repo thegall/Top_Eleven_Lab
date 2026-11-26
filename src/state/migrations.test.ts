@@ -11,7 +11,7 @@ describe('migrar', () => {
       ],
     };
     expect(migrar(bruto)).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [
         {
           id: '1',
@@ -23,6 +23,7 @@ describe('migrar', () => {
           lab: null,
         },
       ],
+      galeria: [],
     });
   });
 
@@ -38,8 +39,9 @@ describe('migrar', () => {
     };
 
     expect(migrar({ schemaVersion: 2, jogadores: [jogador] })).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [jogador],
+      galeria: [],
     });
 
     for (const idade of [17, 36, 20.5, Number.NaN]) {
@@ -94,8 +96,9 @@ describe('migrar', () => {
       jogadores: [{ ...jogadorBase, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'boa' } }],
     };
     expect(migrar(bruto)).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [{ ...bruto.jogadores[0], idade: null }],
+      galeria: [],
     });
   });
 
@@ -106,7 +109,7 @@ describe('migrar', () => {
         { ...jogadorBase, idade: 19, lab: { atributos: atributosCompletos, brancosOverride: null, talento: 'bagre' } },
       ],
     };
-    expect(migrar(bruto)).toEqual(bruto);
+    expect(migrar(bruto)).toEqual({ ...bruto, schemaVersion: 3, galeria: [] });
   });
 
   const atributosGoleiro = {
@@ -139,7 +142,7 @@ describe('migrar', () => {
         },
       ],
     };
-    expect(migrar(bruto)).toEqual(bruto);
+    expect(migrar(bruto)).toEqual({ ...bruto, schemaVersion: 3, galeria: [] });
   });
 
   it('limpa o lab legado com ficha trocada, em vez de recusar o elenco', () => {
@@ -156,12 +159,14 @@ describe('migrar', () => {
     };
 
     expect(migrar({ schemaVersion: 2, jogadores: [goleiroComLabDeLinha] })).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [{ ...goleiroComLabDeLinha, lab: null }],
+      galeria: [],
     });
     expect(migrar({ schemaVersion: 2, jogadores: [linhaComLabDeGoleiro] })).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [{ ...linhaComLabDeGoleiro, lab: null }],
+      galeria: [],
     });
   });
 
@@ -181,8 +186,9 @@ describe('migrar', () => {
     };
 
     expect(migrar({ schemaVersion: 2, jogadores: [dc, gk] })).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [dc, { ...gk, lab: null }],
+      galeria: [],
     });
   });
 
@@ -205,8 +211,9 @@ describe('migrar', () => {
         jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'DC', 'ML', 'ST', 'AMC'] }],
       }),
     ).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [{ ...jogadorBase, idade: null, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
+      galeria: [],
     });
   });
 
@@ -232,8 +239,9 @@ describe('migrar', () => {
       jogadores: [{ ...jogadorBase, lab: null, posicoes: ['DC', 'ML', 'ST'] }],
     };
     expect(migrar(bruto)).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [{ ...bruto.jogadores[0], idade: null }],
+      galeria: [],
     });
   });
 
@@ -254,5 +262,34 @@ describe('migrar', () => {
         ],
       }),
     ).toThrow();
+  });
+
+  describe('Galeria do Clube (THE-90)', () => {
+    it('preserva Squad e Laboratório de um backup v2 e inicia a Galeria vazia', () => {
+      const jogador = {
+        id: '1',
+        nome: 'Ned Stark',
+        idade: 20,
+        overall: 78,
+        posicoes: ['DC'],
+        vendido: false,
+        lab: null,
+      };
+      const migrado = migrar({ schemaVersion: 2, jogadores: [jogador] });
+      expect(migrado.jogadores).toEqual([jogador]);
+      expect(migrado.galeria).toEqual([]);
+    });
+
+    it('mantém a Galeria de um documento v3', () => {
+      const galeria = [{ id: 'g1', nome: 'Arya Stark' }];
+      expect(migrar({ schemaVersion: 3, jogadores: [], galeria }).galeria).toEqual(galeria);
+    });
+
+    it('recusa v3 sem galeria ou com jogador sem nome', () => {
+      expect(() => migrar({ schemaVersion: 3, jogadores: [] })).toThrow();
+      expect(() =>
+        migrar({ schemaVersion: 3, jogadores: [], galeria: [{ id: 'g1', nome: '   ' }] }),
+      ).toThrow();
+    });
   });
 });

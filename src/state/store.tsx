@@ -28,6 +28,7 @@ interface SquadContextValue {
     overall: number,
     posicoes: PosicaoJogador[],
   ) => void;
+  adicionarJogadorGaleria: (nome: string) => void;
   excluirJogador: (id: string) => void;
   marcarVendido: (id: string) => void;
   desfazerVenda: (id: string) => void;
@@ -73,6 +74,8 @@ export function SquadProvider({ children }: { children: ReactNode }) {
     },
     atualizarJogador: (id, nome, idade, overall, posicoes) =>
       dispatch({ type: 'jogador/atualizado', id, nome, idade, overall, posicoes }),
+    adicionarJogadorGaleria: (nome) =>
+      dispatch({ type: 'galeria/adicionado', jogador: { id: generateId(), nome } }),
     excluirJogador: (id) => dispatch({ type: 'jogador/excluido', id }),
     marcarVendido: (id) => dispatch({ type: 'jogador/vendaMarcada', id }),
     desfazerVenda: (id) => dispatch({ type: 'jogador/vendaDesfeita', id }),

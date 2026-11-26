@@ -32,7 +32,8 @@ export function TopbarActions() {
   const pathname = usePathname();
   const t = useTextos().topbar;
   const outro = idioma === 'pt' ? 'en' : 'pt';
-  const pagina: Pagina = pathname === caminho(idioma, 'laboratorio') ? 'laboratorio' : 'squad';
+  const pagina: Pagina =
+    (['laboratorio', 'galeria'] as const).find((p) => pathname === caminho(idioma, p)) ?? 'squad';
 
   async function copiarChave() {
     try {

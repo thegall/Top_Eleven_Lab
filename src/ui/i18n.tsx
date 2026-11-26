@@ -30,6 +30,7 @@ export const pt = {
     aria: 'Abas principais',
     squad: 'Squad',
     laboratorio: 'Laboratório',
+    galeria: 'Galeria do Clube',
     outroIdioma: 'English',
   },
   topbar: {
@@ -134,6 +135,18 @@ export const pt = {
     ataque: 'Ataque',
     atributos: 'Atributos',
     defesaDoGol: 'Defesa do gol',
+  },
+  galeria: {
+    titulo: 'Galeria do Clube',
+    lead: 'Cadastre os jogadores que fazem a história do seu clube.',
+    adicionarTitulo: 'Adicionar jogador',
+    nome: 'Nome',
+    nomePlaceholder: 'Ex.: Ned Stark',
+    adicionar: 'Adicionar',
+    erroNome: 'Informe um nome para o jogador.',
+    listaTitulo: 'Jogadores da galeria',
+    vazioTitulo: 'A galeria está vazia',
+    vazioTexto: 'Digite o nome de um jogador acima para fazer o primeiro cadastro.',
   },
   squad: {
     titulo: 'Squad',
@@ -327,6 +340,7 @@ export const en: Textos = {
     aria: 'Main tabs',
     squad: 'Squad',
     laboratorio: 'Lab',
+    galeria: 'Club Gallery',
     outroIdioma: 'Português',
   },
   topbar: {
@@ -427,6 +441,18 @@ export const en: Textos = {
     ataque: 'Attack',
     atributos: 'Physical',
     defesaDoGol: 'Goalkeeping',
+  },
+  galeria: {
+    titulo: 'Club Gallery',
+    lead: 'Register the players who make your club’s history.',
+    adicionarTitulo: 'Add player',
+    nome: 'Name',
+    nomePlaceholder: 'E.g.: Ned Stark',
+    adicionar: 'Add',
+    erroNome: 'Enter a name for the player.',
+    listaTitulo: 'Gallery players',
+    vazioTitulo: 'The gallery is empty',
+    vazioTexto: 'Type a player’s name above to make the first entry.',
   },
   squad: {
     titulo: 'Squad',
@@ -604,13 +630,13 @@ export const en: Textos = {
 
 export const TEXTOS: Record<Idioma, Textos> = { pt, en };
 
-/** Mesmo endereço no outro idioma. `/laboratorio` não muda de nome em inglês. */
+/** Mesmo endereço no outro idioma. `/laboratorio` e `/galeria` não mudam de nome em inglês. */
 export const PREFIXO: Record<Idioma, string> = { pt: '', en: '/en' };
 
-export type Pagina = 'squad' | 'laboratorio';
+export type Pagina = 'squad' | 'laboratorio' | 'galeria';
 
 export function caminho(idioma: Idioma, pagina: Pagina): string {
-  const resto = pagina === 'squad' ? '' : '/laboratorio';
+  const resto = pagina === 'squad' ? '' : `/${pagina}`;
   return PREFIXO[idioma] + resto || '/';
 }
 

@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 
 import { mediaDos14 } from '../domain/squad';
-import type { Jogador, PosicaoJogador } from '../state/schema';
+import type { Documento, Jogador, PosicaoJogador } from '../state/schema';
 import { useSquad } from '../state/store';
 import { exportarJSON, importarJSON } from '../state/transfer';
 import { CalloutRegra } from '../ui/callout-regra';
@@ -56,7 +56,7 @@ function montarLinhas(jogadores: Jogador[]): { linhas: LinhaElenco[]; indiceDoCo
   return { linhas, indiceDoCorte };
 }
 
-function exportar(documento: { schemaVersion: number; jogadores: Jogador[] }) {
+function exportar(documento: Documento) {
   const blob = new Blob([exportarJSON(documento)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
