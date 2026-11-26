@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { caminho, TEXTOS, type Pagina } from '../ui/i18n';
 import { useIdioma } from '../ui/idioma';
 
-const PAGINAS: Pagina[] = ['squad', 'laboratorio'];
+const PAGINAS: Pagina[] = ['squad', 'laboratorio', 'galeria'];
 
 export function Nav() {
   const pathname = usePathname();

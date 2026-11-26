@@ -28,15 +28,16 @@ describe('carregar / salvar', () => {
   });
 
   it('devolve documento vazio quando nada foi salvo ainda', () => {
-    expect(carregar()).toEqual({ schemaVersion: 2, jogadores: [] });
+    expect(carregar()).toEqual({ schemaVersion: 3, jogadores: [], galeria: [] });
   });
 
   it('faz ida e volta do documento salvo', () => {
     const documento = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [
         { id: '1', nome: 'Ned Stark', idade: 18, overall: 78, posicoes: ['DC' as const], vendido: false, lab: null },
       ],
+      galeria: [{ id: 'g1', nome: 'Arya Stark' }],
     };
     salvar(documento);
     expect(carregar()).toEqual(documento);
@@ -44,7 +45,7 @@ describe('carregar / salvar', () => {
 
   it('devolve documento vazio quando o dado salvo está corrompido', () => {
     localStorage.setItem('top-eleven-lab:documento', '{ isso não é JSON');
-    expect(carregar()).toEqual({ schemaVersion: 2, jogadores: [] });
+    expect(carregar()).toEqual({ schemaVersion: 3, jogadores: [], galeria: [] });
   });
 
   it('carrega elenco com lab legado trocado sem apagar o documento', () => {
@@ -89,8 +90,9 @@ describe('carregar / salvar', () => {
     );
 
     expect(carregar()).toEqual({
-      schemaVersion: 2,
+      schemaVersion: 3,
       jogadores: [dc, { ...gk, lab: null }],
+      galeria: [],
     });
   });
 });

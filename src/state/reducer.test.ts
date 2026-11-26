@@ -24,34 +24,34 @@ describe('reducer', () => {
   });
 
   it('marca um jogador como vendido sem alterar os outros', () => {
-    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })], galeria: [] };
     const depois = reducer(antes, { type: 'jogador/vendaMarcada', id: '1' });
     expect(depois.jogadores.find((j) => j.id === '1')?.vendido).toBe(true);
     expect(depois.jogadores.find((j) => j.id === '2')?.vendido).toBe(false);
   });
 
   it('desfaz a venda', () => {
-    const antes = { schemaVersion: 2, jogadores: [jogador({ vendido: true })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ vendido: true })], galeria: [] };
     const depois = reducer(antes, { type: 'jogador/vendaDesfeita', id: '1' });
     expect(depois.jogadores[0]?.vendido).toBe(false);
   });
 
   it('substitui o documento inteiro na importação/carga', () => {
-    const novo = { schemaVersion: 2, jogadores: [jogador({ id: '9' })] };
+    const novo = { schemaVersion: 3, jogadores: [jogador({ id: '9' })], galeria: [] };
     const depois = reducer(documentoVazio(), { type: 'documento/substituido', documento: novo });
     expect(depois).toEqual(novo);
   });
 
   it('atualiza o lab de um jogador sem alterar os outros', () => {
     const lab = { atributos: {} as Record<string, number>, brancosOverride: null, talento: null };
-    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })], galeria: [] };
     const depois = reducer(antes, { type: 'jogador/labAtualizado', id: '1', lab });
     expect(depois.jogadores.find((j) => j.id === '1')?.lab).toEqual(lab);
     expect(depois.jogadores.find((j) => j.id === '2')?.lab).toBeNull();
   });
 
   it('atualiza nome, idade, overall e posições de um jogador', () => {
-    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })], galeria: [] };
     const depois = reducer(antes, {
       type: 'jogador/atualizado',
       id: '1',
@@ -76,7 +76,7 @@ describe('reducer', () => {
       [['DC'], ['GK']],
       [['GK'], ['DC']],
     ] as const) {
-      const antes = { schemaVersion: 2, jogadores: [jogador({ posicoes: [...posicoesAntes], lab })] };
+      const antes = { schemaVersion: 3, jogadores: [jogador({ posicoes: [...posicoesAntes], lab })], galeria: [] };
       const depois = reducer(antes, {
         type: 'jogador/atualizado',
         id: '1',
@@ -109,7 +109,7 @@ describe('reducer', () => {
   });
 
   it('recusa atualizar jogador com posições inválidas e preserva o estado', () => {
-    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' })], galeria: [] };
     expect(() =>
       reducer(antes, {
         type: 'jogador/atualizado',
@@ -124,8 +124,21 @@ describe('reducer', () => {
   });
 
   it('exclui um jogador sem alterar os outros', () => {
-    const antes = { schemaVersion: 2, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })] };
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' }), jogador({ id: '2' })], galeria: [] };
     const depois = reducer(antes, { type: 'jogador/excluido', id: '1' });
     expect(depois.jogadores.map((j) => j.id)).toEqual(['2']);
+  });
+
+  it('adiciona jogador à Galeria sem tocar no Squad e rejeita nome vazio', () => {
+    const antes = { schemaVersion: 3, jogadores: [jogador({ id: '1' })], galeria: [] };
+    const depois = reducer(antes, {
+      type: 'galeria/adicionado',
+      jogador: { id: 'g1', nome: '  Arya Stark ' },
+    });
+    expect(depois.galeria).toEqual([{ id: 'g1', nome: 'Arya Stark' }]);
+    expect(depois.jogadores).toBe(antes.jogadores);
+    expect(() =>
+      reducer(antes, { type: 'galeria/adicionado', jogador: { id: 'g2', nome: '   ' } }),
+    ).toThrow();
   });
 });

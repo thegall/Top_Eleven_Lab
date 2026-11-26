@@ -4,7 +4,7 @@
  */
 import type { Atributo, AtributoGoleiro, Posicao, RankTalento } from '../domain/types';
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 /**
  * `Posicao` do domínio cobre só as 11 posições de linha, porque a matriz de
@@ -101,12 +101,23 @@ export interface Jogador {
   lab: DadosLab | null;
 }
 
+/**
+ * Cadastro da Galeria do Clube: independente de Squad e Laboratório, com
+ * identidade própria (THE-90). Só o nome por enquanto.
+ */
+export interface JogadorGaleria {
+  id: string;
+  nome: string;
+}
+
 export interface Documento {
   schemaVersion: number;
   jogadores: Jogador[];
+  /** Vazia em documentos anteriores à v3. */
+  galeria: JogadorGaleria[];
 }
 
 /** Documento vazio, usado antes da primeira leitura do `localStorage`. */
 export function documentoVazio(): Documento {
-  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: [] };
+  return { schemaVersion: CURRENT_SCHEMA_VERSION, jogadores: [], galeria: [] };
 }

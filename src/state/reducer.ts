@@ -9,6 +9,7 @@ import {
   type DadosLab,
   type Documento,
   type Jogador,
+  type JogadorGaleria,
 } from './schema';
 
 function exigirPosicoes(posicoes: Jogador['posicoes']): void {
@@ -31,6 +32,7 @@ export type Acao =
   | { type: 'jogador/vendaMarcada'; id: string }
   | { type: 'jogador/vendaDesfeita'; id: string }
   | { type: 'jogador/labAtualizado'; id: string; lab: DadosLab }
+  | { type: 'galeria/adicionado'; jogador: JogadorGaleria }
   | { type: 'documento/substituido'; documento: Documento };
 
 function definirVendido(documento: Documento, id: string, vendido: boolean): Documento {
@@ -83,6 +85,11 @@ export function reducer(documento: Documento, acao: Acao): Documento {
           jogador.id === acao.id ? { ...jogador, lab: acao.lab } : jogador,
         ),
       };
+    case 'galeria/adicionado': {
+      const nome = acao.jogador.nome.trim();
+      if (nome === '') throw new Error('Jogador da Galeria inválido: informe um nome.');
+      return { ...documento, galeria: [...documento.galeria, { ...acao.jogador, nome }] };
+    }
     case 'documento/substituido':
       return acao.documento;
   }
